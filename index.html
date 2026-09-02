@@ -11,9 +11,9 @@
   <meta name="apple-mobile-web-app-title" content="Diag SA">
   <meta name="mobile-web-app-capable" content="yes">
 
-  <link rel="icon" type="image/png" href="icon.png?v=104">
-  <link rel="apple-touch-icon" href="icon.png?v=104">
-  <link rel="manifest" href="manifest.json?v=104">
+  <link rel="icon" type="image/png" href="icon.png?v=105">
+  <link rel="apple-touch-icon" href="icon.png?v=105">
+  <link rel="manifest" href="manifest.json?v=105">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -130,7 +130,7 @@
 <body class="bg-sunny">
 
 <div class="header-container">
-  <div class="header-logo"><img src="icon.png?v=104" alt="Logo Diag SA"></div>
+  <div class="header-logo"><img src="icon.png?v=105" alt="Logo Diag SA"></div>
   <div class="header-text">
     <h1>Diag SA <span style="color: #69b3e7;">NEXT</span></h1>
     <p>Supervision de la MIR 21</p>
@@ -272,8 +272,8 @@
   ];
 
   const WORKER_URL = "https://proxymeteofrance.remiparamoteur.workers.dev";
-  const SEUIL_INACTIVITE_MIN = 15 * 24 * 60; // 15 Jours pleins pour suppression
-  const SEUIL_ROUGE_MIN = 30; // 30 minutes = Hors Ligne
+  const SEUIL_INACTIVITE_MIN = 15 * 24 * 60; // 15 Jours pleins
+  const SEUIL_ROUGE_MIN = 30; // 30 minutes
 
   const STATIONS_EXCLUES = [
       "ST DENIS LES SENS", "SENS", "ST-DIZIER", "LOUVEMONT - MAN", 
@@ -326,7 +326,6 @@
   window.extremesJourCache = {}; 
   window.modeAffichageCarte = 'none';
 
-  let nOk = 0, nWarn = 0, nFault = 0;
   let coucheMarqueurs = null;
 
   function urlProxy(path, params) {
@@ -347,6 +346,7 @@
     return undefined;
   };
 
+  // SECURITE MAXIMALE UTC
   function normaliserObs(obs) {
     if (!obs) return;
     if (estValeurManquante(obs.vv)) obs.vv = extractVal(obs, ['v', 'visibilite']);
@@ -375,8 +375,11 @@
 
   function mettreAJourFondEcran() {
     document.body.className = ''; 
-    if (nFault > 0) document.body.classList.add('bg-stormy');
-    else if (nWarn > 0) document.body.classList.add('bg-warning');
+    let currentFaults = parseInt(document.getElementById("cnt-fault").textContent) || 0;
+    let currentWarns = parseInt(document.getElementById("cnt-warn").textContent) || 0;
+    
+    if (currentFaults > 0) document.body.classList.add('bg-stormy');
+    else if (currentWarns > 0) document.body.classList.add('bg-warning');
     else document.body.classList.add('bg-sunny');
   }
 
@@ -495,7 +498,7 @@
       } catch(e) { return { error: true }; }
   }
 
-  // ====== SCAN GLOBAL (RAPIDE) ======
+  // ====== SCAN GLOBAL ======
   async function tenterPaquetRapide(cleApi) {
     for (let decalageMin = 0; decalageMin <= 24; decalageMin += 6) {
       const dateStr = new Date(arrondir6min(Date.now()).getTime() - decalageMin * 60000).toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -606,7 +609,7 @@
       }
   };
 
-  // ====== LE MOTEUR RÉSEAU COMPLET ET PROPRE ======
+  // ====== LE MOTEUR RÉSEAU ======
   async function scannerRegion(forcerRafraichissement = false) {
     const cleApi = document.getElementById("apikey").value.trim();
     if (!cleApi || cleApi === "COLLE_TA_CLE_API_ICI_ENTRE_LES_GUILLEMETS") { alert("Veuillez saisir votre API Key Météo-France."); return; }
@@ -624,7 +627,12 @@
     const ancienneErreur = document.getElementById("erreurScanReseau"); if (ancienneErreur) ancienneErreur.remove();
     const ancienStatut = document.getElementById("statutScanReseau"); if (ancienStatut) ancienStatut.remove();
     
-    document.getElementById("tbodyReseau").innerHTML = "";
+    document.getElementById("cnt-ok").textContent = "0"; 
+    document.getElementById("cnt-warn").textContent = "0"; 
+    document.getElementById("cnt-fault").textContent = "0";
+    
+    const thead = document.getElementById("theadReseau"); 
+    thead.innerHTML = `<tr><th>Station (Anomalies)</th><th>Dernière mesure</th>${PARAMS_RESEAU.map(p => `<th>${p.label}</th>`).join("")}</tr>`;
 
     if (!window.carteReseau) {
       window.carteReseau = L.map('mapReseau', { center: [47.3, 4.8], zoom: 7, zoomControl: false }); 
@@ -660,6 +668,31 @@
     let cacheObsStr = localStorage.getItem(cacheKey);
     if (cacheObsStr) {
         try { JSON.parse(cacheObsStr).forEach(item => { oldCacheData[item.station.id] = item.obs; }); } catch(e) {}
+    }
+
+    // VERIFICATION CACHE (RAPIDE)
+    if (!forcerRafraichissement && cacheObsStr && (maintenantMs - parseInt(localStorage.getItem(cacheTimeKey)) < 15 * 60 * 1000)) {
+        let tempOk = 0, tempWarn = 0, tempFault = 0;
+        document.getElementById("tbodyReseau").innerHTML = "";
+        document.getElementById("zoneTableauAlertes").style.display = "none";
+        
+        let stationsCacheArray = JSON.parse(cacheObsStr);
+        stationsCacheArray.forEach(item => {
+            if (estExclue(item.station.nom)) return;
+            window.stationsCache[item.station.id] = item.obs;
+            let statut = injecterStationDansDashboard(item.station, item.obs);
+            if (statut === 'ok') tempOk++; else if (statut === 'warn') tempWarn++; else if (statut === 'fault') tempFault++;
+        });
+
+        document.getElementById("cnt-ok").textContent = tempOk;
+        document.getElementById("cnt-warn").textContent = tempWarn;
+        document.getElementById("cnt-fault").textContent = tempFault;
+
+        window.changerModeCarte(window.modeAffichageCarte, true);
+        if (coucheMarqueurs.getBounds().isValid()) window.carteReseau.fitBounds(coucheMarqueurs.getBounds(), { padding: [30, 30] });
+        mettreAJourFondEcran();
+        document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false;
+        return;
     }
 
     const DEP_CIBLES = ["21", "52", "58", "71", "89"];
@@ -739,19 +772,16 @@
             ageMin = Math.round((Date.now() - new Date(vTime).getTime()) / 60000);
         }
 
-        // Si la station est bien dans le paquet ET a répondu il y a moins de 30 minutes, c'est bon.
         if (obsToUse && ageMin <= SEUIL_ROUGE_MIN) {
             window.stationsCache[st.id] = obsToUse;
         } else {
-            // Sinon c'est une ROUGE. On garde temporairement son vieux cache pour l'afficher en rouge.
             let cachedObs = oldCacheData[st.id];
             if (cachedObs) { window.stationsCache[st.id] = cachedObs; }
-            stationsEnPanne.push(st); // On va l'interroger individuellement dans l'API !
+            stationsEnPanne.push(st); 
         }
       });
       
     } else {
-       // Mode dégradé total (paquet KO)
        if (elStatutInitial) elStatutInitial.textContent = "Paquet Météo-France indisponible. Utilisation de la mémoire cache locale.";
        stationsUniques.forEach(st => {
            let cachedObs = oldCacheData[st.id];
@@ -762,7 +792,6 @@
     
     if (elStatutInitial) elStatutInitial.remove();
 
-    // Premier affichage : Vert pour les actives, Rouge avec temps approximatif pour les pannes
     rafraichirInterfaceGlobale(stationsUniques);
 
     if (coucheMarqueurs.getBounds().isValid()) window.carteReseau.fitBounds(coucheMarqueurs.getBounds(), { padding: [30, 30] });
@@ -770,7 +799,6 @@
     document.getElementById("btnScan").disabled = false;
     document.getElementById("btnRefreshMap").disabled = false;
 
-    // Lancement asynchrone des stations ROUGES : On va chercher LEUR heure exacte
     if (stationsEnPanne.length > 0) {
         verifierStationsEnPanne(stationsEnPanne, cleApi, stationsUniques);
     }
@@ -810,90 +838,32 @@
       divMsg.remove();
       sauvegarderCacheLocal();
       
-      // On rafraîchit l'interface avec les temps parfaits des stations en panne (et suppression de celles > 15j)
       rafraichirInterfaceGlobale(stationsUniques);
   }
 
-  // FONCTION QUI NETTOIE TOUT ET AFFICHE LES STATIONS (APPELÉE 2 FOIS : Avant et après la recherche)
+  // ====== MET A JOUR LA CARTE ET LES COMPTEURS ======
   function rafraichirInterfaceGlobale(stationsUniques) {
-      nOk = 0; nWarn = 0; nFault = 0;
       document.getElementById("tbodyReseau").innerHTML = "";
       document.getElementById("zoneTableauAlertes").style.display = "none";
 
+      let tempOk = 0, tempWarn = 0, tempFault = 0;
+
       stationsUniques.forEach(st => {
           let obs = window.stationsCache[st.id];
-          injecterStationDansDashboard(st, obs);
+          let statut = injecterStationDansDashboard(st, obs);
+          if (statut === 'ok') tempOk++;
+          else if (statut === 'warn') tempWarn++;
+          else if (statut === 'fault') tempFault++;
       });
 
+      document.getElementById("cnt-ok").textContent = tempOk;
+      document.getElementById("cnt-warn").textContent = tempWarn;
+      document.getElementById("cnt-fault").textContent = tempFault;
+
+      window.changerModeCarte(window.modeAffichageCarte, true); // Appel groupé = 100x plus rapide
       mettreAJourFondEcran();
   }
 
-  // ====== GESTION DES FILTRES ======
-  window.changerModeCarte = function(mode, keepMode = false) {
-    if (window.modeAffichageCarte === mode && !keepMode) { mode = 'none'; }
-    window.modeAffichageCarte = mode;
-    document.querySelectorAll('.btn-toggle-map').forEach(btn => { if(btn.id !== 'btnModeSat' && btn.id !== 'btnGeoLoc') btn.classList.remove('active'); });
-    if (mode !== 'none') { let btnId = 'btnMode' + mode.charAt(0).toUpperCase() + mode.slice(1); let btn = document.getElementById(btnId); if (btn) btn.classList.add('active'); }
-
-    if (mode === 'pluie' || mode === 'none') { window.demarrerAnimationRadar(); } 
-    else { window.arreterAnimationRadar(); if (window.coucheRadar && window.carteReseau.hasLayer(window.coucheRadar)) { window.carteReseau.removeLayer(window.coucheRadar); } let tDisp = document.getElementById('radarTimeDisplay'); if (tDisp) tDisp.style.display = 'none'; }
-
-    document.getElementById('legendeBase').style.display = 'none'; document.getElementById('legendeTemp').style.display = 'none';
-    document.getElementById('legendeVent').style.display = 'none'; document.getElementById('legendeHumidite').style.display = 'none';
-    document.getElementById('legendeRadar').style.display = 'none';
-
-    if (mode === 'temp') document.getElementById('legendeTemp').style.display = 'flex';
-    else if (mode === 'vent') document.getElementById('legendeVent').style.display = 'flex';
-    else if (mode === 'humidite') document.getElementById('legendeHumidite').style.display = 'flex';
-    else if (mode === 'pluie') document.getElementById('legendeRadar').style.display = 'flex';
-    else document.getElementById('legendeBase').style.display = 'flex';
-
-    let zoomActuel = window.carteReseau ? window.carteReseau.getZoom() : 7;
-
-    for (let id in window.marqueursLeaflet) {
-      let marker = window.marqueursLeaflet[id]; let obs = window.stationsCache[id]; let meta = window.stationsMetaCache[id];
-      if (!obs || !obs.validity_time) { marker.unbindTooltip(); continue; }
-
-      let vTime = obs.validity_time; if (!vTime.endsWith('Z')) vTime += 'Z';
-      let ageMin = Math.round((Date.now() - new Date(vTime).getTime()) / 60000);
-      let isOffline = (ageMin >= SEUIL_ROUGE_MIN);
-      let showMarker = true;
-
-      if (mode !== 'none' && mode !== 'pluie' && isOffline) { showMarker = false; }
-
-      let text = ""; let overrideColor = null; let showTooltip = false;
-
-      if (!isOffline && showMarker) {
-          if (mode === 'temp') {
-              if (!estValeurManquante(obs.t)) { text = `${kelvinToCelsius(obs.t)}°C`; overrideColor = getTempColor(parseFloat(kelvinToCelsius(obs.t))); if (zoomActuel >= 9) showTooltip = true; } else { showMarker = false; }
-          } else if (mode === 'humidite') {
-              if (!estValeurManquante(obs.u)) { text = `${obs.u}%`; overrideColor = getHumiditeColor(parseFloat(obs.u)); if (zoomActuel >= 9) showTooltip = true; } else { showMarker = false; }
-          } else if (mode === 'vent') {
-              let ff = !estValeurManquante(obs.ff) ? msToKmh(obs.ff) : null; let raf = !estValeurManquante(obs.raf10) ? msToKmh(obs.raf10) : (!estValeurManquante(obs.rafper) ? msToKmh(obs.rafper) : null);
-              if (ff !== null || raf !== null) { let vMax = Math.max(ff !== null ? parseFloat(ff) : 0, raf !== null ? parseFloat(raf) : 0); overrideColor = getVentColor(vMax); if (ff !== null && raf !== null) text = `💨 ${ff} (${raf})`; else if (ff !== null) text = `💨 ${ff} km/h`; else if (raf !== null) text = `💨 raf ${raf}`; if (zoomActuel >= 9) showTooltip = true; } else { showMarker = false; }
-          } else if (mode === 'pluie') {
-              let p = !estValeurManquante(obs.rr_per) ? obs.rr_per : (!estValeurManquante(obs.rr1) ? obs.rr1 : null);
-              if (p !== null) {
-                  let val = parseFloat(p);
-                  if (val === 0) { text = `0 mm`; overrideColor = 'transparent'; if (zoomActuel >= 9) showTooltip = true; } else { text = `💧 ${val} mm`; overrideColor = '#0ea5e9'; showTooltip = true; }
-              } else { showMarker = false; }
-          }
-      }
-
-      if (showMarker) {
-          if (!coucheMarqueurs.hasLayer(marker)) coucheMarqueurs.addLayer(marker);
-          let statutActuel = isOffline ? 'fault' : (obs._statut || 'ok');
-          if (mode === 'none') overrideColor = null;
-          marker.setIcon(createStationIcon(statutActuel, meta?.lettre || '?', overrideColor));
-          if (text !== "" && showTooltip) marker.bindTooltip(text, { permanent: true, direction: 'right', className: 'map-live-label', offset: [13, 0] }); else marker.unbindTooltip();
-      } else {
-          if (coucheMarqueurs.hasLayer(marker)) coucheMarqueurs.removeLayer(marker);
-          marker.unbindTooltip();
-      }
-    }
-  };
-
-  // LOGIQUE DE CLASSIFICATION STRICTE !
   function injecterStationDansDashboard(station, obs) {
     let marker = window.marqueursLeaflet[station.id];
     if (!marker) {
@@ -906,14 +876,14 @@
             marker.on('click', () => lancerDetailsStation(station.id, station.nom, station.numer_sta || station.id_station));
             window.marqueursLeaflet[station.id] = marker; 
         } else {
-            return;
+            return null; // Ignore si pas de coordonnées
         }
     }
 
     let ageMin = Infinity;
     if (obs && obs.validity_time) {
         let vTime = obs.validity_time;
-        if (!vTime.endsWith('Z')) vTime += 'Z'; // SECURITE FUSEAU HORAIRE
+        if (!vTime.endsWith('Z')) vTime += 'Z'; 
         ageMin = Math.round((Date.now() - new Date(vTime).getTime()) / 60000);
     }
 
@@ -922,7 +892,7 @@
             window.marqueursLeaflet[station.id].remove();
             delete window.marqueursLeaflet[station.id];
         }
-        return; 
+        return null; // Plus de 15 jours
     }
 
     let isOffline = (!obs || ageMin >= SEUIL_ROUGE_MIN);
@@ -940,8 +910,6 @@
     let statut = isOffline ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok");
     if (obs) obs._statut = statut;
 
-    if (statut === "ok") nOk++; else if (statut === "warn") nWarn++; else nFault++;
-
     let premiereLettre = window.stationsMetaCache[station.id]?.lettre || '?';
     marker.setIcon(createStationIcon(statut, premiereLettre));
     
@@ -953,7 +921,6 @@
 
     if (!coucheMarqueurs.hasLayer(marker)) marker.addTo(coucheMarqueurs);
 
-    // REMPLISSAGE DU TABLEAU DES ALERTES
     if (statut === "warn" || statut === "fault") {
       document.getElementById("zoneTableauAlertes").style.display = "block";
       const nomEchappe = station.nom.replace(/'/g, "\\'"); 
@@ -985,6 +952,8 @@
       trHtml += `</tr>`;
       document.getElementById("tbodyReseau").insertAdjacentHTML('beforeend', trHtml);
     }
+
+    return statut;
   }
 
   // ====== DÉTAILS DE LA STATION ======
