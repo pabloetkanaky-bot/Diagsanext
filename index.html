@@ -11,9 +11,9 @@
   <meta name="apple-mobile-web-app-title" content="Diag SA">
   <meta name="mobile-web-app-capable" content="yes">
 
-  <link rel="icon" type="image/png" href="icon.png?v=105">
-  <link rel="apple-touch-icon" href="icon.png?v=105">
-  <link rel="manifest" href="manifest.json?v=105">
+  <link rel="icon" type="image/png" href="icon.png?v=106">
+  <link rel="apple-touch-icon" href="icon.png?v=106">
+  <link rel="manifest" href="manifest.json?v=106">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -130,7 +130,7 @@
 <body class="bg-sunny">
 
 <div class="header-container">
-  <div class="header-logo"><img src="icon.png?v=105" alt="Logo Diag SA"></div>
+  <div class="header-logo"><img src="icon.png?v=106" alt="Logo Diag SA"></div>
   <div class="header-text">
     <h1>Diag SA <span style="color: #69b3e7;">NEXT</span></h1>
     <p>Supervision de la MIR 21</p>
@@ -272,8 +272,8 @@
   ];
 
   const WORKER_URL = "https://proxymeteofrance.remiparamoteur.workers.dev";
-  const SEUIL_INACTIVITE_MIN = 15 * 24 * 60; // 15 Jours pleins
-  const SEUIL_ROUGE_MIN = 30; // 30 minutes
+  const SEUIL_INACTIVITE_MIN = 15 * 24 * 60; // 15 Jours pleins pour suppression
+  const SEUIL_ROUGE_MIN = 30; // 30 minutes = Hors Ligne
 
   const STATIONS_EXCLUES = [
       "ST DENIS LES SENS", "SENS", "ST-DIZIER", "LOUVEMONT - MAN", 
@@ -346,7 +346,6 @@
     return undefined;
   };
 
-  // SECURITE MAXIMALE UTC
   function normaliserObs(obs) {
     if (!obs) return;
     if (estValeurManquante(obs.vv)) obs.vv = extractVal(obs, ['v', 'visibilite']);
@@ -366,10 +365,11 @@
     }
   }
 
+  // NOUVELLE FONCTION DE FORMATAGE
   function formatHeure(iso) {
     try {
       const d = new Date(iso);
-      return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + " (" + d.toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit'}) + ")";
+      return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) + " à " + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     } catch { return iso; }
   }
 
