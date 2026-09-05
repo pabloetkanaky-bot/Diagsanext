@@ -7,542 +7,372 @@
   
   <meta name="theme-color" content="#0056b3">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Diag SA">
-  <meta name="mobile-web-app-capable" content="yes">
-
-  <link rel="icon" type="image/png" href="icon.png?v=106">
-  <link rel="apple-touch-icon" href="icon.png?v=106">
-  <link rel="manifest" href="manifest.json?v=106">
-
+  
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <!-- Librairie Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Nunito:wght@800&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --primary-color: #0056b3;
-      --glass-bg: rgba(255, 255, 255, 0.25); 
-      --glass-border: rgba(255, 255, 255, 0.2);
-      --radius: 12px;
-    }
+    :root { --primary-color: #0056b3; --glass-bg: rgba(255, 255, 255, 0.25); --radius: 12px; }
 
-    body { 
-      font-family: 'Inter', sans-serif; 
-      margin: 0; 
-      padding: 10px;
-      color: #1e293b; 
-      background-color: #e0e5ec;
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      transition: background-image 1.5s ease-in-out;
-      min-height: 100vh;
-    }
-
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 15px; color: #1e293b; background-color: #e0e5ec; background-size: cover; background-position: center; background-attachment: fixed; transition: background-image 1.5s ease-in-out; min-height: 100vh; }
     body.bg-sunny { background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
     body.bg-warning { background-image: url('https://images.unsplash.com/photo-1486911278844-a81c5267e227?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
     body.bg-stormy { background-image: url('https://images.unsplash.com/photo-1428592953211-077101b2021b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
+    body.bg-terrain { background-color: #1e293b; background-image: none; color: white; }
 
-    /* ====== EN-TÊTE ULTRA COMPACT ====== */
-    .header-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
-    .header-logo { width: 50px; height: 50px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.4); border: 2px solid rgba(255, 255, 255, 0.4); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #0056b3; }
-    .header-logo img { width: 115%; height: 115%; object-fit: cover; object-position: center; }
-    .header-text { text-align: left; display: flex; flex-direction: column; justify-content: center; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
-    .header-text h1 { margin: 0; font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: #ffffff; line-height: 1; }
-    .header-text p { margin: 2px 0 0; font-size: 11px; font-weight: 700; color: #f8fafc; opacity: 0.95; letter-spacing: 0.5px; line-height: 1; }
+    .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 16px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2);}
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .header-logo { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #0056b3; font-size: 24px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+    .header-text { display: flex; flex-direction: column; justify-content: center; text-shadow: 0 2px 5px rgba(0,0,0,0.6); }
+    .header-text h1 { margin: 0; font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 900; color: #ffffff; line-height: 1; }
+    .header-text p { margin: 4px 0 0; font-size: 12px; font-weight: 700; color: #f8fafc; opacity: 0.95; }
+
+    .btn-toggle-app { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;}
+    .btn-toggle-app:active { transform: scale(0.95); }
+    .btn-toggle-app.mode-bureau { background: #3b82f6; }
 
     .container { max-width: 1050px; margin: 0 auto; }
+    .card { background: var(--glass-bg); backdrop-filter: blur(8px); padding: 20px; border-radius: var(--radius); box-shadow: 0 8px 32px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.2); margin-bottom: 20px; }
     
-    .card { background: var(--glass-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 12px; border-radius: var(--radius); box-shadow: 0 8px 32px rgba(0,0,0,0.2); border: 1px solid var(--glass-border); margin-bottom: 15px; animation: fadeIn 0.5s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    body.bg-terrain .card { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); color: white;}
+    body.bg-terrain h2, body.bg-terrain label { color: white; text-shadow: none; }
+    body.bg-terrain input, body.bg-terrain select { background: rgba(15, 23, 42, 0.9); color: white; border: 1px solid rgba(255,255,255,0.2); font-size: 16px; padding: 15px;}
 
-    h2 { color: #004494; margin-top: 0; font-size: 18px; text-shadow: 0 1px 3px rgba(255,255,255,0.7); }
-    .form-group { margin-bottom: 10px; }
-    label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 13px; color: #1e293b; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
-    input { width: 100%; padding: 10px; border: 1px solid rgba(203, 213, 225, 0.5); border-radius: 6px; box-sizing: border-box; font-size: 14px; font-family: 'Inter', sans-serif; background: rgba(255,255,255,0.6); }
+    h2 { color: #004494; margin-top: 0; font-size: 20px; text-shadow: 0 1px 3px rgba(255,255,255,0.7); }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
+    input, select, button { width: 100%; padding: 12px; border: 1px solid rgba(203, 213, 225, 0.5); border-radius: 6px; box-sizing: border-box; font-size: 15px; font-family: 'Inter', sans-serif; background: rgba(255,255,255,0.6); }
     
-    .btn-primary { background: linear-gradient(135deg, rgba(0,86,179,0.85), rgba(0,123,255,0.85)); color: white; border: none; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 14px; padding: 10px; box-shadow: 0 4px 15px rgba(0,123,255,0.3); border-radius: 8px;}
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,123,255,0.4); background: linear-gradient(135deg, #0056b3, #007bff); }
-    
-    .btn-action { display: inline-block; padding: 6px 12px; font-size: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; border: none; color: white; margin-right: 5px; margin-bottom: 5px; transition: 0.2s;}
-    .btn-hist { background-color: rgba(23, 162, 184, 0.8); }
+    .btn-primary { background: linear-gradient(135deg, rgba(0,86,179,0.85), rgba(0,123,255,0.85)); color: white; border: none; font-weight: bold; cursor: pointer; font-size: 16px; padding: 12px; box-shadow: 0 4px 15px rgba(0,123,255,0.3); }
+    .btn-terrain { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-weight: 800; cursor: pointer; font-size: 18px; padding: 20px; border-radius: 12px; margin-bottom: 12px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+    .btn-terrain-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+    .btn-terrain-orange { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); }
 
-    .btn-icon { background: transparent; border: none; padding: 0; margin-left: 5px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none; cursor: pointer; }
-    .btn-icon img { width: 24px; height: 24px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
-
-    /* BOUTONS FILTRES CARTE RÉDUITS */
-    .btn-toggle-map { 
-        padding: 5px 10px; font-size: 20px; line-height: 1; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.6); 
-        background: rgba(255, 255, 255, 0.5); color: #1e293b; cursor: pointer; transition: all 0.2s ease; 
-        box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: inline-flex; align-items: center; justify-content: center;
-    }
+    .btn-toggle-map { width: auto; padding: 6px 12px; font-size: 22px; line-height: 1; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.5); color: #1e293b; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: inline-flex; align-items: center; justify-content: center; }
     .btn-toggle-map.active { background: #0056b3; color: #ffffff; border-color: #004494; box-shadow: 0 4px 12px rgba(0,86,179,0.5); transform: scale(1.05); }
-
-    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; margin-bottom: 10px; border-radius: 8px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 5px; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); font-size: 12px; }
-    th, td { border: 1px solid rgba(255, 255, 255, 0.3); text-align: left; padding: 8px; }
+    
+    /* STYLES DES TABLEAUX (DASHBOARD) */
+    .table-responsive { overflow-x: auto; width: 100%; margin-bottom: 15px; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 5px; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); }
+    th, td { border: 1px solid rgba(255, 255, 255, 0.3); text-align: left; padding: 8px; font-size: 13px;}
     th { background-color: rgba(0, 51, 102, 0.65); color: white; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.1); }
     
-    .error { color: #dc2626; font-weight: bold; white-space: pre-wrap; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
-
-    /* COMPTEURS MINIATURES */
-    .reseau-resume { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
-    .reseau-compteur { flex:1; min-width:70px; padding:6px; border-radius:8px; text-align:center; background: rgba(255,255,255,0.3); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .reseau-compteur .n { font-size:22px; font-weight:900; display:block; margin-bottom: 0px; text-shadow: 0 1px 2px rgba(255,255,255,0.7);}
-    .reseau-compteur .l { font-size:10px; font-weight:800; color: #1e293b; text-shadow: 0 1px 2px rgba(255,255,255,0.5);}
+    .reseau-resume { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px; }
+    .reseau-compteur { flex:1; min-width:80px; padding:10px; border-radius:10px; text-align:center; background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .reseau-compteur .n { font-size:24px; font-weight:800; display:block; margin-bottom: 2px; }
+    .reseau-compteur .l { font-size:11px; font-weight:700; color: #1e293b;}
     
     .c-ok { border-bottom: 4px solid rgba(16, 185, 129, 0.8); color: #047857; }
     .c-warn { border-bottom: 4px solid rgba(245, 158, 11, 0.8); color: #b45309; }
     .c-fault { border-bottom: 4px solid rgba(239, 68, 68, 0.8); color: #b91c1c; }
-
-    /* ====== CARTE GÉANTE ====== */
-    #mapReseau { 
-      border: 2px solid rgba(255,255,255,0.5); border-radius: var(--radius); margin-bottom: 10px; 
-      z-index: 1; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      height: 75vh; 
-      min-height: 450px;
-    }
-
-    .legende { font-size:11px; color:#1e293b; margin-top:5px; line-height:1.4; font-weight: 700; text-shadow: 0 1px 2px rgba(255,255,255,0.6);}
-    .legende span { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:4px; vertical-align:middle; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
     
+    #mapReseau { border: 2px solid rgba(255,255,255,0.5); border-radius: var(--radius); margin-bottom: 20px; z-index: 1; cursor: pointer; height: 60vh; min-height: 500px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.15);}
+    
+    .map-live-label { background: rgba(255, 255, 255, 0.9) !important; border: 1px solid rgba(0,0,0,0.2) !important; border-radius: 6px !important; padding: 3px 6px !important; color: #0f172a !important; font-weight: 800 !important; font-size: 11px !important; box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; white-space: nowrap; text-shadow: none !important; transition: opacity 0.2s ease-in-out; }
+    .map-live-label::before { display: none; }
+    .map-hide-tooltips .map-live-label { opacity: 0 !important; pointer-events: none !important; }
+
+    .age-stale { color:#b91c1c; font-weight:bold; }
     .cell-ok { background: rgba(236, 253, 245, 0.4); }
     .cell-fault { background: rgba(254, 242, 242, 0.5); color:#b91c1c; font-weight:bold; }
     .cell-na { background: rgba(248, 250, 252, 0.3); color:#475569; font-style:italic; }
-    .age-stale { color:#b91c1c; font-weight:bold; }
 
-    .map-live-label {
-      background: rgba(255, 255, 255, 0.9) !important; border: 1px solid rgba(0,0,0,0.2) !important; border-radius: 6px !important;
-      padding: 2px 5px !important; color: #0f172a !important; font-weight: 800 !important; font-size: 11px !important;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; white-space: nowrap; text-shadow: none !important;
-    }
-    .map-live-label::before { display: none; }
+    /* NOUVEAUX STYLES HISTORIQUE AVEC EN-TETES FIXES */
+    #contenuHistorique .table-responsive { max-height: 50vh; overflow: auto; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.5); }
+    #contenuHistorique table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 0; }
+    #contenuHistorique th, #contenuHistorique td { padding: 8px 12px; font-size: 13px; line-height: 1.2; border: none; border-bottom: 1px solid rgba(0, 0, 0, 0.1); white-space: nowrap; text-align: center; }
+    #contenuHistorique th { position: sticky; top: 0; z-index: 4; background-color: #0f172a; color: #ffffff; border-bottom: 2px solid #3b82f6; }
+    #contenuHistorique th:first-child { z-index: 5; left: 0; text-align: left; }
+    #contenuHistorique td:first-child { position: sticky; left: 0; z-index: 2; background-color: #f8fafc; color: #0f172a; box-shadow: 2px 0 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; }
     
-    /* HISTORIQUE */
-    #contenuHistorique th { position: sticky; top: 0; z-index: 4; background-color: #0f172a; color: #ffffff; }
-    #contenuHistorique th:first-child { position: sticky; left: 0; z-index: 5; background-color: #020617; }
-    #contenuHistorique td:first-child { position: sticky; left: 0; z-index: 2; background-color: #f8fafc; color: #0f172a; }
+    .extreme-box { flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.1);}
+
+    @media (max-width: 768px) { body { padding: 10px; } #mapReseau { height: 75vh; min-height: 400px; } }
   </style>
 </head>
 <body class="bg-sunny">
 
 <div class="header-container">
-  <div class="header-logo"><img src="icon.png?v=106" alt="Logo Diag SA"></div>
-  <div class="header-text">
-    <h1>Diag SA <span style="color: #69b3e7;">NEXT</span></h1>
-    <p>Supervision de la MIR 21</p>
+  <div class="header-left">
+    <div class="header-logo">☁️</div>
+    <div class="header-text">
+      <h1>Diag SA <span style="color: #69b3e7;">NEXT</span></h1>
+      <p>Supervision & Maintenance (V2)</p>
+    </div>
   </div>
+  <button id="btnBasculerTerrain" class="btn-toggle-app" onclick="basculerMode()">Mode Terrain 📍</button>
 </div>
 
 <div class="container">
-  <!-- configCard masquée d'office -->
-  <div class="card" id="configCard" style="display:none;">
-    <div id="zoneSaisieApi" class="form-group">
-      <label for="apikey">API Key Météo-France :</label>
-      <input type="text" id="apikey" value="" placeholder="Clé API Météo-France...">
-    </div>
-    <div id="zoneSaisieCheckWX" class="form-group">
-      <label for="apikeyCheckWX">API Key CheckWX (Aéro) :</label>
-      <input type="text" id="apikeyCheckWX" value="03b30ea9919946d39e1d0c1977206b33" placeholder="Clé CheckWX API...">
-    </div>
-    <button id="btnScan" class="btn-primary" onclick="scannerRegion(false)">Démarrer le diagnostic</button>
-  </div>
+  <input type="hidden" id="apikeyCheckWX" value="03b30ea9919946d39e1d0c1977206b33">
 
-  <div id="zoneReseau" class="card" style="display:none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <h2 style="margin:0;">🌍 Cartographie</h2>
-      <div style="display:flex; gap: 8px; align-items: center;">
-        <a href="#" id="btnEditApi" onclick="modifierApi(); return false;" class="btn-icon" title="Modifier l'API" style="display:none;"><img src="https://img.icons8.com/fluency/48/000000/api-settings.png" alt="API" style="width:24px; height:24px;"></a>
-        <button id="btnRefreshMap" onclick="scannerRegion(true)" class="btn-primary" style="margin:0; padding:6px 12px; font-size:12px;">🔄 Actualiser</button>
-      </div>
-    </div>
-    
-    <div class="reseau-resume">
-      <div class="reseau-compteur c-ok"><span class="n" id="cnt-ok">0</span><span class="l">STATIONS OK</span></div>
-      <div class="reseau-compteur c-warn"><span class="n" id="cnt-warn">0</span><span class="l">EN ALERTE</span></div>
-      <div class="reseau-compteur c-fault"><span class="n" id="cnt-fault">0</span><span class="l">HORS LIGNE</span></div>
-    </div>
+  <!-- ==================== ZONE SUPERVISION ==================== -->
+  <div id="zoneSupervision">
+      <div id="zoneReseau" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h2 style="margin:0;">🌍 Cartographie MIR 21</h2>
+          <div style="display:flex; gap: 8px; align-items: center;">
+            <button id="btnRefreshMap" onclick="scannerRegion()" class="btn-primary" style="width: auto; padding: 6px 14px; font-size: 13px; border-radius: 8px; margin: 0;">🔄 Actualiser</button>
+          </div>
+        </div>
+        
+        <p id="statutChargement" style="color:#004494; font-weight:bold; margin-top:0;">Démarrage...</p>
 
-    <!-- BOUTONS FILTRES CARTE -->
-    <div style="display:flex; gap: 5px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; width: 100%;">
-      <button class="btn-toggle-map" id="btnModeTemp" onclick="changerModeCarte('temp')" title="Température">🌡️</button>
-      <button class="btn-toggle-map" id="btnModeHumidite" onclick="changerModeCarte('humidite')" title="Humidité">💧</button>
-      <button class="btn-toggle-map" id="btnModeVent" onclick="changerModeCarte('vent')" title="Vent">💨</button>
-      <button class="btn-toggle-map" id="btnModePluie" onclick="changerModeCarte('pluie')" title="Précipitations & Radar">🌧️</button>
-      
-      <div style="flex-grow: 1;"></div> 
-      
-      <button class="btn-toggle-map" id="btnModeSat" onclick="basculerFondCarte()" title="Satellite">🗺️</button>
-      <button class="btn-toggle-map" id="btnGeoLoc" onclick="centrerSurMoi()" title="Me localiser">📍</button>
-    </div>
+        <div class="reseau-resume">
+          <div class="reseau-compteur c-ok"><span class="n" id="cnt-ok">0</span><span class="l">STATIONS OK</span></div>
+          <div class="reseau-compteur c-warn"><span class="n" id="cnt-warn">0</span><span class="l">PERTE CAPTEUR</span></div>
+          <div class="reseau-compteur c-fault"><span class="n" id="cnt-fault">0</span><span class="l">HORS LIGNE</span></div>
+        </div>
 
-    <div id="mapReseau"></div>
-    
-    <div class="legende" id="legendeBase">
-      <span style="background:rgba(16, 185, 129, 0.8);"></span> OK &nbsp;
-      <span style="background:rgba(245, 158, 11, 0.8);"></span> Alerte Capteur &nbsp;
-      <span style="background:rgba(239, 68, 68, 0.8);"></span> Muette (> 30 min)<br>
-    </div>
-    
-    <div class="legende" id="legendeTemp" style="display:none;"><div><span style="background:#312e81;"></span>&le;-15°C <span style="background:#0ea5e9;margin-left:5px;"></span>5 à 10 <span style="background:#ef4444;margin-left:5px;"></span>25 à 30</div></div>
-    <div class="legende" id="legendeHumidite" style="display:none;"><div><span style="background:#b45309;"></span>&lt;30% <span style="background:#38bdf8;margin-left:5px;"></span>70 à 90% <span style="background:#000000;margin-left:5px;"></span>100%</div></div>
-    <div class="legende" id="legendeVent" style="display:none;"><div><span style="background:#bfdbfe;"></span>&lt;15 km/h <span style="background:#1d4ed8;margin-left:5px;"></span>50 à 70 <span style="background:#020617;margin-left:5px;"></span>&gt;90 km/h</div></div>
-    <div class="legende" id="legendeRadar" style="display:none;"><div><span style="background:linear-gradient(to right, #2ab1ff, #0000ff); width: 20px;"></span> Pluie <span style="background:linear-gradient(to right, #ffff00, #ff9900); width: 20px;"></span> Orage <br><span style="background:rgba(255,255,255,0.3); border:1px solid #000; margin-top:5px;"></span> Pluvio à 0 mm</div></div>
+        <div style="display:flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; width: 100%;">
+          <button class="btn-toggle-map" id="btnModeTemp" onclick="changerModeCarte('temp')" title="Température">🌡️</button>
+          <button class="btn-toggle-map" id="btnModeHumidite" onclick="changerModeCarte('humidite')" title="Humidité">💧</button>
+          <button class="btn-toggle-map" id="btnModeVent" onclick="changerModeCarte('vent')" title="Vent">💨</button>
+          <button class="btn-toggle-map" id="btnModePluie" onclick="changerModeCarte('pluie')" title="Radar Précipitations">🌧️</button>
+          <div style="flex-grow: 1;"></div> 
+          <button class="btn-toggle-map" id="btnGeoLoc" onclick="centrerSurMoi()" title="Me localiser">📍</button>
+        </div>
 
-    <div id="zoneTableauAlertes" style="display:none; border-top: 1px solid rgba(255, 255, 255, 0.3); padding-top:10px; margin-top:10px;">
-      <h3 style="color:#b91c1c; margin-top:0; font-size: 15px; text-shadow: 0 1px 2px rgba(255,255,255,0.7);">⚠️ Stations nécessitant une attention</h3>
-      <div class="table-responsive">
-        <table class="reseau" id="tableReseau">
-          <thead id="theadReseau"></thead>
-          <tbody id="tbodyReseau"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div id="zoneDetailContainer" style="display:none;">
-    <div class="card" id="cardDernieresObs">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-        <h2 id="titreDetails" style="margin: 0; flex: 1;">Détails Station</h2>
-        <div id="actionButtonsStation" style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; flex-wrap: wrap;"></div>
-      </div>
-      <div id="contenuObs"></div>
-    </div>
-
-    <div class="card" id="cardHistorique">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-        <h2 id="titreHistorique" style="margin: 0; flex: 1;">Historique — dernière heure</h2>
-        <div>
-          <button id="btnHist1h" class="btn-action btn-hist" style="display:none;" onclick="chargerHistorique1h()">Dernière heure</button>
-          <button id="btnHist24h" class="btn-action btn-hist" onclick="chargerHistorique24h()">Sur 24h</button>
+        <div id="mapReseau"></div>
+        
+        <div id="zoneTableauAlertes" style="display:none; border-top: 1px solid rgba(255, 255, 255, 0.3); padding-top:15px; margin-top:15px;">
+          <h3 style="color:#b91c1c; margin-top:0;">⚠️ Stations nécessitant une attention</h3>
+          <div class="table-responsive">
+            <table class="reseau" id="tableReseau">
+              <thead id="theadReseau"></thead>
+              <tbody id="tbodyReseau"></tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div id="zoneExtremesJournee" style="margin-bottom: 10px;"></div>
-      <div id="contenuHistorique"></div>
+
+      <!-- BLOC DÉTAILS ET HISTORIQUE -->
+      <div id="zoneDetailContainer" style="display:none;">
+        <div class="card" id="cardDernieresObs">
+          <h2 id="titreDetails" style="margin: 0; margin-bottom: 10px;">Détails Station</h2>
+          <div id="contenuObs"></div>
+        </div>
+        
+        <div class="card" id="cardHistorique">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+            <h2 id="titreHistorique" style="margin: 0; flex: 1;">Historique & Extrêmes depuis minuit</h2>
+          </div>
+          <div id="zoneExtremesJournee" style="margin-bottom: 15px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+          <div id="contenuHistorique"></div>
+        </div>
+      </div>
+  </div>
+
+  <!-- ZONE TERRAIN -->
+  <div id="zoneTerrain" style="display:none;">
+    <div class="card">
+        <h2>📍 Station d'intervention</h2>
+        <div id="gpsStatus" style="font-weight:bold; color:#10b981; margin-bottom: 15px;">Recherche GPS en cours...</div>
+        <div class="form-group">
+            <label>Sélection manuelle :</label>
+            <select id="selectStationTerrain" onchange="changerStationTerrain()"><option value="">Sélectionnez une station...</option></select>
+        </div>
+    </div>
+    <div id="menuActionsTerrain" style="display:none;">
+        <button class="btn-terrain" onclick="ouvrirFormulaire('photo')">📸 Photo & Constat</button>
+        <button class="btn-terrain btn-terrain-orange" onclick="ouvrirFormulaire('materiel')">🔧 Remplacer Matériel</button>
+        <button class="btn-terrain btn-terrain-blue" onclick="ouvrirFormulaire('etalonnage')">📊 Étalonnage Pluvio</button>
+    </div>
+    <div class="card" id="formPhoto" style="display:none;">
+        <h2>📸 Envoi de Photo</h2>
+        <div class="form-group"><label>Type :</label><select id="photoTag"><option value="Generale">Vue générale</option><option value="Pluviometre">Pluviomètre</option></select></div>
+        <div class="form-group"><label>Photo :</label><input type="file" accept="image/*" capture="environment" id="photoInput" style="background:white; color:black;"></div>
+        <button class="btn-primary" style="background:#10b981;" onclick="envoyerPhoto()">Envoyer vers Supabase</button>
+        <button class="btn-primary" style="background:#64748b; margin-top:10px;" onclick="fermerFormulaires()">Annuler</button>
+    </div>
+    <div class="card" id="formMateriel" style="display:none;">
+        <h2>🔧 Remplacement Matériel</h2>
+        <div class="form-group"><label>Type :</label><select id="matType"><option value="Pluviomètre">Pluviomètre</option><option value="Baromètre">Baromètre</option></select></div>
+        <div class="form-group"><label>S/N NOUVEAU :</label><input type="text" id="matNouveauSn"></div>
+        <button class="btn-primary" style="background:#f59e0b;" onclick="enregistrerMateriel()">Valider</button>
+        <button class="btn-primary" style="background:#64748b; margin-top:10px;" onclick="fermerFormulaires()">Annuler</button>
+    </div>
+    <div class="card" id="formEtalonnage" style="display:none;">
+        <h2>📊 Étalonnage Pluviomètre</h2>
+        <div class="form-group"><label>Type :</label><select id="pluvioType" onchange="adapterFormulairePluvio()"><option value="Augets">Augets</option><option value="Lambrecht">Lambrecht</option></select></div>
+        <div id="blocAugets"><div class="form-group"><label>Étalon :</label><input type="number" id="etalonAugets" value="100"></div><div class="form-group"><label>Mesure Gauche :</label><input type="number" id="mesureGauche" oninput="calculerErreurAugets()"></div><div class="form-group"><label>Mesure Droit :</label><input type="number" id="mesureDroit" oninput="calculerErreurAugets()"></div><div class="form-group"><label>Erreur :</label><input type="text" id="erreurAugets" readonly></div></div>
+        <div id="blocLambrecht" style="display:none;"><div class="form-group"><label>Étalon (g) :</label><input type="number" id="etalonLambrecht" value="500" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Mesuré (g) :</label><input type="number" id="mesurePoids" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Écart :</label><input type="text" id="ecartLambrecht" readonly></div></div>
+        <div class="form-group"><label>Résultat :</label><select id="resultatEtalonnage" style="font-weight:bold;"><option value="true">✅ CONFORME</option><option value="false">❌ HORS TOLÉRANCE</option></select></div>
+        <button class="btn-primary" style="background:#3b82f6;" onclick="enregistrerEtalonnage()">Enregistrer</button>
+        <button class="btn-primary" style="background:#64748b; margin-top:10px;" onclick="fermerFormulaires()">Annuler</button>
     </div>
   </div>
 </div>
 
 <script>
-  // ====== LE DICTIONNAIRE PRINCIPAL ======
-  const PARAM_INFO_DETAIL = {
-    metar_decode:    { label: "METAR Décodé",    unit: "", group: "Aéronautique & Ciel" },
-    metar_brut:      { label: "METAR Brut",      unit: "", group: "Aéronautique & Ciel" },
-    vv:              { label: "Visibilité",        unit: "m", group: "Aéronautique & Ciel" },
-    n:               { label: "Nébulosité",             unit: "octas", group: "Aéronautique & Ciel" },
-    hbas:            { label: "Plafond",             unit: "m", group: "Aéronautique & Ciel" },
-    nuages_metar:    { label: "Nuages",          unit: "",  group: "Aéronautique & Ciel" },
-    ww:              { label: "Temps présent",      unit: "", group: "Aéronautique & Ciel" },
-    t:               { label: "Température",             unit: "°C", transform: kelvinToCelsius, group: "Température" },
-    td:              { label: "Point de rosée",           unit: "°C", transform: kelvinToCelsius, group: "Température" },
-    t_10:            { label: "Temp. sol -10cm",   unit: "°C", transform: kelvinToCelsius, group: "Température" },
-    t_20:            { label: "Temp. sol -20cm",   unit: "°C", transform: kelvinToCelsius, group: "Température" },
-    t_50:            { label: "Temp. sol -50cm",   unit: "°C", transform: kelvinToCelsius, group: "Température" },
-    t_100:           { label: "Temp. sol -1m",  unit: "°C", transform: kelvinToCelsius, group: "Température" },
-    u:               { label: "Humidité",        unit: "%",    group: "Humidité & précipitations" },
-    rr_per:          { label: "Pluie (6 min)",             unit: "mm",   group: "Humidité & précipitations" },
-    rr1:             { label: "Pluie (1h)",               unit: "mm",   group: "Humidité & précipitations" },
-    etat_sol:        { label: "État du sol",   unit: "",     group: "Humidité & précipitations" },
-    sss:             { label: "Neige fraîche", unit: "cm",   group: "Humidité & précipitations" },
-    dd:              { label: "Dir. Vent",       unit: "°",    group: "Vent" },
-    ff:              { label: "Vent moyen",         unit: "km/h", transform: msToKmh, group: "Vent" },
-    ddraf10:         { label: "Dir. Rafales",    unit: "°",   group: "Vent" },
-    raf10:           { label: "Rafale max (10 min)",           unit: "km/h", transform: msToKmh, group: "Vent" },
-    rafper:          { label: "Rafale max (1h)",               unit: "km/h", transform: msToKmh, group: "Vent" },
-    insolh:          { label: "Insolation",     unit: "min", group: "Autres paramètres" },
-    ray_glo01:       { label: "Rayonnement",     unit: "J/cm²", group: "Autres paramètres" },
-    pres:            { label: "Pression stat.",       unit: "hPa", transform: paToHpa, group: "Autres paramètres" },
-    pmer:            { label: "Pression mer",            unit: "hPa", transform: paToHpa, group: "Autres paramètres" },
-    tend24:          { label: "Tend. pres. 24h",  unit: "hPa", transform: paToHpa, group: "Autres paramètres" }
+  // ==========================================================
+  // 1. CONFIGURATION SUPABASE
+  // ==========================================================
+  const SUPABASE_URL = "https://vgngxxkafrxcwoeeaqrm.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_hpuexaDRRVat25cx-Qj9yw_4UGesxCt";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ==========================================================
+  // 2. DICTIONNAIRE EN DUR (LES 88 STATIONS)
+  // ==========================================================
+  const STATIONS_OFFICIELLES = {
+    "89003001": "AILLANT", "89014001": "ARCES", "21567001": "ARNAY_SAPC", "52023002": "AUBERIVE_SAPC", "71014004": "AUTUN", "89295001": "AUXERRE-PERRIGNY", "89053001": "AUXERRE_BRANCHES_AERO", "58019001": "AVREE", "71022003": "BAUDEMONT_SAPC", "58023001": "BAZOCHES_SAPC", "21056001": "BEIRE LE CHATEL", "21065001": "BESSEY", "71056003": "BRANGES_SAPC", "52074002": "BREUVANNES_SAPC", "21116002": "BURE LES TEMPLIERS_SAPC", "89068001": "CHABLIS_SAPC", "71081001": "CHALON-CHAMPFO", "89086001": "CHARNY", "71106001": "CHAROLLES", "58061001": "CHASNAY", "58062001": "CHATEAU CHINON", "21154001": "CHATILLON/SEINE", "58079004": "CLAMECY", "52145001": "COUBLANC", "89131001": "CRUZY_SAPC", "89133001": "CUDOT_SAPC", "21231001": "DIJON", "21473001": "DIJON-LONGVIC", "58106005": "DUN_SAPC", "71190001": "EPINAC", "52197003": "FAYL-BILLOT_SAPC", "89173001": "FONTAINES", "89192001": "GRANDCHAMP_SAPC", "21310001": "GROSBOIS-EN-MONTAGNE", "71230002": "GUEUGNON", "58132001": "GUIPY_SAPC", "52248002": "IS-EN-BASSIGNY", "71240001": "JALOGNY_SAPC", "89206001": "JOIGNY", "21326001": "JOURS LES BAIGNEUX_SAPC", "21527001": "LA ROCHEPOT", "52269001": "LANGRES", "58145002": "LORMES_SAPC", "71267001": "LUGNY", "58149001": "LUZY", "71105001": "MACON", "21386001": "MARIGNY LE CAHOUET", "21395001": "MASSINGY-LES-VITTEAUX_SAPC", "71289001": "MATOUR_SAPC", "89260001": "MOLESMES_SAPC", "21425001": "MONTBARD_SAPC", "58177001": "MONTIGNY EN MOR", "71320001": "MT-ST-VINCENT", "52348003": "NEUILLY-L'EVEQUE_SAPC", "21454001": "NICEY", "89279002": "NOYERS_SAPC", "58199001": "ONLAY", "21131001": "PAGNY-LE-CHATEAU", "71340002": "PALINGES", "21501003": "POUILLY EN AUX_SAPC", "21503001": "POUILLY SUR VINGEANNE", "58218006": "PREMERY", "21519001": "RECEY SUR OURCE", "89365001": "SAINT PRIVE", "52450002": "SAINT-LOUP-SUR-AUJON_SAPC", "21579001": "SALIVES", "21584001": "SAULIEU", "89380001": "SAVIGNY/CLAIRIS", "21603001": "SEMUR EN AUXOIS_SAPC", "71523001": "SIMARD", "89333001": "ST ANDRE", "89273001": "ST FARGEAU_SAPC", "21564001": "ST NIC. CITEAUX", "71491001": "ST YAN", "52447001": "ST-CIERGUES", "89349005": "ST-LEGER-VAUBAN_SA", "21561003": "ST-MARTIN-DU-M", "71464001": "ST-MAURICE-LES-COUCHES_SAPC", "71482001": "ST-SYMPHORIEN DE MARMAGNE", "21633002": "THOREY SOUS CHARNY_SAPC", "21638002": "TIL-CHATEL_SAPC", "89418007": "TONNERRE JOUDRE", "71541001": "TORPES_SAPC", "52332001": "VAL-DE-MEUSE", "71558001": "VARENNES-ST-SA", "58304005": "VARZY_SAPC", "52528001": "VILLEGUSIEN", "71589001": "VITRY/LOIRE"
   };
 
-  const PARAMS_RESEAU = [
-    { key: "t",         label: "Temp.",        format: v => kelvinToCelsius(v) + "°C" },
-    { key: "td",        label: "Rosée",        format: v => kelvinToCelsius(v) + "°C" },
-    { key: "u",         label: "Humidité",     format: v => v + "%" },
-    { key: "dd",        label: "Dir. Vent",    format: v => v + "°" },
-    { key: "ff",        label: "Vent",         format: v => msToKmh(v) + " km/h" },
-    { key: "ddraf10",   label: "Dir. Raf.",    format: v => v + "°" },
-    { key: "raf10",     label: "Rafales",      format: v => msToKmh(v) + " km/h" },
-    { key: "rr_per",    label: "Pluie",        format: v => v + " mm" },
-    { key: "pres",      label: "Pression",     format: v => paToHpa(v) + " hPa" }
-  ];
-
-  const WORKER_URL = "https://proxymeteofrance.remiparamoteur.workers.dev";
-  const SEUIL_INACTIVITE_MIN = 15 * 24 * 60; // 15 Jours pleins pour suppression
-  const SEUIL_ROUGE_MIN = 30; // 30 minutes = Hors Ligne
-
-  const STATIONS_EXCLUES = [
-      "ST DENIS LES SENS", "SENS", "ST-DIZIER", "LOUVEMONT - MAN", 
-      "CHEVILLON_SAPC", "CIRFONTAINES_SAPC", "BLECOURT", "BUSSON_SAPC", 
-      "BOURDONS_SAPC", "CHATEAUVILLAIN", "CHAUMONT", "CHAUMONT-SEMOUTIERS", 
-      "NEVERS", "ST PIERRE LE MOUTIER", "LUTHENAY", "DORNES", "SAILLY"
-  ];
-  const exclusionsNorm = STATIONS_EXCLUES.map(s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[\s\-_]+/g, ""));
-
-  function estExclue(nom) {
-      if (!nom) return false;
-      let nomNorm = nom.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[\s\-_]+/g, "");
-      return exclusionsNorm.some(ex => nomNorm.startsWith(ex));
-  }
-
-  function createStationIcon(statut, lettre, overrideBgColor = null) {
-    let bgColor = '#64748b'; let borderColor = '#41464b'; let textColor = 'white';
-    if (statut === 'ok') { bgColor = '#10b981'; borderColor = '#059669'; }
-    else if (statut === 'warn') { bgColor = '#f59e0b'; borderColor = '#d97706'; }
-    else if (statut === 'fault') { bgColor = '#ef4444'; borderColor = '#b91c1c'; }
-
-    if (overrideBgColor === 'transparent') { bgColor = 'rgba(255,255,255,0.3)'; borderColor = 'rgba(255,255,255,0.8)'; textColor = '#1e293b'; } 
-    else if (overrideBgColor) { bgColor = overrideBgColor; borderColor = '#1e293b'; }
-
-    let textShadow = overrideBgColor === 'transparent' ? 'none' : '0px 1px 2px rgba(0,0,0,0.8)';
-    let html = `<div style="background-color: ${bgColor}; border: 2px solid ${borderColor}; color: ${textColor}; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,0.4); text-shadow: ${textShadow};">${lettre}</div>`;
-    return L.divIcon({ html: html, className: '', iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+  const ICAO_MAPPING = { 
+      "21228001": "LFSD", "89024001": "LFLA", "71076001": "LFLH", "71105001": "LFLM", "52269001": "LFSH", "71486001": "LFLN",
+      "DIJON": "LFSD", "AUXERRE": "LFLA", "CHALON": "LFLH", "MACON": "LFLM", "ST YAN": "LFLN", "SAINT YAN": "LFLN", "TROYES": "LFQB", "LANGRES": "LFSH", "BESANCON": "LFSA" 
+  };
+  function getIcao(nom, id) {
+      if (id && ICAO_MAPPING[id]) return ICAO_MAPPING[id];
+      if (!nom) return null; const n = nom.toUpperCase();
+      for (let key in ICAO_MAPPING) { if (n.includes(key)) return ICAO_MAPPING[key]; }
+      return null;
   }
 
   function getTempColor(tempC) {
-      if (tempC <= -15) return '#312e81'; if (tempC <= -10) return '#4c1d95'; if (tempC <= -5) return '#7c3aed';  
-      if (tempC <= 0) return '#1e3a8a'; if (tempC <= 5) return '#3b82f6'; if (tempC <= 10) return '#0ea5e9';  
-      if (tempC <= 15) return '#10b981'; if (tempC <= 20) return '#eab308'; if (tempC <= 25) return '#f97316';  
-      if (tempC <= 30) return '#ef4444'; if (tempC <= 35) return '#b91c1c'; return '#7f1d1d';                   
+      if (tempC <= 0) return '#1e3a8a';   
+      if (tempC <= 10) return '#3b82f6';  
+      if (tempC <= 15) return '#0ea5e9';  
+      if (tempC <= 22) return '#10b981';  
+      if (tempC <= 28) return '#f59e0b';  
+      if (tempC <= 35) return '#ef4444';  
+      return '#7f1d1d';                   
   }
+
   function getHumiditeColor(u) {
-      if (u < 30) return '#b45309'; if (u < 50) return '#f59e0b'; if (u < 70) return '#fcd34d'; 
-      if (u < 90) return '#38bdf8'; if (u < 100) return '#1e3a8a'; return '#000000';             
-  }
-  function getVentColor(vitesseKmh) {
-      if (vitesseKmh < 15) return '#bfdbfe'; if (vitesseKmh < 30) return '#60a5fa'; if (vitesseKmh < 50) return '#3b82f6'; 
-      if (vitesseKmh < 70) return '#1d4ed8'; if (vitesseKmh < 90) return '#1e3a8a'; return '#020617';                      
+      if (u < 50) return '#f59e0b'; 
+      if (u < 80) return '#38bdf8'; 
+      return '#1e3a8a'; 
   }
 
-  window.stationsCache = {};
-  window.stationsCoordCache = {};
-  window.stationsMetaCache = {};
-  window.marqueursLeaflet = {}; 
-  window.stationsBaselines = JSON.parse(localStorage.getItem('meteo_baselines') || '{}');
-  window.extremesJourCache = {}; 
-  window.modeAffichageCarte = 'none';
-
-  let coucheMarqueurs = null;
-
-  function urlProxy(path, params) {
-    const u = new URL(WORKER_URL);
-    u.searchParams.set("path", path);
-    Object.entries(params || {}).forEach(([k, v]) => u.searchParams.set(k, v));
-    return u.toString();
+  function getVentColor(v) {
+      if (v < 30) return '#60a5fa'; 
+      if (v < 60) return '#3b82f6'; 
+      return '#1d4ed8';
   }
 
   function kelvinToCelsius(v) { return (v - 273.15).toFixed(1); }
   function paToHpa(v) { return (v / 100).toFixed(1); }
   function msToKmh(v) { return (v * 3.6).toFixed(1); }
   function estValeurManquante(v) { return v === null || v === undefined || v === "" || (typeof v === 'number' && Number.isNaN(v)) || String(v).trim().toUpperCase() === "NA" || String(v).trim().toUpperCase() === "NAN"; }
+  function formatHeure(iso) { try { return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } }
 
-  const extractVal = (obj, keys) => {
-    if (!obj) return undefined;
-    for (let k of keys) { if (obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k]; }
-    return undefined;
+  const PARAMS_RESEAU = [
+    { key: "t", label: "Temp.", format: v => kelvinToCelsius(v) + "°C" },
+    { key: "u", label: "Humidité", format: v => v + "%" },
+    { key: "ff", label: "Vent", format: v => msToKmh(v) + " km/h" },
+    { key: "rr_per", label: "Pluie", format: v => v + " mm" }
+  ];
+
+  const PARAM_INFO_DETAIL = {
+    metar_brut:      { label: "METAR Brut",      unit: "" },
+    metar_decode:    { label: "METAR Décodé",    unit: "" },
+    vv:              { label: "Visibilité",      unit: "m" },
+    n:               { label: "Nébulosité",      unit: "octas" },
+    hbas:            { label: "Plafond",         unit: "m" },
+    nuages_metar:    { label: "Nuages",          unit: "" },
+    ww:              { label: "Temps présent",   unit: "" },
+    t:               { label: "Température",     unit: "°C", transform: kelvinToCelsius },
+    td:              { label: "Point de rosée",  unit: "°C", transform: kelvinToCelsius },
+    t_10:            { label: "Temp. sol -10cm", unit: "°C", transform: kelvinToCelsius },
+    t_20:            { label: "Temp. sol -20cm", unit: "°C", transform: kelvinToCelsius },
+    t_50:            { label: "Temp. sol -50cm", unit: "°C", transform: kelvinToCelsius },
+    t_100:           { label: "Temp. sol -1m",   unit: "°C", transform: kelvinToCelsius },
+    u:               { label: "Humidité",        unit: "%" },
+    rr_per:          { label: "Pluie (6 min)",   unit: "mm" },
+    rr1:             { label: "Pluie (1h)",      unit: "mm" },
+    etat_sol:        { label: "État du sol",     unit: "" },
+    sss:             { label: "Neige fraîche",   unit: "cm" },
+    dd:              { label: "Dir. Vent",       unit: "°" },
+    ff:              { label: "Vent moyen",      unit: "km/h", transform: msToKmh },
+    ddraf10:         { label: "Dir. Rafales",    unit: "°" },
+    raf10:           { label: "Raf max (10m)",   unit: "km/h", transform: msToKmh },
+    rafper:          { label: "Raf max (1h)",    unit: "km/h", transform: msToKmh },
+    insolh:          { label: "Insolation",      unit: "min" },
+    ray_glo01:       { label: "Rayonnement",     unit: "J/cm²" },
+    pres:            { label: "Pression stat.",  unit: "hPa", transform: paToHpa },
+    pmer:            { label: "Pression mer",    unit: "hPa", transform: paToHpa },
+    tend24:          { label: "Tend. pres. 24h", unit: "hPa", transform: paToHpa }
   };
 
-  function normaliserObs(obs) {
-    if (!obs) return;
-    if (estValeurManquante(obs.vv)) obs.vv = extractVal(obs, ['v', 'visibilite']);
-    if (estValeurManquante(obs.n)) obs.n = extractVal(obs, ['nn', 'nt', 'neb']);
-    if (estValeurManquante(obs.ww)) obs.ww = extractVal(obs, ['w', 'temps_present']);
-    
-    let hbas_val = extractVal(obs, ['hbas', 'h_bas', 'hc1', 'h_nuage1', 'hnuage1', 'h1', 'hauteur_nuage1', 'hbas1']);
-    if (!estValeurManquante(hbas_val)) obs.hbas = hbas_val;
-    let raf10 = extractVal(obs, ['raf10', 'fxi10', 'fxi', 'raf', 'rafper', 'fxy']);
-    if (!estValeurManquante(raf10)) obs.raf10 = raf10;
-    let ddraf10 = extractVal(obs, ['ddraf10', 'dxi10', 'dxi', 'ddraf', 'dir_raf', 'dxy']);
-    if (!estValeurManquante(ddraf10)) obs.ddraf10 = ddraf10;
-    
-    if (!obs.validity_time) obs.validity_time = extractVal(obs, ['dh_utc', 'date', 'reference_time', 'insert_time']);
-    if (obs.validity_time && typeof obs.validity_time === 'string' && !obs.validity_time.endsWith('Z')) {
-        obs.validity_time += 'Z';
-    }
-  }
+  let modeActuel = 'bureau'; 
+  let stationTerrainId = null;
+  window.stationsCache = {};
+  window.stationsCoordCache = {};
+  window.stationsMetaCache = JSON.parse(localStorage.getItem('meteo_stations_favorites_v12') || '{}');
+  window.marqueursLeaflet = {}; 
+  window.stationsBaselines = JSON.parse(localStorage.getItem('meteo_baselines_v3') || '{}');
+  window.modeAffichageCarte = 'none';
+  let coucheMarqueurs = null;
+  
+  let nOk = 0, nWarn = 0, nFault = 0;
 
-  // NOUVELLE FONCTION DE FORMATAGE
-  function formatHeure(iso) {
-    try {
-      const d = new Date(iso);
-      return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) + " à " + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    } catch { return iso; }
-  }
-
-  function mettreAJourFondEcran() {
-    document.body.className = ''; 
-    let currentFaults = parseInt(document.getElementById("cnt-fault").textContent) || 0;
-    let currentWarns = parseInt(document.getElementById("cnt-warn").textContent) || 0;
-    
-    if (currentFaults > 0) document.body.classList.add('bg-stormy');
-    else if (currentWarns > 0) document.body.classList.add('bg-warning');
-    else document.body.classList.add('bg-sunny');
-  }
-
-  function arrondir6min(timestampMs) {
-    const d = new Date(timestampMs);
-    const m = d.getUTCMinutes();
-    d.setUTCMinutes(m - (m % 6), 0, 0);
-    return d;
-  }
-
+  // ==========================================================
+  // 3. INITIALISATION CARTE & ANIMATION RADAR
+  // ==========================================================
   document.addEventListener("DOMContentLoaded", () => {
-    const NOUVEAU_JETON = "eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyZW1pcGFyYW1vdGV1ckBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6InJlbWlwYXJhbW90ZXVyIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJpZCI6Mjc1MzMsInV1aWQiOiJhMjM1OTBhZi0wY2IyLTRlYjAtOWU2MC1kZjdkNWQ2MGM4NWYifSwiaXNzIjoiaHR0cHM6XC9cL3BvcnRhaWwtYXBpLm1ldGVvZnJhbmNlLmZyOjQ0M1wvb2F1dGgyXC90b2tlbiIsInRpZXJJbmZvIjp7IjUwUGVyTWluIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOiJzZWMifSwiMTAwUmVxUGVyTWluIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOiJzZWMifSwiODUwcmVxUGVyNU1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IlByZXZpc2lvbkltbWVkaWF0ZVByZWNpcGl0YXRpb25zIiwiY29udGV4dCI6IlwvcHJvXC9waWFmXC8xLjAiLCJwdWJsaXNoZXIiOiJhZG1pbl9tZiIsInZlcnNpb24iOiIxLjAiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc09ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUE9ic1wvdjIiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MiIsInN1YnNjcmlwdGlvblRpZXIiOiIxMDBSZXFQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc1BhcXVldFJhZGFyIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFBhcXVldFJhZGFyXC92MSIsInB1Ymxpc2hlciI6ImxvaWMubWFydGluIiwidmVyc2lvbiI6InYxIiwic3Vic2NyaXB0aW9uVGllciI6IjUwUGVyTWluIn0seyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkRvbm5lZXNQdWJsaXF1ZXNQYXF1ZXRPYnNlcnZhdGlvbiIsImNvbnRleHQiOiJcL3B1YmxpY1wvRFBQYXF1ZXRPYnNcL3YxIiwicHVibGlzaGVyIjoiYmFzdGllbmciLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc09ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUE9ic1wvdjEiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MSIsInN1YnNjcmlwdGlvblRpZXIiOiI1MFBlck1pbiJ9LHsic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzUmFkYXIiLCJjb250ZXh0IjoiXC9wdWJsaWNcL0RQUmFkYXJcL3YxIiwicHVibGlzaGVyIjoiTUVURU8uRlJcL21hcnRpbmwiLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiODUwcmVxUGVyNU1pbiJ9LHsic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzQ2xpbWF0b2xvZ2llIiwiY29udGV4dCI6IlwvcHVibGljXC9EUENsaW1cL3YxIiwicHVibGlzaGVyIjoiYWRtaW5fbWYiLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc1BhcXVldE9ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFBhcXVldE9ic1wvdjIiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MiIsInN1YnNjcmlwdGlvblRpZXIiOiIxMDBSZXFQZXJNaW4ifV0sImV4cCI6MTg4Mjc0OTk1NSwidG9rZW5fdHlwZSI6ImFwaUtleSIsImlhdCI6MTc4ODA3NzE1NSwianRpIjoiZmZmZGZhMGEtODZiYy00MDZiLWIzMmUtMzdlNTk4MDEzMWZhIn0=.MxIqNrqd1HThwbHQnWIgiOMkVRtuCOigK09B6I9FwP6TDLxW6gObG9lAczv4cGg6WyWVDThtJUnYUCyMq2byzq6iQ1nukSmU67pDDV2MeXlgPfX7dIekDPVI1qdSQ3crAQ6md57Y-4m40o5kpFKuxJ5QtMLQprAou7lxjQdYt2MRuRmsCrrBzUmLa2mZy3L-yc8Bn_KJyfnPbWB3iCmDKuUR_7BUvDW6G3Kd80dTy4iUFb7LGQQRdfWIwQI7-305RyOFBczA1UR30n1Ojr_0_NaJ3lEQKb7xLZTJ4josjGhfoKYeSan4mM2g1jOhykI5P5kkzRLR01eGz1OukpEqWw==";
-    document.getElementById("apikey").value = NOUVEAU_JETON;
-    localStorage.setItem("monApiKeyMeteo", NOUVEAU_JETON);
-
-    const cleSaisie = document.getElementById("apikey").value.trim();
-    const cleCheckWX = localStorage.getItem("monApiKeyCheckWX");
-    if (cleCheckWX) document.getElementById("apikeyCheckWX").value = cleCheckWX;
-
-    if (cleSaisie && cleSaisie !== "COLLE_TA_CLE_API_ICI_ENTRE_LES_GUILLEMETS") {
-      document.getElementById("configCard").style.display = "none";
-      scannerRegion(false);
-    } else {
-      document.getElementById("configCard").style.display = "block";
-    }
+    initialiserCarte();
+    scannerRegion(); 
   });
 
-  window.modifierApi = function() {
-    localStorage.removeItem("monApiKeyMeteo");
-    document.getElementById("apikey").value = "";
-    document.getElementById("configCard").style.display = "block";
-    document.getElementById("zoneReseau").style.display = "none";
-    document.getElementById("zoneDetailContainer").style.display = "none";
-  };
-
-  const ICAO_MAPPING = { "DIJON": "LFSD", "AUXERRE": "LFLA", "CHALON": "LFLH", "MACON": "LFLM", "ST YAN": "LFLN", "SAINT YAN": "LFLN", "TROYES": "LFQB", "LANGRES": "LFSH", "BESANCON": "LFSA" };
-  function getIcao(nom) { if(!nom) return null; const n = nom.toUpperCase(); for (let key in ICAO_MAPPING) { if (n.includes(key)) return ICAO_MAPPING[key]; } return null; }
-
-  // === DÉCODEUR METAR ===
-  function extractCheckWXData(m) {
-      if (!m || typeof m === "string" || !m.icao) return null;
-      let vv = m.visibility?.meters_float !== undefined ? m.visibility.meters_float : null;
-      if (vv === null && m.visibility?.meters) vv = parseInt(String(m.visibility.meters).replace(/\D/g,''));
-      let hbas = null, n = null, ww = null; let flight_category = m.flight_category || 'Inconnu'; let raw = m.raw_text || '';
-      let cloudsStr = [];
-
-      if (m.clouds && m.clouds.length > 0) {
-          const c = m.clouds[0];
-          if (['CAVOK', 'CLR', 'SKC', 'NCD'].includes(c.code)) {
-              n = 0; cloudsStr.push(c.code === 'CAVOK' ? "CAVOK" : "Clair");
-          } else {
-              let maxN = 0; let lowestCeiling = null;
-              m.clouds.forEach(layer => {
-                  let baseFt = null;
-                  if (layer.base_feet_agl !== undefined) baseFt = layer.base_feet_agl; else if (layer.feet !== undefined) baseFt = layer.feet; else if (layer.base_feet !== undefined) baseFt = layer.base_feet;
-                  let baseM = null;
-                  if (layer.base_meters_agl !== undefined) baseM = layer.base_meters_agl; else if (layer.meters !== undefined) baseM = layer.meters; else if (layer.base_meters !== undefined) baseM = layer.base_meters;
-                  
-                  if (baseFt === null && baseM !== null) baseFt = Math.round(baseM / 0.3048);
-                  if (baseM === null && baseFt !== null) baseM = Math.round(baseFt * 0.3048);
-                  
-                  if (layer.code === 'FEW') maxN = Math.max(maxN, 2); if (layer.code === 'SCT') maxN = Math.max(maxN, 4);
-                  if (layer.code === 'BKN') { maxN = Math.max(maxN, 6); if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
-                  if (layer.code === 'OVC') { maxN = Math.max(maxN, 8); if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
-                  if (layer.code === 'VV') { maxN = 9; if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
-                  
-                  let baseTxt = baseFt !== null ? `${baseFt} ft` : 'N/D'; cloudsStr.push(`${layer.code} à ${baseTxt}`);
-              });
-              n = maxN; hbas = lowestCeiling !== null ? lowestCeiling : null;
-          }
-      } else if (vv >= 10000 && !raw.includes("OVC") && !raw.includes("BKN")) { n = 0; }
-
-      let conditionsStr = [];
-      if (m.conditions && m.conditions.length > 0) {
-          ww = m.conditions[0].code || m.conditions[0].text;
-          m.conditions.forEach(cond => conditionsStr.push(cond.text || cond.code));
+  function gererAffichageValeursZoom() {
+      let mapDiv = document.getElementById('mapReseau');
+      if (window.carteReseau.getZoom() >= 9) {
+          mapDiv.classList.remove('map-hide-tooltips');
+      } else {
+          mapDiv.classList.add('map-hide-tooltips');
       }
-
-      let vent_spd = m.wind?.speed_kph ? Math.round(m.wind.speed_kph) : (m.wind?.speed_kts ? Math.round(m.wind.speed_kts * 1.852) : null);
-      let vent_dir = m.wind?.degrees !== undefined ? m.wind.degrees : null;
-      let vent_str = (vent_spd !== null && vent_dir !== null) ? `${vent_dir}° à ${vent_spd}km/h` : 'Calme';
-      let vis_str = vv !== null ? (vv >= 9999 ? '>10km' : `${vv}m`) : 'N/D';
-      let cond_str = conditionsStr.length > 0 ? conditionsStr.join(", ") : 'RAS';
-      let nuages_str = cloudsStr.length > 0 ? cloudsStr.join(", ") : (n === 0 ? "Clair/CAVOK" : "Non signalé");
-      let metar_decode = `[${flight_category}] Vent: ${vent_str} | Vis: ${vis_str} | Nuages: ${nuages_str} | Temps: ${cond_str}`;
-
-      return { vv, hbas, n, ww, raw, flight_category, icao: m.icao, observed: m.observed, nuages_metar: nuages_str, metar_decode: metar_decode, metar_brut: raw };
   }
 
-  async function fetchCheckWX(icaos, apiKey) {
-      if (!apiKey || icaos.length === 0) return {};
-      try {
-          const res = await fetch(`https://api.checkwx.com/metar/${icaos.join(',')}/decoded`, { headers: { 'X-API-Key': apiKey } });
-          if (res.status === 401 || res.status === 429) return { _error: "QUOTA" };
-          if (!res.ok) return {};
-          const data = await res.json();
-          const aeroData = {};
-          if (data && data.data && Array.isArray(data.data)) {
-              data.data.forEach(m => { try { let extracted = extractCheckWXData(m); if (extracted && extracted.icao) aeroData[extracted.icao] = extracted; } catch(err) {} });
+  function initialiserCarte() {
+    if (!window.carteReseau) {
+      window.carteReseau = L.map('mapReseau', { center: [47.3, 4.8], zoom: 7, zoomControl: false }); 
+      L.control.zoom({ position: 'topleft' }).addTo(window.carteReseau);
+      window.osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
+      window.osmLayer.addTo(window.carteReseau);
+      
+      window.radarTimeControl = L.control({position: 'bottomleft'});
+      window.radarTimeControl.onAdd = function () {
+          let div = L.DomUtil.create('div'); div.id = 'radarTimeDisplay'; 
+          div.style.background = 'rgba(0, 30, 60, 0.8)'; div.style.color = '#fff'; div.style.padding = '6px 12px'; 
+          div.style.borderRadius = '8px'; div.style.fontWeight = 'bold'; div.style.display = 'none'; 
+          div.innerHTML = '📡 Chargement...'; return div;
+      };
+      window.radarTimeControl.addTo(window.carteReseau);
+      coucheMarqueurs = L.featureGroup().addTo(window.carteReseau);
+      
+      Object.keys(window.stationsMetaCache).forEach(id => {
+          let st = window.stationsMetaCache[id];
+          if(st.lat && st.lon) {
+              let marker = L.marker([st.lat, st.lon], { icon: createStationIcon('fault', st.lettre) });
+              marker.on('click', () => lancerDetailsStation(id, st.nom));
+              marker.bindPopup(`<b>${st.nom} (${id})</b>`);
+              window.marqueursLeaflet[id] = marker;
+              marker.addTo(coucheMarqueurs);
           }
-          return aeroData;
-      } catch(e) { return {}; }
-  }
+      });
+      if (coucheMarqueurs.getBounds().isValid()) window.carteReseau.fitBounds(coucheMarqueurs.getBounds(), { padding: [30, 30] });
 
-  async function fetchCheckWXHistory(icao, apiKey, hours) {
-      if (!apiKey || !icao) return { error: true };
-      try {
-          const res = await fetch(`https://api.checkwx.com/metar/${icao}/decoded?hours=${hours}`, { headers: { 'X-API-Key': apiKey } });
-          if (res.status === 401 || res.status === 429) return { error: "QUOTA" };
-          if (!res.ok) return { error: true };
-          const json = await res.json(); const list = [];
-          if (json && json.data && Array.isArray(json.data)) {
-              json.data.forEach(m => { try { let ex = extractCheckWXData(m); if (ex) list.push(ex); } catch(err) {} });
-          }
-          return { data: list };
-      } catch(e) { return { error: true }; }
-  }
+      window.carteReseau.on('zoomend', gererAffichageValeursZoom);
+      gererAffichageValeursZoom(); 
 
-  // ====== SCAN GLOBAL ======
-  async function tenterPaquetRapide(cleApi) {
-    for (let decalageMin = 0; decalageMin <= 24; decalageMin += 6) {
-      const dateStr = new Date(arrondir6min(Date.now()).getTime() - decalageMin * 60000).toISOString().replace(/\.\d{3}Z$/, "Z");
-      try {
-        const urlJson = urlProxy("/public/DPPaquetObs/v1/paquet/stations/infrahoraire-6m", { date: dateStr, format: "json" });
-        const resJson = await fetch(urlJson, { headers: { "apikey": cleApi, "accept": "application/json" } });
-        if (resJson.status === 401) throw new Error("401");
-        if (resJson.ok) {
-           const data = await resJson.json();
-           if (Array.isArray(data) && data.length > 0) {
-             const parStation = {};
-             data.forEach(obs => {
-                normaliserObs(obs);
-                [obs.geo_id_insee, obs.num_poste, obs.id_station, obs.numer_sta].forEach(k => {
-                    if (k) { let str = String(k).trim(); let keys = [str]; if (str.length === 4) keys.push("0" + str); keys.forEach(ks => { parStation[ks] = obs; }); }
-                });
-             });
-             return parStation;
-           }
-        }
-      } catch (e) { if (e.message === "401") throw e; }
+      initialiserRadarAnimation();
     }
-    return null; 
   }
 
-  function sauvegarderCacheLocal() {
-      let nouveauCacheData = [];
-      for (let stId in window.stationsCache) {
-          let st = { id: stId, nom: window.stationsMetaCache[stId]?.nom || "Inconnu", position: window.stationsCoordCache[stId] };
-          nouveauCacheData.push({ station: st, obs: window.stationsCache[stId] });
-      }
-      localStorage.setItem("meteo_cache_bourgogne_fast_v97", JSON.stringify(nouveauCacheData));
-      localStorage.setItem("meteo_cache_time_fast_v97", Date.now().toString());
-  }
-
-  // ==== ANIMATION RADAR MAP ====
+  // --- API RAINVIEWER ---
   window.initialiserRadarAnimation = function() {
-      fetch("https://api.rainviewer.com/public/weather-maps.json")
-      .then(res => res.json())
-      .then(data => {
+      fetch("https://api.rainviewer.com/public/weather-maps.json").then(res => res.json()).then(data => {
           if(data && data.radar && data.radar.past) {
               let past = data.radar.past.slice(-12); 
               if (window.coucheRadar) { window.carteReseau.removeLayer(window.coucheRadar); }
-              window.coucheRadar = L.layerGroup(); window.radarLayers = []; window.radarTimestamps = []; window.currentRadarFrame = 0;
+              window.coucheRadar = L.layerGroup();
+              window.radarLayers = []; window.radarTimestamps = []; window.currentRadarFrame = 0;
 
               past.forEach((frame, index) => {
                   let layer = L.tileLayer('https://tilecache.rainviewer.com' + frame.path + '/256/{z}/{x}/{y}/2/1_1.png', { opacity: 0, maxZoom: 18, maxNativeZoom: 7, transparent: true, zIndex: 10 + index });
@@ -550,753 +380,683 @@
               });
               
               if(window.radarLayers.length > 0) {
-                  window.radarLayers[window.radarLayers.length - 1].setOpacity(0.65); window.currentRadarFrame = window.radarLayers.length - 1;
-                  let d = new Date(window.radarTimestamps[window.currentRadarFrame] * 1000);
-                  let tDisp = document.getElementById('radarTimeDisplay'); if (tDisp) tDisp.innerHTML = `📡 Radar : ${d.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}`;
+                  window.radarLayers[window.radarLayers.length - 1].setOpacity(0.65);
+                  window.currentRadarFrame = window.radarLayers.length - 1;
               }
-              if (window.modeAffichageCarte === 'pluie' || window.modeAffichageCarte === 'none') { window.demarrerAnimationRadar(); }
+              if (window.modeAffichageCarte === 'pluie') window.demarrerAnimationRadar();
           }
       }).catch(e => console.log(e));
   };
 
   window.demarrerAnimationRadar = function() {
       window.arreterAnimationRadar();
-      if (!window.coucheRadar) return;
+      if (!window.coucheRadar || !window.radarLayers || window.radarLayers.length === 0) return;
       if(!window.carteReseau.hasLayer(window.coucheRadar)) { window.coucheRadar.addTo(window.carteReseau); }
       let tDisp = document.getElementById('radarTimeDisplay'); if(tDisp) tDisp.style.display = 'block';
       window.radarLayers.forEach(l => l.setOpacity(0));
-      if(window.radarLayers.length > 0) window.radarLayers[window.currentRadarFrame].setOpacity(0.65);
       
       window.radarAnimationInterval = setInterval(() => {
-          if (window.radarLayers.length === 0) return;
+          if (!window.radarLayers || window.radarLayers.length === 0) return;
           window.radarLayers[window.currentRadarFrame].setOpacity(0);
           window.currentRadarFrame = (window.currentRadarFrame + 1) % window.radarLayers.length;
           window.radarLayers[window.currentRadarFrame].setOpacity(0.65);
           let d = new Date(window.radarTimestamps[window.currentRadarFrame] * 1000);
           if(tDisp) tDisp.innerHTML = `📡 Radar : ${d.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}`;
-          if (window.currentRadarFrame === window.radarLayers.length - 1) { window.arreterAnimationRadar(); window.radarTimeoutPause = setTimeout(window.demarrerAnimationRadar, 2000); }
       }, 600);
   };
 
   window.arreterAnimationRadar = function() {
       if (window.radarAnimationInterval) { clearInterval(window.radarAnimationInterval); window.radarAnimationInterval = null; }
-      if (window.radarTimeoutPause) { clearTimeout(window.radarTimeoutPause); window.radarTimeoutPause = null; }
+      if (window.coucheRadar && window.carteReseau.hasLayer(window.coucheRadar)) { window.carteReseau.removeLayer(window.coucheRadar); }
+      let tDisp = document.getElementById('radarTimeDisplay'); if(tDisp) tDisp.style.display = 'none';
   };
 
-  window.estModeSatellite = false;
-  window.basculerFondCarte = function() {
-      if (window.estModeSatellite) {
-          window.carteReseau.removeLayer(window.satLayer); window.carteReseau.addLayer(window.osmLayer);
-          window.estModeSatellite = false; document.getElementById('btnModeSat').classList.remove('active');
-      } else {
-          window.carteReseau.removeLayer(window.osmLayer); window.carteReseau.addLayer(window.satLayer);
-          window.estModeSatellite = true; document.getElementById('btnModeSat').classList.add('active');
-      }
-      if ((window.modeAffichageCarte === 'pluie' || window.modeAffichageCarte === 'none') && window.coucheRadar) { window.coucheRadar.bringToFront(); }
-  };
-
-  window.centrerSurMoi = function() {
-      if (navigator.geolocation) {
-          let btn = document.getElementById('btnGeoLoc'); let oldText = btn.innerHTML; btn.innerHTML = '⏳';
-          navigator.geolocation.getCurrentPosition(function(position) {
-              btn.innerHTML = oldText;
-              let lat = position.coords.latitude; let lon = position.coords.longitude;
-              window.carteReseau.flyTo([lat, lon], 10, { animate: true, duration: 1 });
-              if (window.userMarker) window.carteReseau.removeLayer(window.userMarker);
-              window.userMarker = L.circleMarker([lat, lon], { radius: 8, fillColor: "#3b82f6", color: "#ffffff", weight: 3, opacity: 1, fillOpacity: 1 }).addTo(window.carteReseau);
-              window.userMarker.bindTooltip("Vous êtes ici", {direction: 'top', offset: [0, -10]}).openTooltip();
-          }, function(error) { btn.innerHTML = oldText; alert("Impossible d'obtenir votre position."); });
-      }
-  };
-
-  // ====== LE MOTEUR RÉSEAU ======
-  async function scannerRegion(forcerRafraichissement = false) {
-    const cleApi = document.getElementById("apikey").value.trim();
-    if (!cleApi || cleApi === "COLLE_TA_CLE_API_ICI_ENTRE_LES_GUILLEMETS") { alert("Veuillez saisir votre API Key Météo-France."); return; }
-
-    const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-    if (cleCheckWX) localStorage.setItem("monApiKeyCheckWX", cleCheckWX);
-    localStorage.setItem("monApiKeyMeteo", cleApi);
-    
-    document.getElementById("configCard").style.display = "none";
-    document.getElementById("btnScan").disabled = true; document.getElementById("btnRefreshMap").disabled = true;
-    document.getElementById("zoneReseau").style.display = "block";
-    document.getElementById("zoneDetailContainer").style.display = "none";
+  // ==========================================================
+  // 4. MOTEUR FINAL : BATCH PAR 15 (6 HEURES)
+  // ==========================================================
+  window.scannerRegion = async function() {
+    document.getElementById("btnRefreshMap").disabled = true;
     document.getElementById("zoneTableauAlertes").style.display = "none";
+    document.getElementById("statutChargement").style.display = "block";
+    document.getElementById("statutChargement").innerText = "Chargement des données de la MIR 21...";
     
-    const ancienneErreur = document.getElementById("erreurScanReseau"); if (ancienneErreur) ancienneErreur.remove();
-    const ancienStatut = document.getElementById("statutScanReseau"); if (ancienStatut) ancienStatut.remove();
-    
-    document.getElementById("cnt-ok").textContent = "0"; 
-    document.getElementById("cnt-warn").textContent = "0"; 
-    document.getElementById("cnt-fault").textContent = "0";
-    
-    const thead = document.getElementById("theadReseau"); 
-    thead.innerHTML = `<tr><th>Station (Anomalies)</th><th>Dernière mesure</th>${PARAMS_RESEAU.map(p => `<th>${p.label}</th>`).join("")}</tr>`;
-
-    if (!window.carteReseau) {
-      window.carteReseau = L.map('mapReseau', { center: [47.3, 4.8], zoom: 7, zoomControl: false }); 
-      L.control.zoom({ position: 'topleft' }).addTo(window.carteReseau);
-      window.osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
-      window.satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
-      window.osmLayer.addTo(window.carteReseau);
-      
-      if (!window.radarTimeControl) {
-          window.radarTimeControl = L.control({position: 'bottomleft'});
-          window.radarTimeControl.onAdd = function () {
-              let div = L.DomUtil.create('div'); div.id = 'radarTimeDisplay'; div.style.background = 'rgba(0, 30, 60, 0.8)'; div.style.color = '#fff'; div.style.padding = '6px 12px'; div.style.borderRadius = '8px'; div.style.fontWeight = 'bold'; div.style.fontSize = '14px'; div.style.display = 'none'; div.style.border = '1px solid rgba(255,255,255,0.3)'; div.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)'; div.style.backdropFilter = 'blur(4px)'; div.innerHTML = '📡 Chargement...'; return div;
-          };
-          window.radarTimeControl.addTo(window.carteReseau);
-      }
-      
-      coucheMarqueurs = L.featureGroup().addTo(window.carteReseau);
-      window.initialiserRadarAnimation();
-      setInterval(window.initialiserRadarAnimation, 5 * 60 * 1000);
-      window.carteReseau.on('zoomend', () => { if (window.modeAffichageCarte !== 'none') { window.changerModeCarte(window.modeAffichageCarte, true); } });
-    } else {
-      coucheMarqueurs.clearLayers();
-    }
-    
+    coucheMarqueurs.clearLayers();
     window.marqueursLeaflet = {};
-    setTimeout(() => window.carteReseau.invalidateSize(), 100);
+    nOk = 0; nWarn = 0; nFault = 0; 
+    
+    document.getElementById("theadReseau").innerHTML = `<tr><th>Station</th><th>Dernière mesure</th>${PARAMS_RESEAU.map(p => `<th>${p.label}</th>`).join("")}</tr>`;
+    document.getElementById("tbodyReseau").innerHTML = "";
 
-    const cacheKey = "meteo_cache_bourgogne_fast_v97";
-    const cacheTimeKey = "meteo_cache_time_fast_v97";
-    const maintenantMs = Date.now();
+    try {
+        let idsCibles = Object.keys(STATIONS_OFFICIELLES);
+        let icaosToFetch = [];
 
-    let oldCacheData = {};
-    let cacheObsStr = localStorage.getItem(cacheKey);
-    if (cacheObsStr) {
-        try { JSON.parse(cacheObsStr).forEach(item => { oldCacheData[item.station.id] = item.obs; }); } catch(e) {}
-    }
-
-    // VERIFICATION CACHE (RAPIDE)
-    if (!forcerRafraichissement && cacheObsStr && (maintenantMs - parseInt(localStorage.getItem(cacheTimeKey)) < 15 * 60 * 1000)) {
-        let tempOk = 0, tempWarn = 0, tempFault = 0;
-        document.getElementById("tbodyReseau").innerHTML = "";
-        document.getElementById("zoneTableauAlertes").style.display = "none";
+        const limiteTemps6h = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+        const chunkSize = 15;
         
-        let stationsCacheArray = JSON.parse(cacheObsStr);
-        stationsCacheArray.forEach(item => {
-            if (estExclue(item.station.nom)) return;
-            window.stationsCache[item.station.id] = item.obs;
-            let statut = injecterStationDansDashboard(item.station, item.obs);
-            if (statut === 'ok') tempOk++; else if (statut === 'warn') tempWarn++; else if (statut === 'fault') tempFault++;
+        for (let i = 0; i < idsCibles.length; i += chunkSize) {
+            const chunk = idsCibles.slice(i, i + chunkSize);
+            
+            const requetes = chunk.map(id => 
+                supabaseClient
+                    .from('historique_meteo')
+                    .select('*')
+                    .eq('id_station', id)
+                    .gte('created_at', limiteTemps6h)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+            );
+            
+            const reponses = await Promise.all(requetes);
+            
+            reponses.forEach((res, index) => {
+                let idStr = chunk[index];
+                let vraiNom = STATIONS_OFFICIELLES[idStr];
+
+                if (res.data && res.data.length > 0) {
+                    let row = res.data[0];
+                    let lat = row.lat || row.latitude;
+                    let lon = row.lon || row.longitude;
+                    
+                    if (idStr === "58062001" && (!lat || !lon)) { lat = 47.064; lon = 3.933; }
+                    if (idStr === "58149001" && (!lat || !lon)) { lat = 46.789; lon = 3.970; } 
+                    
+                    if (!lat || !lon) return;
+
+                    let json = row.data_json || {};
+                    if (typeof json === 'string') { try { json = JSON.parse(json); } catch(e){} }
+                    let obs = { ...row, ...json };
+                    
+                    if (obs.derniere_mesure) obs.validity_time = obs.derniere_mesure;
+                    if (!obs.validity_time && obs.created_at) obs.validity_time = obs.created_at;
+
+                    let etiquette = vraiNom.charAt(0).toUpperCase(); 
+                    
+                    window.stationsCoordCache[idStr] = { lat, lon };
+                    window.stationsMetaCache[idStr] = { nom: vraiNom, lettre: etiquette, lat: lat, lon: lon };
+                    window.stationsCache[idStr] = obs;
+
+                    let icao = getIcao(vraiNom, idStr);
+                    if (icao) icaosToFetch.push(icao);
+                }
+            });
+            await new Promise(r => setTimeout(r, 100)); // Micro pause
+        }
+        
+        if(Object.keys(window.stationsMetaCache).length > 0) {
+            localStorage.setItem('meteo_stations_favorites_v12', JSON.stringify(window.stationsMetaCache));
+        }
+
+        // METAR
+        const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
+        if (cleCheckWX && icaosToFetch.length > 0) {
+            document.getElementById("statutChargement").innerText = "Croisement avec l'aviation (METAR)...";
+            let aeroData = await fetchCheckWX([...new Set(icaosToFetch)], cleCheckWX);
+            
+            Object.keys(window.stationsCache).forEach(id => {
+                let nom = window.stationsMetaCache[id].nom;
+                let icao = getIcao(nom, id);
+                if (icao && aeroData[icao]) {
+                    window.stationsCache[id].metar_brut = aeroData[icao].metar_brut;
+                    window.stationsCache[id].metar_decode = aeroData[icao].metar_decode;
+                    window.stationsCache[id].nuages_metar = aeroData[icao].nuages_metar;
+                    window.stationsCache[id].vv = aeroData[icao].vv;
+                }
+            });
+        }
+
+        // Affichage Carte : On affiche les 88 stations
+        Object.keys(STATIONS_OFFICIELLES).forEach(id => {
+            let stNom = STATIONS_OFFICIELLES[id];
+            let cachedMeta = window.stationsMetaCache[id] || {};
+            let lat = window.stationsCoordCache[id]?.lat || cachedMeta.lat;
+            let lon = window.stationsCoordCache[id]?.lon || cachedMeta.lon;
+            
+            if (id === "58062001" && !lat) { lat = 47.064; lon = 3.933; } 
+            if (id === "58149001" && !lat) { lat = 46.789; lon = 3.970; } 
+            
+            if (lat && lon) {
+                let etiquette = stNom.charAt(0).toUpperCase();
+                let marker = L.marker([lat, lon], { icon: createStationIcon('default', etiquette) });
+                marker.on('click', () => lancerDetailsStation(id, stNom));
+                marker.bindPopup(`<b>${stNom} (${id})</b>`);
+                window.marqueursLeaflet[id] = marker;
+
+                injecterStationDansDashboard({id: id, nom: stNom}, window.stationsCache[id]);
+            }
         });
 
-        document.getElementById("cnt-ok").textContent = tempOk;
-        document.getElementById("cnt-warn").textContent = tempWarn;
-        document.getElementById("cnt-fault").textContent = tempFault;
-
-        window.changerModeCarte(window.modeAffichageCarte, true);
-        if (coucheMarqueurs.getBounds().isValid()) window.carteReseau.fitBounds(coucheMarqueurs.getBounds(), { padding: [30, 30] });
-        mettreAJourFondEcran();
-        document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false;
-        return;
+    } catch(err) {
+        console.error(err);
+        document.getElementById("statutChargement").innerHTML = "<span style='color:#ef4444;'>Erreur d'affichage.</span>";
     }
-
-    const DEP_CIBLES = ["21", "52", "58", "71", "89"];
-    let toutesLesStations = []; let erreursDept = [];
-
-    const requetesListes = DEP_CIBLES.map(async (code) => {
-      try {
-        const r = await fetch(urlProxy("/public/DPClim/v1/liste-stations/infrahoraire-6m", { "id-departement": code }), { headers: { "apikey": cleApi } });
-        if (r.status === 401) { erreursDept.push("401_UNAUTHORIZED"); return []; }
-        if (r.ok) return await r.json();
-        erreursDept.push(`Dépt ${code}: HTTP ${r.status}`); return [];
-      } catch (e) { erreursDept.push(`Dépt ${code}: ${e.message}`); return []; }
-    });
-    
-    const resultatsListes = await Promise.all(requetesListes);
-    
-    if (erreursDept.includes("401_UNAUTHORIZED")) {
-        alert("⛔ Erreur 401 : Votre clé API Météo-France a expiré ou est invalide."); window.modifierApi();
-        document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false; return;
-    }
-
-    resultatsListes.forEach(arr => { if(Array.isArray(arr)) toutesLesStations.push(...arr); });
-    let stationsUniques = Array.from(new Map(toutesLesStations.map(s => [s.id, s])).values()).filter(st => !estExclue(st.nom));
-
-    if(stationsUniques.length === 0) {
-        let sec = localStorage.getItem("meteo_stations_secours_mir21"); if(sec) stationsUniques = JSON.parse(sec);
-    } else {
-        localStorage.setItem("meteo_stations_secours_mir21", JSON.stringify(stationsUniques));
-    }
-
-    if(stationsUniques.length === 0) {
-      document.getElementById("mapReseau").insertAdjacentHTML("beforebegin", `<p class="error" id="erreurScanReseau">Aucune station récupérée.</p>`);
-      document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false; return;
-    }
-
-    document.getElementById("mapReseau").insertAdjacentHTML("beforebegin", `<p id="statutScanReseau" style="color:#f8fafc; font-size:13px; margin:8px 0; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">Récupération globale en cours…</p>`);
-    const elStatutInitial = document.getElementById("statutScanReseau");
-
-    let paquet = null;
-    try { paquet = await tenterPaquetRapide(cleApi); } catch(e) {
-       if (e.message === "401") {
-           if (elStatutInitial) elStatutInitial.remove(); alert("⛔ Erreur 401 : Votre clé API Météo-France a expiré."); window.modifierApi();
-           document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false; return;
-       }
-    }
-
-    let stationsEnPanne = [];
-
-    if (paquet && Object.keys(paquet).length > 0) {
-      if (elStatutInitial) elStatutInitial.textContent = "Génération de la carte...";
-      
-      let aeroCheckWXData = {};
-      if (cleCheckWX) {
-          let icaos = [...new Set(stationsUniques.map(s => getIcao(s.nom)).filter(i=>i))];
-          if (icaos.length > 0) aeroCheckWXData = await fetchCheckWX(icaos, cleCheckWX);
-      }
-
-      stationsUniques.forEach(st => {
-        let c = paquet[st.id] || (st.numer_sta ? paquet[st.numer_sta] : null) || (st.num_poste ? paquet[st.num_poste] : null);
-        let obsToUse = null;
-
-        if (c) {
-          let icao = getIcao(st.nom);
-          if (icao && aeroCheckWXData[icao] && aeroCheckWXData[icao] !== "QUOTA") {
-              let ch = aeroCheckWXData[icao];
-              if (!estValeurManquante(ch.vv)) c.vv = ch.vv; if (!estValeurManquante(ch.n)) c.n = ch.n;
-              if (!estValeurManquante(ch.ww)) c.ww = ch.ww; if (!estValeurManquante(ch.hbas)) c.hbas = ch.hbas;
-              if (ch.nuages_metar) c.nuages_metar = ch.nuages_metar; if (ch.metar_decode) c.metar_decode = ch.metar_decode; if (ch.raw) c.metar_brut = ch.raw;
-          }
-          obsToUse = c;
-        }
-
-        let ageMin = Infinity;
-        if (obsToUse && obsToUse.validity_time) {
-            let vTime = obsToUse.validity_time;
-            if (!vTime.endsWith('Z')) vTime += 'Z';
-            ageMin = Math.round((Date.now() - new Date(vTime).getTime()) / 60000);
-        }
-
-        if (obsToUse && ageMin <= SEUIL_ROUGE_MIN) {
-            window.stationsCache[st.id] = obsToUse;
-        } else {
-            let cachedObs = oldCacheData[st.id];
-            if (cachedObs) { window.stationsCache[st.id] = cachedObs; }
-            stationsEnPanne.push(st); 
-        }
-      });
-      
-    } else {
-       if (elStatutInitial) elStatutInitial.textContent = "Paquet Météo-France indisponible. Utilisation de la mémoire cache locale.";
-       stationsUniques.forEach(st => {
-           let cachedObs = oldCacheData[st.id];
-           if (cachedObs) { window.stationsCache[st.id] = cachedObs; }
-           stationsEnPanne.push(st); 
-       });
-    }
-    
-    if (elStatutInitial) elStatutInitial.remove();
-
-    rafraichirInterfaceGlobale(stationsUniques);
 
     if (coucheMarqueurs.getBounds().isValid()) window.carteReseau.fitBounds(coucheMarqueurs.getBounds(), { padding: [30, 30] });
-    
-    document.getElementById("btnScan").disabled = false;
+    mettreAJourFondEcran();
+
+    document.getElementById("statutChargement").style.display = "none";
     document.getElementById("btnRefreshMap").disabled = false;
+    if(modeActuel === 'terrain') peuplerSelectTerrain();
+  };
 
-    if (stationsEnPanne.length > 0) {
-        verifierStationsEnPanne(stationsEnPanne, cleApi, stationsUniques);
-    }
-  }
-
-  // TACHE DE FOND QUI INTERROGE SEULEMENT LES ROUGES INDIVIDUELLEMENT
-  async function verifierStationsEnPanne(inconnues, cleApi, stationsUniques) {
-      if (inconnues.length === 0) return;
-      let divMsg = document.createElement('div');
-      divMsg.style = "position:fixed; bottom:10px; right:10px; background:rgba(0,0,0,0.7); color:#fff; font-size:11px; font-weight:bold; padding:4px 8px; border-radius:4px; z-index:9999;";
-      divMsg.innerText = `Recherche de l'heure exacte des pannes (0/${inconnues.length})...`;
-      document.body.appendChild(divMsg);
-
-      const TAILLE_LOT = 5; let traitees = 0;
-      for (let i = 0; i < inconnues.length; i += TAILLE_LOT) {
-          const lot = inconnues.slice(i, i + TAILLE_LOT);
-          await Promise.all(lot.map(async (st) => {
-              try {
-                  const queryId = st.numer_sta || st.id;
-                  const res = await fetch(urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: queryId, format: "json" }), { headers: { "apikey": cleApi } });
-                  if (res.ok) {
-                      const data = await res.json();
-                      let dataArray = Array.isArray(data) ? data : [data];
-                      dataArray.sort((a, b) => new Date(b.validity_time) - new Date(a.validity_time));
-                      let obs = dataArray[0];
-                      if (obs && obs.validity_time) {
-                          normaliserObs(obs);
-                          window.stationsCache[st.id] = obs;
+  // --- API CHECKWX DECODAGE ---
+  async function fetchCheckWX(icaos, apiKey) {
+      if (!apiKey || icaos.length === 0) return {};
+      try {
+          const res = await fetch(`https://api.checkwx.com/metar/${icaos.join(',')}/decoded`, { headers: { 'X-API-Key': apiKey } });
+          if (!res.ok) return {};
+          const data = await res.json();
+          const aeroData = {};
+          if (data && data.data && Array.isArray(data.data)) {
+              data.data.forEach(m => {
+                  try { 
+                      let metar_brut = m.raw_text || "";
+                      let vv = m.visibility?.meters_float || (m.visibility?.meters ? parseInt(String(m.visibility.meters).replace(/\D/g,'')) : null);
+                      let vis_str = vv !== null ? (vv >= 9999 ? '>10km' : `${vv}m`) : 'N/D';
+                      let vent_spd = m.wind?.speed_kph ? Math.round(m.wind.speed_kph) : null;
+                      let vent_dir = m.wind?.degrees !== undefined ? m.wind.degrees : null;
+                      let vent_str = (vent_spd !== null && vent_dir !== null) ? `${vent_dir}° à ${vent_spd}km/h` : 'Calme';
+                      
+                      let cloudsStr = [];
+                      if (m.clouds && m.clouds.length > 0) {
+                          m.clouds.forEach(layer => {
+                              let baseFt = layer.base_feet_agl || layer.feet || layer.base_feet;
+                              cloudsStr.push(`${layer.code} à ${baseFt ? baseFt + ' ft' : 'N/D'}`);
+                          });
                       }
-                  }
-              } catch(e) {}
-          }));
-          traitees += lot.length;
-          divMsg.innerText = `Recherche de l'heure exacte des pannes (${traitees}/${inconnues.length})...`;
-          await new Promise(r => setTimeout(r, 1000));
-      }
-      divMsg.remove();
-      sauvegarderCacheLocal();
-      
-      rafraichirInterfaceGlobale(stationsUniques);
+                      let nuages_str = cloudsStr.length > 0 ? cloudsStr.join(", ") : "Clair/CAVOK";
+                      let metar_decode = `Vent: ${vent_str} | Vis: ${vis_str} | Nuages: ${nuages_str}`;
+                      
+                      aeroData[m.icao] = { metar_brut: metar_brut, metar_decode: metar_decode, nuages_metar: nuages_str, vv: vv };
+                  } catch(err) {} 
+              });
+          }
+          return aeroData;
+      } catch(e) { return {}; }
   }
 
-  // ====== MET A JOUR LA CARTE ET LES COMPTEURS ======
-  function rafraichirInterfaceGlobale(stationsUniques) {
-      document.getElementById("tbodyReseau").innerHTML = "";
-      document.getElementById("zoneTableauAlertes").style.display = "none";
-
-      let tempOk = 0, tempWarn = 0, tempFault = 0;
-
-      stationsUniques.forEach(st => {
-          let obs = window.stationsCache[st.id];
-          let statut = injecterStationDansDashboard(st, obs);
-          if (statut === 'ok') tempOk++;
-          else if (statut === 'warn') tempWarn++;
-          else if (statut === 'fault') tempFault++;
-      });
-
-      document.getElementById("cnt-ok").textContent = tempOk;
-      document.getElementById("cnt-warn").textContent = tempWarn;
-      document.getElementById("cnt-fault").textContent = tempFault;
-
-      window.changerModeCarte(window.modeAffichageCarte, true); // Appel groupé = 100x plus rapide
-      mettreAJourFondEcran();
-  }
-
+  // ==========================================================
+  // TABLEAU DE BORD (Alertes, Couleurs)
+  // ==========================================================
   function injecterStationDansDashboard(station, obs) {
     let marker = window.marqueursLeaflet[station.id];
-    if (!marker) {
-        let lat = station.position ? station.position.lat : station.lat; let lon = station.position ? station.position.lon : station.lon;
-        if (lat && lon) {
-            window.stationsCoordCache[station.id] = { lat, lon };
-            let premiereLettre = station.nom ? station.nom.charAt(0).toUpperCase() : '?';
-            window.stationsMetaCache[station.id] = { nom: station.nom, lettre: premiereLettre };
-            marker = L.marker([lat, lon], { icon: createStationIcon('fault', premiereLettre) });
-            marker.on('click', () => lancerDetailsStation(station.id, station.nom, station.numer_sta || station.id_station));
-            window.marqueursLeaflet[station.id] = marker; 
-        } else {
-            return null; // Ignore si pas de coordonnées
-        }
-    }
+    if (!marker) return;
 
     let ageMin = Infinity;
-    if (obs && obs.validity_time) {
-        let vTime = obs.validity_time;
-        if (!vTime.endsWith('Z')) vTime += 'Z'; 
-        ageMin = Math.round((Date.now() - new Date(vTime).getTime()) / 60000);
-    }
-
-    if (ageMin > SEUIL_INACTIVITE_MIN) {
-        if (window.marqueursLeaflet[station.id]) {
-            window.marqueursLeaflet[station.id].remove();
-            delete window.marqueursLeaflet[station.id];
-        }
-        return null; // Plus de 15 jours
-    }
-
-    let isOffline = (!obs || ageMin >= SEUIL_ROUGE_MIN);
+    if (obs && obs.validity_time) ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000);
+    
+    let isOffline = (!obs || ageMin >= 30); 
     let capteursPerdus = [];
-    
+    let coreSensors = ['t', 'u', 'ff', 'pres'];
+
     if (!isOffline && obs) {
-        const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
-        let capteursActuels = Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k]));
+        let capteursActuels = Object.keys(obs).filter(k => coreSensors.includes(k) && !estValeurManquante(obs[k]));
         let baseline = window.stationsBaselines[station.id] || [];
-        if (baseline.length === 0) { window.stationsBaselines[station.id] = capteursActuels; localStorage.setItem('meteo_baselines', JSON.stringify(window.stationsBaselines)); baseline = capteursActuels;}
-        
-        capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
+        if (baseline.length === 0 && capteursActuels.length > 0) { 
+            window.stationsBaselines[station.id] = capteursActuels; 
+            localStorage.setItem('meteo_baselines_v3', JSON.stringify(window.stationsBaselines)); 
+            baseline = capteursActuels;
+        }
+        capteursPerdus = baseline.filter(c => !capteursActuels.includes(c));
     }
 
-    let statut = isOffline ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok");
+    let statut = "ok";
+    if (isOffline) statut = "fault";
+    else if (capteursPerdus.length > 0) statut = "warn";
+
     if (obs) obs._statut = statut;
-
-    let premiereLettre = window.stationsMetaCache[station.id]?.lettre || '?';
-    marker.setIcon(createStationIcon(statut, premiereLettre));
     
-    let popupHtml = `<b>${station.nom} (${station.id})</b><br>`;
-    if (statut === 'ok') popupHtml += '✅ OK';
-    else if (statut === 'warn') popupHtml += '⚠️ Alerte (Capteur)';
-    else popupHtml += '⚠️ Hors ligne';
-    marker.setPopupContent(popupHtml);
+    if (statut === "ok") nOk++; else if (statut === "warn") nWarn++; else nFault++;
 
+    document.getElementById("cnt-ok").textContent = nOk;
+    document.getElementById("cnt-warn").textContent = nWarn;
+    document.getElementById("cnt-fault").textContent = nFault;
+
+    let etiquette = window.stationsMetaCache[station.id]?.lettre || station.nom.charAt(0).toUpperCase();
+    marker.setIcon(createStationIcon(statut, etiquette));
     if (!coucheMarqueurs.hasLayer(marker)) marker.addTo(coucheMarqueurs);
 
+    // TABLEAU DES ALERTES
     if (statut === "warn" || statut === "fault") {
       document.getElementById("zoneTableauAlertes").style.display = "block";
       const nomEchappe = station.nom.replace(/'/g, "\\'"); 
-      let anomalieTexte = isOffline ? "Hors ligne" : "Perte capteur";
       
+      let anomalieTexte = "Défaut";
+      let couleurAnomalie = "#ef4444"; 
+      if (statut === "fault") { anomalieTexte = "Hors ligne"; }
+      else if (statut === "warn") { anomalieTexte = "Perte capteur"; couleurAnomalie = "#d97706"; } 
+
       let trHtml = `<tr class="row-${statut}">`;
-      trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${station.id}', '${nomEchappe}', '${station.numer_sta || ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${station.nom} (${station.id})</a></strong><br>
-                 <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
+      trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${station.id}', '${nomEchappe}'); return false;" style="color:var(--primary-color); text-decoration:none;">${station.nom}</a></strong><br>
+                 <span style="font-size:11px; color:${couleurAnomalie}; font-weight:bold;">${anomalieTexte}</span></td>`;
       
       let dateAffichee = "—";
       if (obs && obs.validity_time) {
-          let vTime = obs.validity_time; if (!vTime.endsWith('Z')) vTime += 'Z';
-          let hd = new Date(vTime);
-          dateAffichee = `${hd.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'})} ${hd.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}<br><span style="font-size:10px; color:#64748b;">(il y a ${ageMin} min)</span>`;
+          let affichageAge = ageMin > 1440 ? "(> 1 jour)" : `(il y a ${ageMin} min)`;
+          dateAffichee = `${formatHeure(obs.validity_time)}<br><span style="font-size:10px; color:#64748b;">${affichageAge}</span>`;
       }
-      
       trHtml += `<td class="${isOffline ? 'age-stale' : ''}">${dateAffichee}</td>`;
       
       PARAMS_RESEAU.forEach(p => { 
         let valeur = obs ? obs[p.key] : null;
         if (p.key === 'rr_per' && estValeurManquante(valeur)) valeur = 0;
         
-        if (isOffline) { trHtml += `<td class="cell-na">—</td>`; }
-        else if (!estValeurManquante(valeur)) trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
-        else if (p.key === 't') trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
-        else if (capteursPerdus.includes(p.key)) trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
-        else trHtml += `<td class="cell-na">—</td>`;
+        if (isOffline) { 
+            trHtml += `<td class="cell-na">—</td>`; 
+        } else {
+            if (!estValeurManquante(valeur)) {
+                trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
+            } else if (capteursPerdus.includes(p.key)) {
+                trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
+            } else {
+                trHtml += `<td class="cell-na">—</td>`;
+            }
+        }
       });
       trHtml += `</tr>`;
       document.getElementById("tbodyReseau").insertAdjacentHTML('beforeend', trHtml);
     }
-
-    return statut;
   }
 
-  // ====== DÉTAILS DE LA STATION ======
-  window.actuelleStationId = null;
-  window.actuelleStationNom = null;
-  window.actuelleStationOmm = null;
+  function mettreAJourFondEcran() {
+    if(modeActuel === 'terrain') return;
+    document.body.className = ''; 
+    if (nFault > 0) document.body.classList.add('bg-stormy');
+    else if (nWarn > 0) document.body.classList.add('bg-warning');
+    else document.body.classList.add('bg-sunny');
+  }
 
-  window.lancerDetailsStation = function(stationId, stationNom, stationOmm) {
-    window.actuelleStationId = stationId;
-    window.actuelleStationNom = stationNom;
-    window.actuelleStationOmm = stationOmm || (window.stationsCache[stationId] ? (window.stationsCache[stationId].numer_sta || window.stationsCache[stationId].id_station) : null);
+  function createStationIcon(statut, lettre, overrideColor = null) {
+    let bgColor = '#64748b'; let borderColor = '#41464b'; let textColor = 'white';
+    if (statut === 'ok') { bgColor = '#10b981'; borderColor = '#059669'; }
+    else if (statut === 'warn') { bgColor = '#f59e0b'; borderColor = '#d97706'; }
+    else if (statut === 'fault') { bgColor = '#ef4444'; borderColor = '#b91c1c'; }
     
-    if (window.carteReseau) window.carteReseau.closePopup();
+    if (overrideColor === 'transparent') { bgColor = 'rgba(255,255,255,0.3)'; borderColor = 'rgba(255,255,255,0.8)'; textColor = '#1e293b'; } 
+    else if (overrideColor) { bgColor = overrideColor; borderColor = '#1e293b'; }
     
+    let textShadow = overrideColor === 'transparent' ? 'none' : '0px 1px 2px rgba(0,0,0,0.8)';
+    let html = `<div style="background-color: ${bgColor}; border: 2px solid ${borderColor}; color: ${textColor}; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,0.4); text-shadow: ${textShadow};">${lettre}</div>`;
+    return L.divIcon({ html: html, className: '', iconSize: [30, 30], iconAnchor: [15, 15] });
+  }
+
+  // --- FILTRES DE COULEURS ET DE VISIBILITE SUR LA CARTE ---
+  window.changerModeCarte = function(mode) { 
+    if (window.modeAffichageCarte === mode) {
+        mode = 'none'; // Effet Toggle
+    }
+    window.modeAffichageCarte = mode;
+
+    document.querySelectorAll('.btn-toggle-map').forEach(btn => { if(btn.id !== 'btnGeoLoc') btn.classList.remove('active'); });
+    if(mode !== 'none') {
+        let btnId = 'btnMode' + mode.charAt(0).toUpperCase() + mode.slice(1);
+        let btn = document.getElementById(btnId);
+        if (btn) btn.classList.add('active');
+    }
+
+    if (mode === 'pluie') window.demarrerAnimationRadar();
+    else window.arreterAnimationRadar();
+
+    for (let id in window.marqueursLeaflet) {
+      let marker = window.marqueursLeaflet[id]; 
+      let obs = window.stationsCache[id];
+      let lettre = STATIONS_OFFICIELLES[id].charAt(0).toUpperCase();
+      let statutActuel = (obs && obs._statut) ? obs._statut : 'fault';
+      
+      let text = ""; let overrideColor = null; let showTooltip = false;
+      let afficher = true;
+
+      if (mode !== 'none') {
+          if (!obs || statutActuel === 'fault') {
+              afficher = false;
+          } else {
+              if (mode === 'temp') {
+                  let val = parseFloat(obs.t);
+                  if (!isNaN(val)) {
+                      let tempC = parseFloat((val - 273.15).toFixed(1));
+                      text = `${tempC}°C`; overrideColor = getTempColor(tempC); showTooltip = true;
+                  } else { afficher = false; }
+              } 
+              else if (mode === 'humidite') {
+                  let val = parseFloat(obs.u);
+                  if (!isNaN(val)) {
+                      text = `${val}%`; overrideColor = getHumiditeColor(val); showTooltip = true;
+                  } else { afficher = false; }
+              }
+              else if (mode === 'vent') {
+                  let valFf = parseFloat(obs.ff);
+                  let valRaf = parseFloat(obs.raf10);
+                  let valVent = !isNaN(valFf) ? valFf : (!isNaN(valRaf) ? valRaf : null);
+                  
+                  if (valVent !== null) {
+                      let ventKmh = (valVent * 3.6).toFixed(1);
+                      text = `💨 ${ventKmh} km/h`; overrideColor = getVentColor(parseFloat(ventKmh)); showTooltip = true;
+                  } else { afficher = false; }
+              }
+              else if (mode === 'pluie') {
+                  let rr_per = parseFloat(obs.rr_per);
+                  let rr1 = parseFloat(obs.rr1);
+                  let p = !isNaN(rr_per) ? rr_per : (!isNaN(rr1) ? rr1 : null);
+                  
+                  if (p !== null && p > 0) { 
+                      text = `💧 ${p} mm`; overrideColor = '#0ea5e9'; showTooltip = true; 
+                  } else { 
+                      afficher = false;
+                  }
+              }
+          }
+      }
+
+      if (afficher) {
+          marker.setIcon(createStationIcon(statutActuel, lettre, overrideColor));
+          if (text !== "" && showTooltip) {
+              marker.bindTooltip(text, { permanent: true, direction: 'right', className: 'map-live-label', offset: [15, 0] });
+          } else {
+              marker.unbindTooltip();
+          }
+          if (!coucheMarqueurs.hasLayer(marker)) marker.addTo(coucheMarqueurs);
+      } else {
+          if (coucheMarqueurs.hasLayer(marker)) coucheMarqueurs.removeLayer(marker);
+          marker.unbindTooltip();
+      }
+    }
+  };
+
+  // ==========================================================
+  // DÉTAILS ET HISTORIQUE DYNAMIQUE
+  // ==========================================================
+  window.lancerDetailsStation = function(stationId, stationNom) {
     document.getElementById("zoneDetailContainer").style.display = "block";
     document.getElementById("titreDetails").textContent = `Détails : ${stationNom} (${stationId})`;
+    let obs = window.stationsCache[stationId];
+    if(!obs) { document.getElementById("contenuObs").innerHTML = "<p>Aucune donnée trouvée.</p>"; return; }
     
-    document.getElementById("btnHist1h").style.display = "none";
-    document.getElementById("btnHist24h").style.display = "inline-block";
-    document.getElementById("titreHistorique").textContent = "Historique — dernière heure";
+    let html = `<div class="table-responsive"><table><tbody>`;
+    if(obs.validity_time) html += `<tr><td style="width:40%;"><strong>Heure (locale)</strong></td><td style="color:#0056b3; font-weight:bold;">${formatHeure(obs.validity_time)}</td></tr>`;
     
-    let actionHtml = `<button class="btn-primary" style="width: auto; padding: 6px 14px; font-size: 12px; border-radius: 6px; margin-right: 10px;" onclick="rafraichirStationActuelle(); return false;">🔄 Actualiser</button>`;
-    const coords = window.stationsCoordCache[stationId];
-    if (coords) {
-      actionHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}" target="_blank" class="btn-icon"><img src="https://img.icons8.com/color/48/000000/google-maps-new.png" alt="Maps" style="width:24px; height:24px;"></a>`;
-      actionHtml += `<a href="https://www.waze.com/ul?ll=${coords.lat},${coords.lon}&navigate=yes" target="_blank" class="btn-icon"><img src="https://img.icons8.com/color/48/000000/waze.png" alt="Waze" style="width:24px; height:24px;"></a>`;
-    }
-    document.getElementById("actionButtonsStation").innerHTML = actionHtml;
-
-    rafraichirStationActuelle();
-    document.getElementById("cardDernieresObs").scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  async function fetchHistoryForDate(stationId, stationOmm, path, date, cleApi) {
-      let url = urlProxy(path, { id_station: stationId, date: date, format: "json" });
-      try {
-          let r = await fetch(url, { headers: { "apikey": cleApi } });
-          if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) return o; }
-      } catch(e) {}
-      if (stationOmm) {
-          let urlOmm = urlProxy(path, { id_station: stationOmm, date: date, format: "json" });
-          try {
-              let r = await fetch(urlOmm, { headers: { "apikey": cleApi } });
-              if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) return o; }
-          } catch(e) {}
-      }
-      return null;
-  }
-
-  window.rafraichirStationActuelle = async function() {
-    const cleApi = document.getElementById("apikey").value.trim();
-    const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-    document.getElementById("contenuObs").innerHTML = "<p>Mise à jour en direct depuis Météo-France...</p>";
-
-    try {
-      const urls6m = [urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: window.actuelleStationId, format: "json" })];
-      if (window.actuelleStationOmm) urls6m.push(urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: window.actuelleStationOmm, format: "json" }));
-
-      let obsMerged = null;
-      for (let u of urls6m) {
-          try {
-              let res = await fetch(u, { headers: { "apikey": cleApi } });
-              if (!res.ok) { res = await fetch(u.replace('/v2/', '/v1/'), { headers: { "apikey": cleApi } }); }
-              if (res.ok) {
-                  const data = await res.json(); let dataArray = Array.isArray(data) ? data : [data];
-                  dataArray.sort((a, b) => new Date(b.validity_time) - new Date(a.validity_time));
-                  if (dataArray[0] && dataArray[0].validity_time) { normaliserObs(dataArray[0]); obsMerged = dataArray[0]; break; }
-              }
-          } catch(e) {}
-      }
-
-      if (!obsMerged) obsMerged = window.stationsCache[window.actuelleStationId];
-      if (!obsMerged) { document.getElementById("contenuObs").innerHTML = `<p class="error">Aucune donnée trouvée.</p>`; return; }
-
-      let icao = getIcao(window.actuelleStationNom);
-      if (icao && cleCheckWX) {
-          let aeroData = await fetchCheckWX([icao], cleCheckWX);
-          if (aeroData && aeroData._error !== "QUOTA") {
-              let ch = aeroData[icao];
-              if (ch && ch.raw) {
-                  if (!estValeurManquante(ch.vv)) obsMerged.vv = ch.vv; if (!estValeurManquante(ch.n)) obsMerged.n = ch.n;
-                  if (!estValeurManquante(ch.ww)) obsMerged.ww = ch.ww; if (!estValeurManquante(ch.hbas)) obsMerged.hbas = ch.hbas;
-                  if (ch.nuages_metar) obsMerged.nuages_metar = ch.nuages_metar; if (ch.metar_decode) obsMerged.metar_decode = ch.metar_decode; if (ch.raw) obsMerged.metar_brut = ch.raw;
-              }
-          }
-      }
-
-      window.stationsCache[window.actuelleStationId] = obsMerged;
-      afficherDonneesDetaillees([obsMerged]);
-      chargerHistoriqueStation(window.actuelleStationId, cleApi);
-      calculerExtremesDuJour(window.actuelleStationId, window.actuelleStationOmm, cleApi);
-    } catch (erreur) { document.getElementById("contenuObs").innerHTML = `<p class="error">Échec.\n${erreur.message}</p>`; }
-  };
-
-  function afficherDonneesDetaillees(data) {
-    let obs = Array.isArray(data) ? data[0] : data;
-    let paramsAForcer = ['t', 'rr_per', 'rr1'];
-    paramsAForcer.forEach(param => { if (!(param in obs) || estValeurManquante(obs[param])) obs[param] = null; });
-
-    let html = `<div style="text-align:center; margin-bottom:20px;">
-                    <span style="font-size:16px; font-weight:bold; color:#0f172a; background:rgba(255,255,255,0.6); padding:8px 16px; border-radius:8px; display:inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-shadow: 0 1px 1px rgba(255,255,255,0.6);">
-                        ⏱️ Mesure du ${formatHeure(obs.validity_time)}
-                    </span>
-                 </div><div class="table-responsive">`;
-
-    const clesInutiles = ["reference_time", "insert_time", "id_station", "geo_id_insee", "lat", "lon", "dh_utc", "date", "numer_sta", "num_poste", "validity_time"];
-    const groupes = {};
-    for (const [cle, valeur] of Object.entries(obs)) {
-      if (clesInutiles.includes(cle)) continue;
-      const info = PARAM_INFO_DETAIL[cle];
-      if (!info || (estValeurManquante(valeur) && !paramsAForcer.includes(cle))) continue;
-      
-      if (!groupes[info.group]) groupes[info.group] = [];
-      let affichage = estValeurManquante(valeur) ? (['rr_per', 'rr1'].includes(cle) ? "0 mm" : "<span style='color:#dc2626; font-weight:bold;'>⚠ Défaut</span>") : (info.transform ? `${info.transform(valeur)} ${info.unit}` : `${valeur} ${info.unit}`);
-      if (cle === "metar_brut") { affichage = `<span style="font-family:monospace; color:#334155; font-size:11px;">${affichage}</span>`; }
-      groupes[info.group].push(`<tr><td style="width:30%;"><strong>${info.label}</strong></td><td>${affichage}</td></tr>`);
-    }
-    
-    ["Température", "Humidité & précipitations", "Vent", "Aéronautique & Ciel", "Autres paramètres"].forEach(g => {
-      if (groupes[g]) html += `<h3 style="color:var(--primary-color);font-size:16px;margin:20px 0 10px;">${g}</h3><table><tbody>${groupes[g].join("")}</tbody></table>`;
-    });
-    
-    html += `</div><p style="margin-top:16px;"><a href="#" onclick="document.getElementById('jsonBrutStation').style.display = document.getElementById('jsonBrutStation').style.display === 'none' ? 'block' : 'none'; return false;" style="font-size:12.5px;color:#1e293b; font-weight: 600;">Voir le JSON brut complet</a></p>
-    <pre id="jsonBrutStation" style="display:none;background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);padding:12px;border-radius:4px;font-size:12px;overflow-x:auto;">${JSON.stringify(obs, null, 2)}</pre>`;
-    document.getElementById("contenuObs").innerHTML = html;
-  }
-
-  // ====== EXTRÊMES DU JOUR ======
-  async function calculerExtremesDuJour(stationId, stationOmm, cleApi) {
-      let todayStr = new Date().toLocaleDateString('fr-FR'); let cacheKey = stationId + "_" + todayStr;
-      if (window.extremesJourCache[cacheKey]) { afficherExtremesUI(window.extremesJourCache[cacheKey]); return; }
-      document.getElementById("zoneExtremesJournee").innerHTML = "<div style='text-align:center; font-size:12px; color:#475569;'>Recherche des extrêmes...</div>";
-
-      try {
-          const horodatages = []; let d = new Date(); d.setUTCMinutes(0, 0, 0);
-          for (let i = 0; i <= 23; i++) {
-            let t = new Date(d.getTime() - (i * 3600000));
-            if(t.toLocaleDateString('fr-FR') === todayStr) horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z"));
-          }
-          let tn = Infinity, tx = -Infinity, ventMax = -Infinity, cumulPluie = 0; let hTn = "", hTx = "", hVent = "";
-
-          for (let date of horodatages) {
-              let url = urlProxy("/public/DPObs/v1/station/horaire", { id_station: stationId, date: date, format: "json" });
-              try {
-                  let r = await fetch(url, { headers: { "apikey": cleApi } });
-                  if (r.ok) {
-                      let data = await r.json(); let obsData = Array.isArray(data) ? data[0] : data;
-                      if (obsData && obsData.validity_time) {
-                          let heureStr = new Date(obsData.validity_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                          let tempMax = obsData.tx1 !== undefined ? obsData.tx1 : obsData.t; if (tempMax !== undefined && tempMax !== null && tempMax > tx) { tx = tempMax; hTx = heureStr; }
-                          let tempMin = obsData.tn1 !== undefined ? obsData.tn1 : obsData.t; if (tempMin !== undefined && tempMin !== null && tempMin < tn) { tn = tempMin; hTn = heureStr; }
-                          let raf = obsData.fxy !== undefined ? obsData.fxy : obsData.rafper; if (raf !== undefined && raf !== null && raf > ventMax) { ventMax = raf; hVent = heureStr; }
-                          if (obsData.rr1 !== undefined && obsData.rr1 !== null) cumulPluie += parseFloat(obsData.rr1);
-                      }
-                  }
-              } catch(e) {} await new Promise(r => setTimeout(r, 60)); 
-          }
-          const extremes = { tn, tx, ventMax, cumulPluie, hTn, hTx, hVent };
-          window.extremesJourCache[cacheKey] = extremes; afficherExtremesUI(extremes);
-      } catch (e) { document.getElementById("zoneExtremesJournee").innerHTML = ""; }
-  }
-
-  function afficherExtremesUI(extremes) {
-      let html = `<div style="display: flex; gap: 10px; flex-wrap: wrap;">`;
-      if (extremes.tx !== -Infinity) html += `<div style="flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4);"><span style="font-size:11px; font-weight:800;">Max Temp.</span><br><span style="font-size:18px; font-weight:900; color:#dc2626;">${kelvinToCelsius(extremes.tx)} °C</span><br><span style="font-size:11px;">vers ${extremes.hTx}</span></div>`;
-      if (extremes.tn !== Infinity) html += `<div style="flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4);"><span style="font-size:11px; font-weight:800;">Min Temp.</span><br><span style="font-size:18px; font-weight:900; color:#2563eb;">${kelvinToCelsius(extremes.tn)} °C</span><br><span style="font-size:11px;">vers ${extremes.hTn}</span></div>`;
-      if (extremes.ventMax !== -Infinity) html += `<div style="flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4);"><span style="font-size:11px; font-weight:800;">Rafale Max</span><br><span style="font-size:18px; font-weight:900; color:#7c3aed;">${msToKmh(extremes.ventMax)} km/h</span><br><span style="font-size:11px;">vers ${extremes.hVent}</span></div>`;
-      if (extremes.cumulPluie > 0) html += `<div style="flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4);"><span style="font-size:11px; font-weight:800;">Pluie</span><br><span style="font-size:18px; font-weight:900; color:#0284c7;">${extremes.cumulPluie.toFixed(1)} mm</span><br><span style="font-size:11px;">Cumul 00:00</span></div>`;
-      html += `</div>`;
-      document.getElementById("zoneExtremesJournee").innerHTML = html;
-  }
-
-  // ====== HISTORIQUE ======
-  window.chargerHistorique1h = function() {
-    document.getElementById("btnHist1h").style.display = "none"; document.getElementById("btnHist24h").style.display = "inline-block";
-    document.getElementById("titreHistorique").textContent = "Historique — dernière heure";
-    chargerHistoriqueStation(window.actuelleStationId, document.getElementById("apikey").value.trim());
-  };
-
-  window.chargerHistorique24h = async function() {
-    const cleApi = document.getElementById("apikey").value.trim();
-    document.getElementById("btnHist24h").style.display = "none"; document.getElementById("btnHist1h").style.display = "inline-block";
-    document.getElementById("titreHistorique").textContent = "Historique — 24h";
-    document.getElementById("contenuHistorique").innerHTML = "<p>Récupération des cumuls horaires...</p>";
-    
-    try {
-      let dateDepart = new Date(); const obsActuelle = window.stationsCache[window.actuelleStationId];
-      if (obsActuelle && obsActuelle.validity_time) { dateDepart = new Date(obsActuelle.validity_time); }
-      dateDepart.setUTCMinutes(0, 0, 0);
-
-      const horodatages = [];
-      for (let i = 0; i <= 23; i++) { let t = new Date(dateDepart.getTime() - (i * 3600000)); horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z")); }
-
-      const resultats = [];
-      for (let date of horodatages) {
-          let url = urlProxy("/public/DPObs/v1/station/horaire", { id_station: window.actuelleStationId, date: date, format: "json" });
-          try {
-              let r = await fetch(url, { headers: { "apikey": cleApi } });
-              if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) { normaliserObs(o); resultats.push(o); } }
-          } catch(e) {} await new Promise(r => setTimeout(r, 60)); 
-      }
-
-      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-      let icao = getIcao(window.actuelleStationNom);
-      if (icao && cleCheckWX) {
-          let aeroHistResult = await fetchCheckWXHistory(icao, cleCheckWX, 24);
-          if (aeroHistResult && aeroHistResult.data && aeroHistResult.data.length > 0) {
-              resultats.forEach(obs => {
-                  if (obs.validity_time) {
-                      let tObs = new Date(obs.validity_time).getTime();
-                      let closest = aeroHistResult.data.reduce((prev, curr) => Math.abs(new Date(curr.observed).getTime() - tObs) < Math.abs(new Date(prev.observed).getTime() - tObs) ? curr : prev);
-                      if (closest && closest.observed && Math.abs(new Date(closest.observed).getTime() - tObs) <= 45 * 60000) {
-                          if (!estValeurManquante(closest.vv)) obs.vv = closest.vv; if (!estValeurManquante(closest.n)) obs.n = closest.n;
-                          if (!estValeurManquante(closest.ww)) obs.ww = closest.ww; if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
-                      }
-                  }
-              });
-          }
-      }
-      afficherHistorique(resultats, false);
-    } catch (erreur) { document.getElementById("contenuHistorique").innerHTML = `<p class="error">Échec historique.</p>`; }
-  };
-
-  async function chargerHistoriqueStation(stationId, cleApi) {
-    document.getElementById("contenuHistorique").innerHTML = "<p>Récupération de l'historique en cours...</p>";
-    try {
-      let dateDepart = new Date(); const obsActuelle = window.stationsCache[stationId];
-      if (obsActuelle && obsActuelle.validity_time) { dateDepart = new Date(obsActuelle.validity_time); } else { dateDepart.setMinutes(dateDepart.getMinutes() - 10); }
-      dateDepart.setUTCMinutes(dateDepart.getUTCMinutes() - (dateDepart.getUTCMinutes()%6), 0, 0);
-
-      const horodatages = [];
-      for (let i = 0; i <= 10; i++) { let t = new Date(dateDepart.getTime() - (i * 6 * 60000)); horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z")); }
-
-      const resultats = [];
-      for (let date of horodatages) {
-          let url = urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: stationId, date: date, format: "json" });
-          try {
-              let r = await fetch(url, { headers: { "apikey": cleApi } });
-              if (!r.ok) { r = await fetch(url.replace('/v2/', '/v1/'), { headers: { "apikey": cleApi } }); }
-              if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) { normaliserObs(o); resultats.push(o); } }
-          } catch(e) {} await new Promise(r => setTimeout(r, 60)); 
-      }
-
-      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-      let icao = getIcao(window.actuelleStationNom);
-      if (icao && cleCheckWX) {
-          let aeroHistResult = await fetchCheckWXHistory(icao, cleCheckWX, 3); 
-          if (aeroHistResult && aeroHistResult.data && aeroHistResult.data.length > 0) {
-              resultats.forEach(obs => {
-                  if (obs.validity_time) {
-                      let tObs = new Date(obs.validity_time).getTime();
-                      let closest = aeroHistResult.data.reduce((prev, curr) => Math.abs(new Date(curr.observed).getTime() - tObs) < Math.abs(new Date(prev.observed).getTime() - tObs) ? curr : prev);
-                      if (closest && closest.observed && Math.abs(new Date(closest.observed).getTime() - tObs) <= 45 * 60000) {
-                          if (!estValeurManquante(closest.vv)) obs.vv = closest.vv; if (!estValeurManquante(closest.n)) obs.n = closest.n;
-                          if (!estValeurManquante(closest.ww)) obs.ww = closest.ww; if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
-                      }
-                  }
-              });
-          }
-      }
-      afficherHistorique(resultats, true);
-    } catch (erreur) { document.getElementById("contenuHistorique").innerHTML = `<p class="error">Échec historique.</p>`; }
-  }
-
-  window.chargerHistorique6mPourHeure = async function(dateCibleIso) {
-    const cleApi = document.getElementById("apikey").value.trim();
-    document.getElementById("titreHistorique").textContent = "Détail 6 min : " + new Date(dateCibleIso).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
-    document.getElementById("btnHist24h").style.display = "inline-block"; document.getElementById("btnHist24h").textContent = "⬅️ Retour 24h";
-    document.getElementById("btnHist1h").style.display = "none";
-    document.getElementById("contenuHistorique").innerHTML = "<p>Récupération du flux rapide...</p>";
-
-    const dateCible = new Date(dateCibleIso); const horodatages = [];
-    for (let i = 0; i <= 9; i++) { let t = new Date(dateCible.getTime() - (i * 6 * 60000)); horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z")); }
-
-    try {
-      const resultats = [];
-      for (let date of horodatages) {
-          let url = urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: window.actuelleStationId, date: date, format: "json" });
-          try {
-              let r = await fetch(url, { headers: { "apikey": cleApi } });
-              if (!r.ok) { r = await fetch(url.replace('/v2/', '/v1/'), { headers: { "apikey": cleApi } }); }
-              if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) { normaliserObs(o); resultats.push(o); } }
-          } catch(e) {} await new Promise(r => setTimeout(r, 60)); 
-      }
-
-      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-      let icao = getIcao(window.actuelleStationNom);
-      if (icao && cleCheckWX) {
-          let aeroHistResult = await fetchCheckWXHistory(icao, cleCheckWX, 24);
-          if (aeroHistResult && aeroHistResult.data && aeroHistResult.data.length > 0) {
-              resultats.forEach(obs => {
-                  if (obs.validity_time) {
-                      let tObs = new Date(obs.validity_time).getTime();
-                      let closest = aeroHistResult.data.reduce((prev, curr) => Math.abs(new Date(curr.observed).getTime() - tObs) < Math.abs(new Date(prev.observed).getTime() - tObs) ? curr : prev);
-                      if (closest && closest.observed && Math.abs(new Date(closest.observed).getTime() - tObs) <= 45 * 60000) {
-                          if (!estValeurManquante(closest.vv)) obs.vv = closest.vv; if (!estValeurManquante(closest.n)) obs.n = closest.n;
-                          if (!estValeurManquante(closest.ww)) obs.ww = closest.ww; if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
-                      }
-                  }
-              });
-          }
-      }
-      afficherHistorique(resultats, true);
-    } catch (erreur) { document.getElementById("contenuHistorique").innerHTML = `<p class="error">Échec.</p>`; }
-  };
-
-  function afficherHistorique(resultats, isInfrahoraire) {
-    const zone = document.getElementById("contenuHistorique"); const capteursPresents = new Set(); let estModeHoraire = false;
-
-    resultats.forEach(obs => {
-      if (!obs) return; if ('rr1' in obs) estModeHoraire = true; 
-      Object.keys(obs).forEach(key => { if (PARAM_INFO_DETAIL[key] && !estValeurManquante(obs[key])) capteursPresents.add(key); });
-    });
-
-    capteursPresents.add('t'); if (estModeHoraire) capteursPresents.add('rr1'); else capteursPresents.add('rr_per');
-    const clesExcluesHistorique = ['metar_decode', 'metar_brut', 'nuages_metar']; 
-    const clesOrdonnees = Object.keys(PARAM_INFO_DETAIL).filter(k => capteursPresents.has(k) && !clesExcluesHistorique.includes(k));
-
-    let html = `<div class="table-responsive"><table><thead><tr><th style="white-space:nowrap;">Heure</th>`;
-    clesOrdonnees.forEach(key => { html += `<th style="white-space:nowrap;">${PARAM_INFO_DETAIL[key].label}</th>`; });
-    html += `</tr></thead><tbody>`;
-
-    resultats.sort((a, b) => new Date(b.validity_time) - new Date(a.validity_time));
-    resultats.forEach((obs) => {
-      if (!obs || !obs.validity_time) return;
-      const heure = new Date(obs.validity_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-      html += `<tr>`;
-      if (estModeHoraire && !isInfrahoraire) html += `<td style="cursor:pointer; color:#0056b3; font-weight:800; text-decoration:underline; white-space:nowrap;" onclick="chargerHistorique6mPourHeure('${obs.validity_time}')">📅 ${heure}</td>`;
-      else html += `<td style="white-space:nowrap;"><strong>${heure}</strong></td>`;
-      
-      clesOrdonnees.forEach(key => {
-        const val = obs[key]; const info = PARAM_INFO_DETAIL[key];
-        if (estValeurManquante(val)) {
-             if (['rr_per', 'rr1', 'sss'].includes(key)) html += `<td style="white-space:nowrap;">0 ${info.unit}</td>`; else html += `<td style="color:#64748b; white-space:nowrap;">—</td>`;
-        } else {
-             let displayVal = info.transform ? info.transform(val) : val; html += `<td style="white-space:nowrap;">${displayVal} ${info.unit || ''}</td>`;
+    Object.keys(PARAM_INFO_DETAIL).forEach(cle => {
+        if(obs[cle] !== undefined && obs[cle] !== null && obs[cle] !== "") {
+            let info = PARAM_INFO_DETAIL[cle];
+            let affichage = info.transform ? info.transform(obs[cle]) : obs[cle];
+            html += `<tr><td><strong>${info.label}</strong></td><td>${affichage} ${info.unit}</td></tr>`;
         }
-      });
-      html += `</tr>`;
     });
-    html += "</tbody></table></div>"; zone.innerHTML = html;
+    
+    Object.keys(obs).forEach(cle => {
+        if(!PARAM_INFO_DETAIL[cle] && !['id_station', 'nom', 'lat', 'lon', 'latitude', 'longitude', 'derniere_mesure', 'created_at', 'validity_time', '_statut', 'data_json', 'id'].includes(cle) && typeof obs[cle] !== 'object') {
+            html += `<tr><td style="color:#64748b; font-size:12px;">${cle}</td><td style="color:#64748b; font-size:12px;">${obs[cle]}</td></tr>`;
+        }
+    });
+    html += `</tbody></table></div>`;
+    document.getElementById("contenuObs").innerHTML = html;
+    document.getElementById("cardDernieresObs").scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    chargerHistoriqueStation(stationId);
+  };
+
+  window.chargerHistoriqueStation = async function(stationId) {
+    document.getElementById("contenuHistorique").innerHTML = "<p style='color:#0056b3;'>Chargement de l'historique depuis Supabase...</p>";
+    document.getElementById("zoneExtremesJournee").innerHTML = "";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('historique_meteo')
+            .select('*')
+            .eq('id_station', stationId)  
+            .order('created_at', { ascending: false })
+            .limit(150); 
+
+        if (error) throw error;
+
+        let resultats = [];
+        let tn = Infinity, tx = -Infinity, ventMax = -Infinity;
+        let hTn = "", hTx = "", hVent = "";
+
+        let minuit = new Date();
+        minuit.setHours(0, 0, 0, 0);
+        let tempsMinuit = minuit.getTime();
+
+        if (data) {
+            data.forEach(row => {
+                let json = row.data_json || {};
+                if (typeof json === 'string') { try { json = JSON.parse(json); } catch(e){} }
+                let obs = { ...row, ...json };
+                if (obs.derniere_mesure) obs.validity_time = obs.derniere_mesure;
+                if (!obs.validity_time && obs.created_at) obs.validity_time = obs.created_at;
+                
+                resultats.push(obs);
+
+                if(obs.validity_time) {
+                    let obsTime = new Date(obs.validity_time).getTime();
+                    let heureStr = formatHeure(obs.validity_time).split(' ')[1];
+
+                    if (obsTime >= tempsMinuit) {
+                        let tempMax = obs.tx1 !== undefined ? obs.tx1 : obs.t;
+                        if (tempMax !== undefined && tempMax !== null && tempMax > tx) { tx = tempMax; hTx = heureStr; }
+                        
+                        let tempMin = obs.tn1 !== undefined ? obs.tn1 : obs.t;
+                        if (tempMin !== undefined && tempMin !== null && tempMin < tn) { tn = tempMin; hTn = heureStr; }
+                        
+                        let raf = obs.fxy !== undefined ? obs.fxy : obs.rafper;
+                        if (raf !== undefined && raf !== null && raf > ventMax) { ventMax = raf; hVent = heureStr; }
+                    }
+                }
+            });
+        }
+
+        let htmlExtremes = "";
+        if (tx !== -Infinity) htmlExtremes += `<div class="extreme-box"><span style="font-size:11px; font-weight:800;">Max Temp.</span><br><span style="font-size:18px; font-weight:900; color:#dc2626;">${kelvinToCelsius(tx)} °C</span><br><span style="font-size:11px;">vers ${hTx}</span></div>`;
+        if (tn !== Infinity) htmlExtremes += `<div class="extreme-box"><span style="font-size:11px; font-weight:800;">Min Temp.</span><br><span style="font-size:18px; font-weight:900; color:#2563eb;">${kelvinToCelsius(tn)} °C</span><br><span style="font-size:11px;">vers ${hTn}</span></div>`;
+        if (ventMax !== -Infinity) htmlExtremes += `<div class="extreme-box"><span style="font-size:11px; font-weight:800;">Rafale Max</span><br><span style="font-size:18px; font-weight:900; color:#7c3aed;">${msToKmh(ventMax)} km/h</span><br><span style="font-size:11px;">vers ${hVent}</span></div>`;
+        
+        if (htmlExtremes === "") htmlExtremes = "<span style='color:#64748b; font-size:13px;'>Aucune donnée depuis minuit.</span>";
+        document.getElementById("zoneExtremesJournee").innerHTML = htmlExtremes;
+
+        // CONSTRUCTION DYNAMIQUE DU TABLEAU
+        let exclusionsTableau = ['metar_brut', 'metar_decode', 'nuages_metar'];
+        let colonnesActives = [];
+        
+        Object.keys(PARAM_INFO_DETAIL).forEach(cle => {
+            if (exclusionsTableau.includes(cle)) return;
+            // Si au moins une ligne contient cette donnée, on crée la colonne
+            let aDeLaDonnee = resultats.some(obs => !estValeurManquante(obs[cle]));
+            if (aDeLaDonnee) {
+                colonnesActives.push(cle);
+            }
+        });
+
+        let htmlTable = `<div class="table-responsive"><table><thead><tr><th>Heure</th>`;
+        colonnesActives.forEach(cle => {
+            htmlTable += `<th>${PARAM_INFO_DETAIL[cle].label}</th>`;
+        });
+        htmlTable += `</tr></thead><tbody>`;
+        
+        resultats.forEach((obs) => {
+            if (!obs || !obs.validity_time) return;
+            const heure = formatHeure(obs.validity_time).split(' ')[1];
+            htmlTable += `<tr><td><strong>${heure}</strong></td>`;
+            
+            colonnesActives.forEach(cle => {
+                let val = obs[cle];
+                if (estValeurManquante(val)) {
+                    htmlTable += `<td style="color: #94a3b8;">—</td>`;
+                } else {
+                    let info = PARAM_INFO_DETAIL[cle];
+                    let affichage = info.transform ? info.transform(val) : val;
+                    htmlTable += `<td>${affichage} ${info.unit}</td>`;
+                }
+            });
+            htmlTable += `</tr>`;
+        });
+        htmlTable += "</tbody></table></div>";
+        document.getElementById("contenuHistorique").innerHTML = htmlTable;
+
+    } catch(e) {
+        document.getElementById("contenuHistorique").innerHTML = `<p class="error">Erreur historique: ${e.message}</p>`;
+    }
+  };
+
+  window.centrerSurMoi = function() {
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(pos) {
+              window.carteReseau.flyTo([pos.coords.latitude, pos.coords.longitude], 10);
+          });
+      }
+  };
+
+  // ==========================================================
+  // MODE TERRAIN & FORMULAIRES DE MAINTENANCE
+  // ==========================================================
+  window.basculerMode = function() {
+      const btn = document.getElementById("btnBasculerTerrain");
+      if(modeActuel === 'bureau') {
+          modeActuel = 'terrain';
+          document.body.className = 'bg-terrain';
+          document.getElementById("zoneSupervision").style.display = 'none';
+          document.getElementById("zoneTerrain").style.display = 'block';
+          btn.innerHTML = "Retour Supervision 💻";
+          btn.classList.add("mode-bureau");
+          peuplerSelectTerrain();
+          trouverStationGPS();
+      } else {
+          modeActuel = 'bureau';
+          mettreAJourFondEcran();
+          document.getElementById("zoneSupervision").style.display = 'block';
+          document.getElementById("zoneTerrain").style.display = 'none';
+          btn.innerHTML = "Mode Terrain 📍";
+          btn.classList.remove("mode-bureau");
+          fermerFormulaires();
+      }
+  }
+
+  function peuplerSelectTerrain() {
+      const select = document.getElementById("selectStationTerrain");
+      select.innerHTML = '<option value="">Sélectionnez une station...</option>';
+      let liste = Object.keys(window.stationsMetaCache).map(id => ({
+          id: id, nom: window.stationsMetaCache[id].nom
+      })).sort((a,b) => a.nom.localeCompare(b.nom));
+
+      liste.forEach(st => {
+          let opt = document.createElement("option"); opt.value = st.id; opt.text = `${st.nom} (${st.id})`; select.appendChild(opt);
+      });
+  }
+
+  function trouverStationGPS() {
+      const statusDiv = document.getElementById("gpsStatus");
+      statusDiv.innerHTML = "Recherche GPS en cours... 🛰️";
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+              let userLat = position.coords.latitude;
+              let userLon = position.coords.longitude;
+              let closestId = null; let minDistance = Infinity;
+
+              for(let id in window.stationsCoordCache) {
+                  let dist = calculerDistance(userLat, userLon, window.stationsCoordCache[id].lat, window.stationsCoordCache[id].lon);
+                  if(dist < minDistance) { minDistance = dist; closestId = id; }
+              }
+
+              if(closestId) {
+                  stationTerrainId = closestId;
+                  document.getElementById("selectStationTerrain").value = closestId;
+                  let stNom = window.stationsMetaCache[closestId].nom;
+                  statusDiv.innerHTML = `✅ Géolocalisé à ${minDistance.toFixed(1)} km de <b>${stNom}</b>`;
+                  activerMenuActions(closestId, stNom);
+              }
+          }, function(error) {
+              statusDiv.innerHTML = "❌ GPS introuvable. Utilisez la liste manuelle."; statusDiv.style.color = "#ef4444";
+          }, { enableHighAccuracy: true, timeout: 10000 });
+      }
+  }
+
+  function calculerDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; 
+      const dLat = (lat2-lat1) * Math.PI / 180; const dLon = (lon2-lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+  }
+
+  window.changerStationTerrain = function() {
+      stationTerrainId = document.getElementById("selectStationTerrain").value;
+      if(stationTerrainId) activerMenuActions(stationTerrainId); else fermerFormulaires();
+  }
+
+  function activerMenuActions(id) { document.getElementById("menuActionsTerrain").style.display = "block"; fermerFormulaires(); }
+
+  window.ouvrirFormulaire = function(type) {
+      fermerFormulaires();
+      if(type === 'photo') document.getElementById("formPhoto").style.display = "block";
+      if(type === 'materiel') document.getElementById("formMateriel").style.display = "block";
+      if(type === 'etalonnage') document.getElementById("formEtalonnage").style.display = "block";
+  }
+
+  window.fermerFormulaires = function() {
+      document.getElementById("formPhoto").style.display = "none";
+      document.getElementById("formMateriel").style.display = "none";
+      document.getElementById("formEtalonnage").style.display = "none";
+      document.getElementById("menuActionsTerrain").style.display = stationTerrainId ? "block" : "none";
+  }
+
+  window.adapterFormulairePluvio = function() {
+      let type = document.getElementById("pluvioType").value;
+      document.getElementById("blocAugets").style.display = type === 'Augets' ? "block" : "none";
+      document.getElementById("blocLambrecht").style.display = type === 'Lambrecht' ? "block" : "none";
+  }
+
+  window.calculerErreurAugets = function() {
+      let etalon = parseFloat(document.getElementById("etalonAugets").value);
+      let g = parseFloat(document.getElementById("mesureGauche").value) || 0;
+      let d = parseFloat(document.getElementById("mesureDroit").value) || 0;
+      let moyenne = (g + d) / 2;
+
+      if(etalon > 0 && (g > 0 || d > 0)) {
+          let err = ((moyenne - etalon) / etalon) * 100;
+          let champ = document.getElementById("erreurAugets");
+          champ.value = err.toFixed(2) + " %";
+          champ.style.color = Math.abs(err) <= 4 ? "#10b981" : "#ef4444";
+          document.getElementById("resultatEtalonnage").value = Math.abs(err) <= 4 ? "true" : "false";
+      }
+  }
+
+  window.calculerEcartLambrecht = function() {
+      let etalon = parseFloat(document.getElementById("etalonLambrecht").value);
+      let m = parseFloat(document.getElementById("mesurePoids").value) || 0;
+      if(etalon > 0 && m > 0) {
+          let ecart = m - etalon;
+          let champ = document.getElementById("ecartLambrecht");
+          champ.value = ecart > 0 ? "+" + ecart.toFixed(1) + " g" : ecart.toFixed(1) + " g";
+          champ.style.color = Math.abs(ecart) <= 2 ? "#10b981" : "#ef4444";
+          document.getElementById("resultatEtalonnage").value = Math.abs(ecart) <= 2 ? "true" : "false";
+      }
+  }
+
+  window.enregistrerEtalonnage = async function() {
+      let type = document.getElementById("pluvioType").value;
+      let payload = { station_id: stationTerrainId, type_pluvio: type, est_conforme: document.getElementById("resultatEtalonnage").value === "true" };
+      if(type === 'Augets') {
+          payload.auget_gauche = parseFloat(document.getElementById("mesureGauche").value);
+          payload.auget_droit = parseFloat(document.getElementById("mesureDroit").value);
+          payload.erreur_pct = parseFloat(document.getElementById("erreurAugets").value);
+      } else {
+          payload.poids_mesure = parseFloat(document.getElementById("mesurePoids").value);
+          payload.ecart = parseFloat(document.getElementById("ecartLambrecht").value);
+      }
+      const { error } = await supabaseClient.from('etalonnages').insert([payload]);
+      if(error) alert("Erreur : " + error.message); else { alert("✅ Étalonnage sauvegardé !"); fermerFormulaires(); }
+  }
+
+  window.enregistrerMateriel = async function() {
+      let payload = { station_id: stationTerrainId, type_capteur: document.getElementById("matType").value, numero_serie: document.getElementById("matNouveauSn").value };
+      const { error } = await supabaseClient.from('materiel').insert([payload]);
+      if(error) alert("Erreur : " + error.message); else { alert("✅ Matériel sauvegardé !"); fermerFormulaires(); }
+  }
+
+  window.envoyerPhoto = async function() {
+      const fileInput = document.getElementById('photoInput');
+      if(!fileInput.files.length) return alert("Prenez une photo.");
+      let payload = { station_id: stationTerrainId, tag: document.getElementById("photoTag").value, commentaire: document.getElementById("photoComment").value, url_drive: "En attente Drive" };
+      const { error } = await supabaseClient.from('photos').insert([payload]);
+      if(error) alert("Erreur : " + error.message); else { alert("✅ Photo enregistrée !"); fermerFormulaires(); }
   }
 </script>
-
 </body>
 </html>
