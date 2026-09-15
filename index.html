@@ -1499,6 +1499,38 @@
       if(error) alert("Erreur : " + error.message); else { alert("✅ Observation enregistrée !"); document.getElementById("obsTexte").value = ""; fermerFormulaires(); }
   };
 
+  // NOUVELLE FONCTION : SUPPRESSION D'UNE INTERVENTION (AVEC FICHIER SI PHOTO)
+  window.supprimerIntervention = async function(tableNom, idRow, urlImage) {
+      if(!confirm("⚠️ Êtes-vous sûr de vouloir supprimer définitivement cet élément ?")) return;
+
+      try {
+          // 1. Si c'est une photo, on essaie d'abord d'effacer le fichier du Storage
+          if (tableNom === 'photos' && urlImage) {
+              try {
+                  // Extraction du nom de fichier exact à partir de l'URL publique
+                  const nomFichier = urlImage.split('/public/photos_maintenance/')[1];
+                  if (nomFichier) {
+                      await supabaseClient.storage.from('photos_maintenance').remove([nomFichier]);
+                  }
+              } catch (e) {
+                  console.error("Échec de la suppression de l'image (fantôme ?) :", e);
+              }
+          }
+
+          // 2. On supprime la ligne dans la base de données
+          const { error } = await supabaseClient.from(tableNom).delete().eq('id', idRow);
+          if(error) throw error;
+
+          alert("🗑️ Suppression réussie !");
+          
+          // 3. On rafraîchit la liste de l'historique
+          window.chargerHistoriqueMaintenance();
+          
+      } catch (error) {
+          alert("Erreur lors de la suppression : " + error.message);
+      }
+  };
+
   window.chargerHistoriqueMaintenance = async function() {
       ouvrirFormulaire('consult');
       document.getElementById("contenuConsultMaintenance").innerHTML = "<p style='color:#10b981;'>Recherche dans les archives de la station...</p>";
@@ -1510,25 +1542,45 @@
               supabaseClient.from('etalonnages').select('*').eq('station_id', window.stationTerrainId)
           ]);
           let tousLesEvenements = [];
-          if(obsReq.data) obsReq.data.forEach(d => tousLesEvenements.push({date: d.created_at, type: "📝 Observation", detail: d.texte, badge: "#8b5cf6"}));
-          if(photosReq.data) photosReq.data.forEach(d => tousLesEvenements.push({date: d.created_at, type: "📸 Photo ("+d.tag+")", detail: d.commentaire || "Image ajoutée", lien: d.url_drive, badge: "#10b981"}));
-          if(matReq.data) matReq.data.forEach(d => tousLesEvenements.push({date: d.created_at, type: "🔧 Remplacement", detail: `Nouveau ${d.type_capteur} (S/N: ${d.numero_serie})`, badge: "#f59e0b"}));
+          
+          const getValidDateStr = (d1, d2, d3) => d1 || d2 || d3 || null;
+
+          if(obsReq.data) obsReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "observations", date: getValidDateStr(d.created_at, d.date_intervention, d.date_photo), type: "📝 Observation", detail: d.texte, badge: "#8b5cf6"}));
+          if(photosReq.data) photosReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "photos", date: getValidDateStr(d.date_photo, d.created_at), type: "📸 Photo ("+d.tag+")", detail: d.commentaire || "Image ajoutée", lien: d.url_drive, badge: "#10b981"}));
+          if(matReq.data) matReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "materiel", date: getValidDateStr(d.date_installation, d.created_at), type: "🔧 Remplacement", detail: `Nouveau ${d.type_capteur} (S/N: ${d.numero_serie})`, badge: "#f59e0b"}));
           if(etalReq.data) etalReq.data.forEach(d => {
               let resStr = d.est_conforme ? "✅ CONFORME" : "❌ HORS TOLÉRANCE";
               let det = `Pluvio ${d.type_pluvio} - ${resStr}. `;
               if(d.type_pluvio === 'Augets') det += `G: ${d.auget_gauche||0}mm | D: ${d.auget_droit||0}mm (Erreur: ${d.erreur_pct}%)`; 
               else det += `Ecart: ${d.ecart}g`;
-              tousLesEvenements.push({date: d.created_at, type: "📊 Étalonnage", detail: det, badge: "#3b82f6"});
+              tousLesEvenements.push({db_id: d.id, table_nom: "etalonnages", date: getValidDateStr(d.date_intervention, d.created_at), type: "📊 Étalonnage", detail: det, badge: "#3b82f6"});
           });
-          tousLesEvenements.sort((a, b) => new Date(b.date) - new Date(a.date));
+          
+          tousLesEvenements.sort((a, b) => {
+              let timeA = a.date ? new Date(a.date).getTime() : 0;
+              let timeB = b.date ? new Date(b.date).getTime() : 0;
+              if (isNaN(timeA)) timeA = 0; if (isNaN(timeB)) timeB = 0;
+              return timeB - timeA;
+          });
+
           if(tousLesEvenements.length === 0) { document.getElementById("contenuConsultMaintenance").innerHTML = "<p>Aucune intervention passée pour cette station.</p>"; return; }
+          
           let html = `<ul style="list-style:none; padding:0; margin:0;">`;
           tousLesEvenements.forEach(ev => {
-              let dateStr = new Date(ev.date).toLocaleString('fr-FR');
-              html += `<li style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 10px; margin-bottom: 10px; border-radius: 8px;">`;
+              let time = ev.date ? new Date(ev.date).getTime() : NaN;
+              let dateStr = (isNaN(time) || time === 0) ? "Date inconnue" : new Date(time).toLocaleString('fr-FR');
+              
+              // On échappe l'URL de l'image pour éviter les bugs javascript dans le onclick
+              let urlDriveClean = ev.lien ? ev.lien.replace(/'/g, "\\'") : '';
+
+              html += `<li style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 10px; margin-bottom: 10px; border-radius: 8px; position: relative;">`;
+              
+              // Bouton Poubelle en haut à droite
+              html += `<button onclick="supprimerIntervention('${ev.table_nom}', '${ev.db_id}', '${urlDriveClean}')" style="position:absolute; top:8px; right:8px; background:none; border:none; cursor:pointer; font-size:16px; opacity:0.7; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)';" onmouseout="this.style.opacity='0.7'; this.style.transform='scale(1)'; " title="Supprimer">🗑️</button>`;
+
               html += `<div style="font-size: 11px; color:#94a3b8; margin-bottom: 4px;">📅 ${dateStr}</div>`;
               html += `<div><span style="background:${ev.badge}; color:white; padding: 2px 6px; border-radius: 4px; font-size:11px; font-weight:bold; margin-right: 8px;">${ev.type}</span></div>`;
-              html += `<div style="margin-top: 6px; font-size: 14px;">${ev.detail}</div>`;
+              html += `<div style="margin-top: 6px; font-size: 14px; padding-right: 25px;">${ev.detail}</div>`; // padding-right pour ne pas chevaucher la corbeille
               if(ev.lien && ev.lien.startsWith("http")) html += `<div style="margin-top: 8px;"><a href="${ev.lien}" target="_blank" style="color: #3b82f6; text-decoration: underline; font-size:12px;">🔗 Voir l'image jointe</a></div>`;
               html += `</li>`;
           });
@@ -1585,7 +1637,17 @@
   };
 
   window.enregistrerMateriel = async function() {
-      let payload = { station_id: window.stationTerrainId, type_capteur: document.getElementById("matType").value, numero_serie: document.getElementById("matNouveauSn").value };
+      // On génère la date du jour au format YYYY-MM-DD
+      const dateAujourdhui = new Date().toISOString().split('T')[0];
+
+      let payload = { 
+          station_id: window.stationTerrainId, 
+          type_capteur: document.getElementById("matType").value, 
+          numero_serie: document.getElementById("matNouveauSn").value,
+          date_installation: dateAujourdhui,
+          statut: 'En service'
+      };
+      
       const { error } = await supabaseClient.from('materiel').insert([payload]);
       if(error) alert("Erreur : " + error.message); else { alert("✅ Matériel sauvegardé !"); fermerFormulaires(); }
   };
@@ -1628,7 +1690,6 @@
       btn.disabled = true;
 
       try {
-          // Compression locale de l'image (1200px max, 70% qualité)
           let blobCompress = await compresserImage(file, 1200, 1200, 0.7);
           let fileName = `station_${window.stationTerrainId}_${Date.now()}.jpg`;
 
