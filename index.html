@@ -17,7 +17,6 @@
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <!-- Ajout de Supabase pour le Mode Terrain -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Nunito:wght@800&display=swap" rel="stylesheet">
 
@@ -56,7 +55,7 @@
 
     .btn-toggle-app { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;}
     .btn-toggle-app:active { transform: scale(0.95); }
-    .btn-toggle-app.mode-bureau { background: #3b82f6; }
+    .btn-toggle-app.mode-supervision { background: #3b82f6; }
 
     .container { max-width: 1050px; margin: 0 auto; }
     
@@ -141,7 +140,7 @@
     .map-live-label::before { display: none; }
     .radar-time-control { background: rgba(255,255,255,0.85); padding: 6px 10px; border-radius: 6px; font-weight: 800; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); pointer-events: none; transition: opacity 0.3s; margin: 10px; color: #0f172a; border: 1px solid rgba(0,0,0,0.1); }
 
-    /* AJUSTEMENTS TÉLÉPHONE (COMPACITÉ MAXIMALE) */
+    /* AJUSTEMENTS TÉLÉPHONE */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .header-container { margin-bottom: 10px; gap: 8px; }
@@ -167,7 +166,6 @@
 
 <div class="header-container">
   <div class="header-left">
-    <!-- Intégration du logo local personnalisé -->
     <div class="header-logo"><img src="icon.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;"></div>
     <div class="header-text">
       <h1>Diag SA <span style="color: #69b3e7;">NEXT</span></h1>
@@ -181,7 +179,6 @@
   <div class="card" id="configCard">
     <div id="zoneSaisieApi" class="form-group">
       <label for="apikey">API Key (Météo-France) :</label>
-      <!-- Clé API encodée -->
       <input type="text" id="apikey" value="eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyZW1pcGFyYW1vdGV1ckBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6InJlbWlwYXJhbW90ZXVyIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJpZCI6Mjc1MzMsInV1aWQiOiJhMjM1OTBhZi0wY2IyLTRlYjAtOWU2MC1kZjdkNWQ2MGM4NWYifSwiaXNzIjoiaHR0cHM6XC9cL3BvcnRhaWwtYXBpLm1ldGVvZnJhbmNlLmZyOjQ0M1wvb2F1dGgyXC90b2tlbiIsInRpZXJJbmZvIjp7IjUwUGVyTWluIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOiJzZWMifSwiMTAwUmVxUGVyTWluIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOiJzZWMifSwiODUwcmVxUGVyNU1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IlByZXZpc2lvbkltbWVkaWF0ZVByZWNpcGl0YXRpb25zIiwiY29udGV4dCI6IlwvcHJvXC9waWFmXC8xLjAiLCJwdWJsaXNoZXIiOiJhZG1pbl9tZiIsInZlcnNpb24iOiIxLjAiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc09ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUE9ic1wvdjIiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MiIsInN1YnNjcmlwdGlvblRpZXIiOiIxMDBSZXFQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc1BhcXVldFJhZGFyIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFBhcXVldFJhZGFyXC92MSIsInB1Ymxpc2hlciI6ImxvaWMubWFydGluIiwidmVyc2lvbiI6InYxIiwic3Vic2NyaXB0aW9uVGllciI6IjUwUGVyTWluIn0seyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkRvbm5lZXNQdWJsaXF1ZXNQYXF1ZXRPYnNlcnZhdGlvbiIsImNvbnRleHQiOiJcL3B1YmxpY1wvRFBQYXF1ZXRPYnNcL3YxIiwicHVibGlzaGVyIjoiYmFzdGllbmciLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc09ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUE9ic1wvdjEiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MSIsInN1YnNjcmlwdGlvblRpZXIiOiI1MFBlck1pbiJ9LHsic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzUmFkYXIiLCJjb250ZXh0IjoiXC9wdWJsaWNcL0RQUmFkYXJcL3YxIiwicHVibGlzaGVyIjoiTUVURU8uRlJcL21hcnRpbmwiLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiODUwcmVxUGVyNU1pbiJ9LHsic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzQ2xpbWF0b2xvZ2llIiwiY29udGV4dCI6IlwvcHVibGljXC9EUENsaW1cL3YxIiwicHVibGlzaGVyIjoiYWRtaW5fbWYiLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc1BhcXVldE9ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFBhcXVldE9ic1wvdjIiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MiIsInN1YnNjcmlwdGlvblRpZXIiOiIxMDBSZXFQZXJNaW4ifV0sImV4cCI6MTg4Mzg5NDg5NCwidG9rZW5fdHlwZSI6ImFwaUtleSIsImlhdCI6MTc4OTIyMjA5NCwianRpIjoiZTU3MTIxODktNjdkNy00MmFjLTk2Y2EtMjdkMzM0Y2E2NDUwIn0=.e-5BUJpz1ScNftZUpJZAs6UBPtnRgSG2QlKHSiWtnLa9pCR3gZZ5lZJ9SaA9307vyfJplWIqPPXXqVXbPZeezrWghRwVMAReJrF9C71ILPib19fSqG6eG7em9XYN9QYhC8ey8G6ssNs7MovbJMmbXwiAFpj0TNUxsrqoXeKj4vRpNmvm07H3jY-JLBHZjTmuJK9J44__OD3JBcJ_8f4iVsFBV-UkHVrPwobK5OaQb3NU8rHarDBannnTqo1eozMqUfZKnOzIbc6MAk4ohP8daoJe68pyK86JWuCWQOANxWrNR48gbv1VPlHw06alwvJ_4wadgWh61RX3HTan8O9rhw==" placeholder="Collez ici votre clé API Météo-France...">
       <div class="hint">Abonnements requis : « Données Climatologiques » (DPClim) et « Observations » (DPObs).</div>
     </div>
@@ -252,7 +249,6 @@
         <h2 id="titreDetails" style="margin: 0; flex: 1;">Détails Station</h2>
         <div id="actionButtonsStation" style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; flex-wrap: wrap;"></div>
       </div>
-
       <div id="contenuObs"></div>
     </div>
 
@@ -340,7 +336,7 @@
             <div class="form-group"><label>Erreur :</label><input type="text" id="erreurAugets" readonly></div>
         </div>
         
-        <div id="blocLambrecht" style="display:none;"><div class="form-group"><label>Étalon (g) :</label><input type="number" id="etalonLambrecht" value="500" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Mesuré (g) :</label><input type="number" id="mesurePoids" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Écart :</label><input type="text" id="ecartLambrecht" readonly></div></div>
+        <div id="blocLambrecht" style="display:none;"><div class="form-group"><label>Étalon (g) :</label><input type="number" id="etalonLambrecht" value="3.49" step="0.01" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Mesuré (g) :</label><input type="number" id="mesurePoids" step="0.01" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Écart :</label><input type="text" id="ecartLambrecht" readonly></div></div>
         
         <div class="form-group"><label>Résultat :</label><select id="resultatEtalonnage" style="font-weight:bold;"><option value="true">✅ CONFORME</option><option value="false">❌ HORS TOLÉRANCE</option></select></div>
         <button class="btn-primary" style="background:#3b82f6;" onclick="enregistrerEtalonnage()">Enregistrer</button>
@@ -350,13 +346,9 @@
 </div>
 
 <script>
-  // ==========================================================
-  // INITIALISATION SUPABASE (AJOUT RÉALISÉ ICI)
-  // ==========================================================
   const supabaseUrl = 'https://vgngxxkafrxcwoeeaqrm.supabase.co';
   const supabaseKey = 'sb_publishable_hpuexaDRRVat25cx-Qj9yw_4UGesxCt';
   const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-  // ==========================================================
 
   const PARAM_INFO_DETAIL = {
     metar_decode:    { label: "METAR Décodé",    unit: "", group: "Aéronautique & Ciel" },
@@ -402,16 +394,9 @@
   ];
 
   const WORKER_URL = "https://proxymeteofrance.remiparamoteur.workers.dev";
+  const STATIONS_CIBLES = [ "89003001", "89014001", "21567001", "52023002", "71014004", "89295001", "89053001", "58019001", "71022003", "58023001", "21056001", "21065001", "71056003", "52074002", "21116002", "89068001", "71081001", "89086001", "71106001", "58061001", "58062001", "21154001", "58079004", "52145001", "89131001", "89133001", "21231001", "21473001", "58106005", "71190001", "52197003", "89173001", "89192001", "21310001", "71230002", "58132001", "52248002", "71240001", "89206001", "21326001", "21527001", "52269001", "58145002", "71267001", "58149001", "71105001", "21386001", "21395001", "71289001", "89260001", "21425001", "58177001", "71320001", "52348003", "21454001", "89279002", "58199001", "21131001", "71340002", "21501003", "21503001", "58218006", "21519001", "89365001", "52450002", "21579001", "21584001", "89380001", "21603001", "71523001", "89333001", "89273001", "21564001", "71491001", "52447001", "89349005", "21561003", "71464001", "71482001", "21633002", "21638002", "89418007", "71541001", "52332001", "71558001", "58304005", "52528001", "71589001" ];
 
-  // === WHITELIST STRICTE MIR 21 ===
-  const STATIONS_CIBLES = [
-      "89003001", "89014001", "21567001", "52023002", "71014004", "89295001", "89053001", "58019001", "71022003", "58023001", "21056001", "21065001", "71056003", "52074002", "21116002", "89068001", "71081001", "89086001", "71106001", "58061001", "58062001", "21154001", "58079004", "52145001", "89131001", "89133001", "21231001", "21473001", "58106005", "71190001", "52197003", "89173001", "89192001", "21310001", "71230002", "58132001", "52248002", "71240001", "89206001", "21326001", "21527001", "52269001", "58145002", "71267001", "58149001", "71105001", "21386001", "21395001", "71289001", "89260001", "21425001", "58177001", "71320001", "52348003", "21454001", "89279002", "58199001", "21131001", "71340002", "21501003", "21503001", "58218006", "21519001", "89365001", "52450002", "21579001", "21584001", "89380001", "21603001", "71523001", "89333001", "89273001", "21564001", "71491001", "52447001", "89349005", "21561003", "71464001", "71482001", "21633002", "21638002", "89418007", "71541001", "52332001", "71558001", "58304005", "52528001", "71589001"
-  ];
-
-  function estCible(id) {
-      if (!id) return false;
-      return STATIONS_CIBLES.includes(String(id).trim());
-  }
+  function estCible(id) { if (!id) return false; return STATIONS_CIBLES.includes(String(id).trim()); }
 
   // ==== FONCTIONS RADAR ====
   window.radarLayers = []; window.radarTimestamps = []; window.radarIndex = 0; window.radarInterval = null; window.radarActif = true; window.radarTimeControl = null;
@@ -450,71 +435,39 @@
       window.radarActif = show; let displayDiv = document.getElementById('radar-time-display'); if (displayDiv) displayDiv.style.opacity = show ? '1' : '0';
       if (!show) window.radarLayers.forEach(layer => layer.setOpacity(0));
   }
-  // =========================
 
   function createStationIcon(statut, lettre, overrideBgColor = null) {
     let bgColor = '#64748b'; let borderColor = '#41464b'; 
     if (statut === 'ok') { bgColor = '#10b981'; borderColor = '#059669'; }
     else if (statut === 'warn') { bgColor = '#f59e0b'; borderColor = '#d97706'; }
     else if (statut === 'fault') { bgColor = '#ef4444'; borderColor = '#b91c1c'; }
-
-    if (overrideBgColor) {
-        bgColor = overrideBgColor;
-        borderColor = '#1e293b'; 
-    }
-
+    if (overrideBgColor) { bgColor = overrideBgColor; borderColor = '#1e293b'; }
     let html = `<div style="background-color: ${bgColor}; border: 2px solid ${borderColor}; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,0.4); text-shadow: 0px 1px 2px rgba(0,0,0,0.8);">${lettre}</div>`;
-
-    return L.divIcon({
-      html: html,
-      className: '', 
-      iconSize: [26, 26],
-      iconAnchor: [13, 13],
-      popupAnchor: [0, -13]
-    });
+    return L.divIcon({ html: html, className: '', iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -13] });
   }
 
   function getTempColor(tempC) {
-      if (tempC <= 0) return '#1e3a8a';  
-      if (tempC <= 5) return '#3b82f6';  
-      if (tempC <= 10) return '#0ea5e9'; 
-      if (tempC <= 15) return '#10b981'; 
-      if (tempC <= 20) return '#eab308'; 
-      if (tempC <= 25) return '#f97316'; 
-      if (tempC <= 30) return '#ef4444'; 
-      if (tempC <= 35) return '#b91c1c'; 
-      return '#7f1d1d';                  
+      if (tempC <= 0) return '#1e3a8a';  if (tempC <= 5) return '#3b82f6';  if (tempC <= 10) return '#0ea5e9'; 
+      if (tempC <= 15) return '#10b981'; if (tempC <= 20) return '#eab308'; if (tempC <= 25) return '#f97316'; 
+      if (tempC <= 30) return '#ef4444'; if (tempC <= 35) return '#b91c1c'; return '#7f1d1d';                  
   }
-
   function getVentColor(vitesseKmh) {
-      if (vitesseKmh < 15) return '#bfdbfe'; 
-      if (vitesseKmh < 30) return '#60a5fa'; 
-      if (vitesseKmh < 50) return '#3b82f6'; 
-      if (vitesseKmh < 70) return '#1d4ed8'; 
-      if (vitesseKmh < 90) return '#1e3a8a'; 
-      return '#020617';                      
+      if (vitesseKmh < 15) return '#bfdbfe'; if (vitesseKmh < 30) return '#60a5fa'; if (vitesseKmh < 50) return '#3b82f6'; 
+      if (vitesseKmh < 70) return '#1d4ed8'; if (vitesseKmh < 90) return '#1e3a8a'; return '#020617';                      
   }
-
   function getHumiditeColor(u) {
       if (u < 30) return '#b45309'; if (u < 50) return '#f59e0b'; if (u < 70) return '#fcd34d'; 
-      if (u < 90) return '#38bdf8'; if (u < 100) return '#1e3a8a'; return '#000000';             
+      if (u < 90) return '#38bdf8'; if (u < 100) return '#1e3a8a'; return '#000000';              
   }
 
-  window.stationsCache = {};
-  window.stationsCoordCache = {};
-  window.stationsMetaCache = {};
-  window.marqueursLeaflet = {}; 
+  window.stationsCache = {}; window.stationsCoordCache = {}; window.stationsMetaCache = {}; window.marqueursLeaflet = {}; 
   window.stationsBaselines = JSON.parse(localStorage.getItem('meteo_baselines') || '{}');
-  window.extremesJourCache = {}; 
-  window.modeAffichageCarte = 'none';
+  window.extremesJourCache = {}; window.modeAffichageCarte = 'none';
 
-  let nOk = 0, nWarn = 0, nFault = 0;
-  let coucheMarqueurs = null;
-  const SEUIL_INACTIVITE_MIN = 30; 
+  let nOk = 0, nWarn = 0, nFault = 0; let coucheMarqueurs = null; const SEUIL_INACTIVITE_MIN = 30; 
 
   function urlProxy(path, params) {
-    const u = new URL(WORKER_URL);
-    u.searchParams.set("path", path);
+    const u = new URL(WORKER_URL); u.searchParams.set("path", path);
     Object.entries(params || {}).forEach(([k, v]) => u.searchParams.set(k, v));
     return u.toString();
   }
@@ -525,92 +478,66 @@
   function estValeurManquante(v) { return v === null || v === undefined || v === "" || (typeof v === 'number' && Number.isNaN(v)) || String(v).trim().toUpperCase() === "NA" || String(v).trim().toUpperCase() === "NAN"; }
 
   function formatHeure(iso) {
-    try {
-      const d = new Date(iso);
-      return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + " (heure locale)";
-    } catch { return iso; }
+    try { const d = new Date(iso); return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + " (heure locale)"; } catch { return iso; }
   }
 
   const extractVal = (obj, keys) => {
     if (!obj) return undefined;
-    for (let k of keys) {
-      if (obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
-    }
-    return undefined;
-  };
+    for (let k of keys) { if (obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k]; } return undefined;
+  }
 
   function normaliserObs(obs) {
     if (!obs) return;
     if (estValeurManquante(obs.vv)) obs.vv = extractVal(obs, ['v', 'visibilite']);
     if (estValeurManquante(obs.n)) obs.n = extractVal(obs, ['nn', 'nt', 'neb']);
     if (estValeurManquante(obs.ww)) obs.ww = extractVal(obs, ['w', 'temps_present']);
-    
     let hbas_val = extractVal(obs, ['hbas', 'h_bas', 'hc1', 'h_nuage1', 'hnuage1', 'h1', 'hauteur_nuage1', 'hbas1']);
     if (!estValeurManquante(hbas_val)) obs.hbas = hbas_val;
-
     let raf10 = extractVal(obs, ['raf10', 'fxi10', 'fxi', 'raf', 'rafper', 'fxy']);
     if (!estValeurManquante(raf10)) obs.raf10 = raf10;
-    
     let ddraf10 = extractVal(obs, ['ddraf10', 'dxi10', 'dxi', 'ddraf', 'dir_raf', 'dxy']);
     if (!estValeurManquante(ddraf10)) obs.ddraf10 = ddraf10;
-    
     if (!obs.validity_time) obs.validity_time = extractVal(obs, ['dh_utc', 'date', 'reference_time', 'insert_time']);
   }
 
   function mettreAJourFondEcran() {
     document.body.className = ''; 
-    if (window.modeActuel === 'terrain') {
-        document.body.classList.add('bg-terrain');
-        return;
-    }
+    if (window.modeActuel === 'terrain') { document.body.classList.add('bg-terrain'); return; }
     if (nFault > 0) document.body.classList.add('bg-stormy');
     else if (nWarn > 0) document.body.classList.add('bg-warning');
     else document.body.classList.add('bg-sunny');
   }
 
   function arrondir6min(timestampMs) {
-    const d = new Date(timestampMs);
-    const m = d.getUTCMinutes();
-    d.setUTCMinutes(m - (m % 6), 0, 0);
-    return d;
+    const d = new Date(timestampMs); const m = d.getUTCMinutes();
+    d.setUTCMinutes(m - (m % 6), 0, 0); return d;
   }
 
   function dateValideEtRecente(valeur) {
-    if (!valeur) return false;
-    const t = new Date(valeur).getTime();
-    if (isNaN(t)) return false;
+    if (!valeur) return false; const t = new Date(valeur).getTime(); if (isNaN(t)) return false;
     return (Date.now() - t) < (30 * 24 * 60 * 60 * 1000); 
   }
 
   async function fetchLatestObsExact(queryId, cleApi) {
-      const dates = [];
-      let d = new Date(); 
-      d.setUTCMinutes(d.getUTCMinutes() - (d.getUTCMinutes()%6), 0, 0);
-      for (let i = 0; i < 4; i++) {
-          dates.push(new Date(d.getTime() - (i * 6 * 60000)).toISOString().replace(/\.\d{3}Z$/, "Z"));
-      }
-      
+      const dates = []; let d = new Date(); d.setUTCMinutes(d.getUTCMinutes() - (d.getUTCMinutes()%6), 0, 0);
+      for (let i = 0; i < 4; i++) { dates.push(new Date(d.getTime() - (i * 6 * 60000)).toISOString().replace(/\.\d{3}Z$/, "Z")); }
       for (let date of dates) {
           try {
               let res = await fetch(urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: queryId, date: date, format: "json" }), { headers: { "apikey": cleApi } });
               if (res.ok) {
-                  let data = await res.json();
-                  let obs = Array.isArray(data) ? data[0] : data;
+                  let data = await res.json(); let obs = Array.isArray(data) ? data[0] : data;
                   if (obs && obs.validity_time) return obs;
               }
           } catch(e) {}
       }
-      
       try {
           let res = await fetch(urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: queryId, format: "json" }), { headers: { "apikey": cleApi } });
           if (res.ok) {
-              let data = await res.json();
-              let dataArray = Array.isArray(data) ? data : [data];
+              let data = await res.json(); let dataArray = Array.isArray(data) ? data : [data];
               dataArray.sort((a, b) => new Date(b.validity_time) - new Date(a.validity_time));
               if (dataArray[0] && dataArray[0].validity_time) return dataArray[0];
           }
       } catch(e) {}
-      
       return null;
   }
 
@@ -626,101 +553,60 @@
             });
         } catch(e){}
     }
-
     const cleSaisie = document.getElementById("apikey").value.trim();
     const cleSauvegardee = localStorage.getItem("monApiKeyMeteo");
     const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-    
     if (cleCheckWX) document.getElementById("apikeyCheckWX").value = cleCheckWX;
-
     if (cleSaisie && cleSaisie !== "") {
       localStorage.setItem("monApiKeyMeteo", cleSaisie);
-      document.getElementById("configCard").style.display = "none";
-      scannerRegion(false);
+      document.getElementById("configCard").style.display = "none"; scannerRegion(false);
     } else if (cleSauvegardee) {
       document.getElementById("apikey").value = cleSauvegardee;
-      document.getElementById("configCard").style.display = "none";
-      scannerRegion(false);
+      document.getElementById("configCard").style.display = "none"; scannerRegion(false);
     }
   });
 
   window.modifierApi = function() {
     localStorage.removeItem("monApiKeyMeteo");
-    document.getElementById("apikey").value = "";
-    document.getElementById("configCard").style.display = "block";
-    document.getElementById("zoneReseau").style.display = "none";
-    document.getElementById("zoneDetailContainer").style.display = "none";
+    document.getElementById("apikey").value = ""; document.getElementById("configCard").style.display = "block";
+    document.getElementById("zoneReseau").style.display = "none"; document.getElementById("zoneDetailContainer").style.display = "none";
   };
 
-  const ICAO_MAPPING = {
-      "LONGVIC": "LFSD", "OUGES": "LFSD", "AUXERRE": "LFLA", "CHALON": "LFLH",
-      "MACON": "LFLM", "ST YAN": "LFLN", "SAINT YAN": "LFLN", "TROYES": "LFQB",
-      "LANGRES": "LFSH", "BESANCON": "LFSA"
-  };
-
+  const ICAO_MAPPING = { "LONGVIC": "LFSD", "OUGES": "LFSD", "AUXERRE": "LFLA", "CHALON": "LFLH", "MACON": "LFLM", "ST YAN": "LFLN", "SAINT YAN": "LFLN", "TROYES": "LFQB", "LANGRES": "LFSH", "BESANCON": "LFSA" };
   function getIcao(nom) {
-      if(!nom) return null;
-      const n = nom.toUpperCase();
-      for (let key in ICAO_MAPPING) {
-          if (n.includes(key)) return ICAO_MAPPING[key];
-      }
-      return null;
+      if(!nom) return null; const n = nom.toUpperCase();
+      for (let key in ICAO_MAPPING) { if (n.includes(key)) return ICAO_MAPPING[key]; } return null;
   }
 
   function extractCheckWXData(m) {
       if (!m || typeof m === "string" || !m.icao) return null;
-
       let vv_api = m.visibility?.meters_float !== undefined ? m.visibility.meters_float : null;
       if (vv_api === null && m.visibility?.meters) vv_api = parseInt(String(m.visibility.meters).replace(/\D/g,''));
-
-      let hbas = null, n = null, ww = null;
-      let flight_category = m.flight_category || 'Inconnu';
-      let raw = m.raw_text || '';
-      
+      let hbas = null, n = null, ww = null; let flight_category = m.flight_category || 'Inconnu'; let raw = m.raw_text || '';
       let cloudsStr = [];
 
       if (m.clouds && m.clouds.length > 0) {
           const c = m.clouds[0];
           if (['CAVOK', 'CLR', 'SKC', 'NCD'].includes(c.code)) {
-              n = 0;
-              cloudsStr.push(c.code === 'CAVOK' ? "CAVOK" : "Clair");
+              n = 0; cloudsStr.push(c.code === 'CAVOK' ? "CAVOK" : "Clair");
           } else {
-              let maxN = 0;
-              let lowestCeiling = null;
+              let maxN = 0; let lowestCeiling = null;
               m.clouds.forEach(layer => {
                   let baseM = null;
-                  if (layer.base_meters_agl !== undefined) {
-                      baseM = Math.round(layer.base_meters_agl);
-                  } else if (layer.base_feet_agl !== undefined) {
-                      baseM = Math.round(layer.base_feet_agl * 0.3048);
-                  } else if (layer.base_feet !== undefined) {
-                      baseM = Math.round(layer.base_feet * 0.3048);
-                  }
-                  
+                  if (layer.base_meters_agl !== undefined) { baseM = Math.round(layer.base_meters_agl); }
+                  else if (layer.base_feet_agl !== undefined) { baseM = Math.round(layer.base_feet_agl * 0.3048); }
+                  else if (layer.base_feet !== undefined) { baseM = Math.round(layer.base_feet * 0.3048); }
                   if (layer.code === 'FEW') maxN = Math.max(maxN, 2);
                   if (layer.code === 'SCT') maxN = Math.max(maxN, 4);
-                  if (layer.code === 'BKN') { 
-                      maxN = Math.max(maxN, 6); 
-                      if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; 
-                  }
-                  if (layer.code === 'OVC') { 
-                      maxN = Math.max(maxN, 8); 
-                      if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; 
-                  }
-                  if (layer.code === 'VV') { 
-                      maxN = 9;
-                      if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM;
-                  }
-                  
+                  if (layer.code === 'BKN') { maxN = Math.max(maxN, 6); if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
+                  if (layer.code === 'OVC') { maxN = Math.max(maxN, 8); if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
+                  if (layer.code === 'VV') { maxN = 9; if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
                   let baseTxt = baseM !== null ? `${baseM}m` : (layer.base_feet_agl ? `${layer.base_feet_agl}ft` : '?');
                   cloudsStr.push(`${layer.code} à ${baseTxt}`);
               });
-              n = maxN;
-              hbas = lowestCeiling !== null ? lowestCeiling : null;
+              n = maxN; hbas = lowestCeiling !== null ? lowestCeiling : null;
           }
-      } else if (vv_api >= 10000 && !raw.includes("OVC") && !raw.includes("BKN")) { 
-          n = 0; 
-      }
+      } else if (vv_api >= 10000 && !raw.includes("OVC") && !raw.includes("BKN")) { n = 0; }
 
       let conditionsStr = [];
       if (m.conditions && m.conditions.length > 0) {
@@ -731,19 +617,12 @@
       let vent_spd = m.wind?.speed_kph ? Math.round(m.wind.speed_kph) : (m.wind?.speed_kts ? Math.round(m.wind.speed_kts * 1.852) : null);
       let vent_dir = m.wind?.degrees !== undefined ? m.wind.degrees : null;
       let vent_str = (vent_spd !== null && vent_dir !== null) ? `${vent_dir}° à ${vent_spd}km/h` : 'Calme';
-      
       let vis_str = vv_api !== null ? (vv_api >= 9999 ? '>10km' : `${vv_api}m`) : 'N/D';
       let cond_str = conditionsStr.length > 0 ? conditionsStr.join(", ") : 'RAS';
       let nuages_str = cloudsStr.length > 0 ? cloudsStr.join(", ") : (n === 0 ? "Clair/CAVOK" : "Non signalé");
-      
       let metar_decode = `[${flight_category}] Vent: ${vent_str} | Vis: ${vis_str} | Nuages: ${nuages_str} | Temps: ${cond_str}`;
 
-      return { 
-          hbas, n, ww, raw, flight_category, icao: m.icao, observed: m.observed,
-          nuages_metar: nuages_str,
-          metar_decode: metar_decode,
-          metar_brut: raw
-      };
+      return { hbas, n, ww, raw, flight_category, icao: m.icao, observed: m.observed, nuages_metar: nuages_str, metar_decode: metar_decode, metar_brut: raw };
   }
 
   async function fetchCheckWX(icaos, apiKey) {
@@ -752,15 +631,9 @@
           const res = await fetch(`https://api.checkwx.com/metar/${icaos.join(',')}/decoded`, { headers: { 'X-API-Key': apiKey } });
           if (res.status === 401 || res.status === 429) return { _error: "QUOTA" };
           if (!res.ok) return {};
-          const data = await res.json();
-          const aeroData = {};
+          const data = await res.json(); const aeroData = {};
           if (data && data.data && Array.isArray(data.data)) {
-              data.data.forEach(m => {
-                  try {
-                      let extracted = extractCheckWXData(m);
-                      if (extracted && extracted.icao) aeroData[extracted.icao] = extracted;
-                  } catch(err) {} 
-              });
+              data.data.forEach(m => { try { let extracted = extractCheckWXData(m); if (extracted && extracted.icao) aeroData[extracted.icao] = extracted; } catch(err) {} });
           }
           return aeroData;
       } catch(e) { return {}; }
@@ -772,15 +645,9 @@
           const res = await fetch(`https://api.checkwx.com/metar/${icao}/decoded?hours=${hours}`, { headers: { 'X-API-Key': apiKey } });
           if (res.status === 401 || res.status === 429) return { error: "QUOTA" };
           if (!res.ok) return { error: true };
-          const json = await res.json();
-          const list = [];
+          const json = await res.json(); const list = [];
           if (json && json.data && Array.isArray(json.data)) {
-              json.data.forEach(m => {
-                  try {
-                      let ex = extractCheckWXData(m);
-                      if (ex) list.push(ex);
-                  } catch(err) {}
-              });
+              json.data.forEach(m => { try { let ex = extractCheckWXData(m); if (ex) list.push(ex); } catch(err) {} });
           }
           return { data: list };
       } catch(e) { return { error: true }; }
@@ -800,12 +667,7 @@
              data.forEach(obs => {
                 normaliserObs(obs);
                 [obs.geo_id_insee, obs.num_poste, obs.id_station, obs.numer_sta].forEach(k => {
-                    if (k) {
-                        let str = String(k).trim();
-                        let keys = [str];
-                        if (str.length === 4) keys.push("0" + str);
-                        keys.forEach(ks => { parStation[ks] = obs; });
-                    }
+                    if (k) { let str = String(k).trim(); let keys = [str]; if (str.length === 4) keys.push("0" + str); keys.forEach(ks => { parStation[ks] = obs; }); }
                 });
              });
              return parStation;
@@ -818,56 +680,38 @@
 
   async function scannerRegion(forcerRafraichissement = false) {
     const cleApi = document.getElementById("apikey").value.trim();
-    if (!cleApi || cleApi === "") { 
-      alert("Veuillez saisir votre API Key Météo-France."); 
-      return; 
-    }
+    if (!cleApi || cleApi === "") { alert("Veuillez saisir votre API Key Météo-France."); return; }
 
     const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
     if (cleCheckWX) localStorage.setItem("monApiKeyCheckWX", cleCheckWX);
     localStorage.setItem("monApiKeyMeteo", cleApi);
     
     document.getElementById("configCard").style.display = "none";
-    document.getElementById("btnScan").disabled = true;
-    document.getElementById("btnRefreshMap").disabled = true;
-    document.getElementById("zoneReseau").style.display = "block";
-    document.getElementById("zoneDetailContainer").style.display = "none";
+    document.getElementById("btnScan").disabled = true; document.getElementById("btnRefreshMap").disabled = true;
+    document.getElementById("zoneReseau").style.display = "block"; document.getElementById("zoneDetailContainer").style.display = "none";
     document.getElementById("zoneTableauAlertes").style.display = "none";
     
-    const ancienneErreur = document.getElementById("erreurScanReseau");
-    if (ancienneErreur) ancienneErreur.remove();
-    const ancienStatut = document.getElementById("statutScanReseau");
-    if (ancienStatut) ancienStatut.remove();
+    const ancienneErreur = document.getElementById("erreurScanReseau"); if (ancienneErreur) ancienneErreur.remove();
+    const ancienStatut = document.getElementById("statutScanReseau"); if (ancienStatut) ancienStatut.remove();
     
     nOk = 0; nWarn = 0; nFault = 0;
-    document.getElementById("cnt-ok").textContent = "0";
-    document.getElementById("cnt-warn").textContent = "0";
-    document.getElementById("cnt-fault").textContent = "0";
+    document.getElementById("cnt-ok").textContent = "0"; document.getElementById("cnt-warn").textContent = "0"; document.getElementById("cnt-fault").textContent = "0";
     
-    const thead = document.getElementById("theadReseau");
-    const tbody = document.getElementById("tbodyReseau");
+    const thead = document.getElementById("theadReseau"); const tbody = document.getElementById("tbodyReseau");
     thead.innerHTML = `<tr><th>Station (Anomalies)</th><th>Dernière mesure</th>${PARAMS_RESEAU.map(p => `<th>${p.label}</th>`).join("")}</tr>`;
     tbody.innerHTML = "";
 
     if (!window.carteReseau) {
       window.carteReseau = L.map('mapReseau', { center: [47.3, 4.8], zoom: 8, layers: [L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 14, attribution: 'Tiles &copy; Esri' })] }); 
       coucheMarqueurs = L.featureGroup().addTo(window.carteReseau);
-      
-      window.carteReseau.on('zoomend', () => {
-          if (window.modeAffichageCarte !== 'none') {
-              window.changerModeCarte(window.modeAffichageCarte, true);
-          }
-      });
+      window.carteReseau.on('zoomend', () => { if (window.modeAffichageCarte !== 'none') { window.changerModeCarte(window.modeAffichageCarte, true); } });
       initRadarRainViewer(window.carteReseau);
     } else {
       coucheMarqueurs.clearLayers();
     }
-    window.marqueursLeaflet = {};
-    setTimeout(() => window.carteReseau.invalidateSize(), 100);
+    window.marqueursLeaflet = {}; setTimeout(() => window.carteReseau.invalidateSize(), 100);
 
-    const cacheKey = "meteo_cache_mir21_final";
-    const cacheTimeKey = "meteo_cache_time_mir21_final";
-    const maintenantMs = Date.now();
+    const cacheKey = "meteo_cache_mir21_final"; const cacheTimeKey = "meteo_cache_time_mir21_final"; const maintenantMs = Date.now();
 
     if (!forcerRafraichissement && localStorage.getItem(cacheKey) && (maintenantMs - parseInt(localStorage.getItem(cacheTimeKey)) < 15 * 60 * 1000)) {
       JSON.parse(localStorage.getItem(cacheKey)).forEach(item => {
@@ -886,50 +730,36 @@
         }
       });
       if (coucheMarqueurs.getBounds().isValid()) window.carteReseau.fitBounds(coucheMarqueurs.getBounds(), { padding: [30, 30] });
-      mettreAJourFondEcran();
-      document.getElementById("btnScan").disabled = false;
-      document.getElementById("btnRefreshMap").disabled = false;
+      mettreAJourFondEcran(); document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false;
       if(window.modeActuel === 'terrain') window.peuplerSelectTerrain();
       return;
     }
 
-    const DEP_CIBLES = ["21", "52", "58", "71", "89"];
-    let toutesLesStations = [];
-    let erreursDept = [];
+    const DEP_CIBLES = ["21", "52", "58", "71", "89"]; let toutesLesStations = []; let erreursDept = [];
 
     const requetesListes = DEP_CIBLES.map(async (code) => {
       try {
         const r = await fetch(urlProxy("/public/DPClim/v1/liste-stations/infrahoraire-6m", { "id-departement": code }), { headers: { "apikey": cleApi } });
         if (r.status === 401) { erreursDept.push("401_UNAUTHORIZED"); return []; }
         if (r.ok) return await r.json();
-        erreursDept.push(`Dépt ${code}: HTTP ${r.status}`);
-        return [];
-      } catch (e) {
-        erreursDept.push(`Dépt ${code}: ${e.message}`);
-        return [];
-      }
+        erreursDept.push(`Dépt ${code}: HTTP ${r.status}`); return [];
+      } catch (e) { erreursDept.push(`Dépt ${code}: ${e.message}`); return []; }
     });
     
     const resultatsListes = await Promise.all(requetesListes);
     
     if (erreursDept.includes("401_UNAUTHORIZED")) {
-        alert("⛔ Erreur 401 : Votre clé API Météo-France a expiré ou est invalide.");
-        window.modifierApi();
-        document.getElementById("btnScan").disabled = false;
-        document.getElementById("btnRefreshMap").disabled = false;
-        return;
+        alert("⛔ Erreur 401 : Votre clé API Météo-France a expiré ou est invalide."); window.modifierApi();
+        document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false; return;
     }
 
     resultatsListes.forEach(arr => { if(Array.isArray(arr)) toutesLesStations.push(...arr); });
-
     const stationsUniques = Array.from(new Map(toutesLesStations.map(s => [s.id, s])).values()).filter(st => estCible(st.id) || estCible(st.numer_sta));
 
     if(stationsUniques.length === 0) {
       const messageErreur = erreursDept.length > 0 ? `Aucune station récupérée. Détails : ${erreursDept.join(" — ")}` : "Aucune station récupérée, et aucune erreur réseau détectée.";
       document.getElementById("mapReseau").insertAdjacentHTML("beforebegin", `<p class="error" id="erreurScanReseau">${messageErreur}</p>`);
-      document.getElementById("btnScan").disabled = false;
-      document.getElementById("btnRefreshMap").disabled = false;
-      return;
+      document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false; return;
     }
 
     stationsUniques.forEach(st => {
@@ -950,22 +780,16 @@
     const elStatutInitial = document.getElementById("statutScanReseau");
 
     let paquet = null;
-    try {
-       paquet = await tenterPaquetRapide(cleApi);
-    } catch(e) {
+    try { paquet = await tenterPaquetRapide(cleApi); } 
+    catch(e) {
        if (e.message === "401") {
-           if (elStatutInitial) elStatutInitial.remove();
-           alert("⛔ Erreur 401 : Votre clé API Météo-France a expiré.");
-           window.modifierApi();
-           document.getElementById("btnScan").disabled = false;
-           document.getElementById("btnRefreshMap").disabled = false;
-           return;
+           if (elStatutInitial) elStatutInitial.remove(); alert("⛔ Erreur 401 : Votre clé API Météo-France a expiré."); window.modifierApi();
+           document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false; return;
        }
     }
 
     if (paquet) {
       if (elStatutInitial) elStatutInitial.textContent = "Croisement avec les API aéro...";
-      
       let aeroCheckWXData = {};
       if (cleCheckWX) {
           let icaos = [...new Set(stationsUniques.map(s => getIcao(s.nom)).filter(i=>i))];
@@ -973,74 +797,45 @@
       }
 
       const stationsManquantes = [];
-
       stationsUniques.forEach(st => {
         let c = paquet[st.id] || (st.numer_sta ? paquet[st.numer_sta] : null) || (st.num_poste ? paquet[st.num_poste] : null);
-
         if (c) {
           let icao = getIcao(st.nom);
           if (icao && aeroCheckWXData[icao] && aeroCheckWXData[icao] !== "QUOTA") {
               let ch = aeroCheckWXData[icao];
-              if (!estValeurManquante(ch.n)) c.n = ch.n;
-              if (!estValeurManquante(ch.ww)) c.ww = ch.ww;
-              if (!estValeurManquante(ch.hbas)) c.hbas = ch.hbas;
-              if (ch.nuages_metar) c.nuages_metar = ch.nuages_metar;
-              if (ch.metar_decode) c.metar_decode = ch.metar_decode;
-              if (ch.raw) c.metar_brut = ch.raw;
+              if (!estValeurManquante(ch.n)) c.n = ch.n; if (!estValeurManquante(ch.ww)) c.ww = ch.ww; if (!estValeurManquante(ch.hbas)) c.hbas = ch.hbas;
+              if (ch.nuages_metar) c.nuages_metar = ch.nuages_metar; if (ch.metar_decode) c.metar_decode = ch.metar_decode; if (ch.raw) c.metar_brut = ch.raw;
           }
-
           if (dateValideEtRecente(c.validity_time)) {
-            window.stationsCache[st.id] = c;
-            nouveauCacheData.push({ station: st, obs: c });
-            injecterStationDansDashboard(st, c);
-          } else {
-            stationsManquantes.push(st);
-          }
+            window.stationsCache[st.id] = c; nouveauCacheData.push({ station: st, obs: c }); injecterStationDansDashboard(st, c);
+          } else { stationsManquantes.push(st); }
         } else {
-          let cachedObs = window.stationsCache[st.id];
-          let ageCache = Infinity;
+          let cachedObs = window.stationsCache[st.id]; let ageCache = Infinity;
           if (cachedObs && cachedObs.validity_time) ageCache = (Date.now() - new Date(cachedObs.validity_time).getTime()) / 60000;
-
-          if (ageCache <= 10) {
-              nouveauCacheData.push({ station: st, obs: cachedObs });
-              injecterStationDansDashboard(st, cachedObs);
-          } else {
-              stationsManquantes.push(st);
-          }
+          if (ageCache <= 10) { nouveauCacheData.push({ station: st, obs: cachedObs }); injecterStationDansDashboard(st, cachedObs); } 
+          else { stationsManquantes.push(st); }
         }
       });
 
       if (stationsManquantes.length > 0) {
-         const TAILLE_LOT = 5;
-         let traitesManquantes = 0;
-
+         const TAILLE_LOT = 5; let traitesManquantes = 0;
          for (let i = 0; i < stationsManquantes.length; i += TAILLE_LOT) {
             const lot = stationsManquantes.slice(i, i + TAILLE_LOT);
             await Promise.all(lot.map(async (st) => {
                try {
-                  const queryId = st.numer_sta || st.id;
-                  let obs = await fetchLatestObsExact(queryId, cleApi);
+                  const queryId = st.numer_sta || st.id; let obs = await fetchLatestObsExact(queryId, cleApi);
                   if (obs) {
-                      normaliserObs(obs);
-                      let icao = getIcao(st.nom);
+                      normaliserObs(obs); let icao = getIcao(st.nom);
                       if (icao && aeroCheckWXData[icao] && aeroCheckWXData[icao] !== "QUOTA") {
                           let ch = aeroCheckWXData[icao];
-                          if (!estValeurManquante(ch.n)) obs.n = ch.n;
-                          if (!estValeurManquante(ch.ww)) obs.ww = ch.ww;
-                          if (!estValeurManquante(ch.hbas)) obs.hbas = ch.hbas;
-                          if (ch.nuages_metar) obs.nuages_metar = ch.nuages_metar;
-                          if (ch.metar_decode) obs.metar_decode = ch.metar_decode;
-                          if (ch.raw) obs.metar_brut = ch.raw;
+                          if (!estValeurManquante(ch.n)) obs.n = ch.n; if (!estValeurManquante(ch.ww)) obs.ww = ch.ww; if (!estValeurManquante(ch.hbas)) obs.hbas = ch.hbas;
+                          if (ch.nuages_metar) obs.nuages_metar = ch.nuages_metar; if (ch.metar_decode) obs.metar_decode = ch.metar_decode; if (ch.raw) obs.metar_brut = ch.raw;
                       }
-                      window.stationsCache[st.id] = obs;
-                      nouveauCacheData.push({ station: st, obs: obs });
-                      injecterStationDansDashboard(st, obs);
+                      window.stationsCache[st.id] = obs; nouveauCacheData.push({ station: st, obs: obs }); injecterStationDansDashboard(st, obs);
                       return;
                   }
                   injecterStationDansDashboard(st, null);
-               } catch(e) {
-                  injecterStationDansDashboard(st, null);
-               }
+               } catch(e) { injecterStationDansDashboard(st, null); }
             }));
             traitesManquantes += lot.length;
             if (elStatutInitial) elStatutInitial.textContent = `Vérification du statut... ${traitesManquantes}/${stationsManquantes.length}`;
@@ -1054,19 +849,10 @@
         const lot = stationsUniques.slice(i, i + TAILLE_LOT);
         await Promise.all(lot.map(async (st) => {
           try {
-            const queryId = st.numer_sta || st.id;
-            let obs = await fetchLatestObsExact(queryId, cleApi);
-            if (obs) {
-                normaliserObs(obs);
-                window.stationsCache[st.id] = obs;
-                nouveauCacheData.push({ station: st, obs: obs });
-                injecterStationDansDashboard(st, obs);
-                return;
-            }
+            const queryId = st.numer_sta || st.id; let obs = await fetchLatestObsExact(queryId, cleApi);
+            if (obs) { normaliserObs(obs); window.stationsCache[st.id] = obs; nouveauCacheData.push({ station: st, obs: obs }); injecterStationDansDashboard(st, obs); return; }
             injecterStationDansDashboard(st, null);
-          } catch (e) {
-            injecterStationDansDashboard(st, null);
-          }
+          } catch (e) { injecterStationDansDashboard(st, null); }
         }));
         if (elStatutInitial) elStatutInitial.textContent = `Interrogation stations... ${Math.min(i + TAILLE_LOT, stationsUniques.length)}/${stationsUniques.length}`;
         await new Promise(r => setTimeout(r, 3000));
@@ -1074,110 +860,137 @@
     }
     
     if (elStatutInitial) elStatutInitial.remove();
-
-    if (nouveauCacheData.length > 0) {
-      localStorage.setItem(cacheKey, JSON.stringify(nouveauCacheData));
-      localStorage.setItem(cacheTimeKey, Date.now().toString());
-    }
-
+    if (nouveauCacheData.length > 0) { localStorage.setItem(cacheKey, JSON.stringify(nouveauCacheData)); localStorage.setItem(cacheTimeKey, Date.now().toString()); }
     if (coucheMarqueurs.getBounds().isValid()) window.carteReseau.fitBounds(coucheMarqueurs.getBounds(), { padding: [30, 30] });
     mettreAJourFondEcran();
 
-    document.getElementById("btnScan").disabled = false;
-    document.getElementById("btnRefreshMap").disabled = false;
+    document.getElementById("btnScan").disabled = false; document.getElementById("btnRefreshMap").disabled = false;
     if(window.modeActuel === 'terrain') window.peuplerSelectTerrain();
   }
 
+  function injecterStationDansDashboard(station, obs) {
+    let ageMin = Infinity;
+    if (obs && obs.validity_time) ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000);
+    
+    let marker = window.marqueursLeaflet[station.id];
+    let meta = window.stationsMetaCache[station.id] || { lettre: '?' };
+
+    let isOffline = (!obs || ageMin >= SEUIL_INACTIVITE_MIN);
+    const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
+    let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k])) : [];
+    let baseline = window.stationsBaselines[station.id] || [];
+    if (baseline.length === 0 && capteursActuels.length > 0) { 
+        window.stationsBaselines[station.id] = capteursActuels; localStorage.setItem('meteo_baselines', JSON.stringify(window.stationsBaselines)); baseline = capteursActuels;
+    }
+    
+    let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
+    let aUnDefautCritique = isOffline ? true : estValeurManquante(obs.t);
+    let statut = isOffline ? "fault" : (aUnDefautCritique ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok"));
+    if (obs) obs._statut = statut;
+
+    if (statut === "ok") nOk++; else if (statut === "warn") nWarn++; else nFault++;
+
+    document.getElementById("cnt-ok").textContent = nOk; document.getElementById("cnt-warn").textContent = nWarn; document.getElementById("cnt-fault").textContent = nFault;
+
+    if (marker) {
+      marker.setPopupContent(`<b>${station.nom} (${station.id})</b><br>${statut==='ok'?'✅ OK':(statut==='warn'?'⚠️ Alerte':(isOffline?'⚠️ Hors ligne (Muette)':'⚠️ Défaut'))}`);
+      window.changerModeCarte(window.modeAffichageCarte, true); 
+    }
+
+    if (statut === "warn" || statut === "fault") {
+      document.getElementById("zoneTableauAlertes").style.display = "block";
+      const nomEchappe = station.nom.replace(/'/g, "\\'"); 
+      let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
+      let trHtml = `<tr class="row-${statut}">`;
+      trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${station.id}', '${nomEchappe}', '${station.numer_sta || ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${station.nom} (${station.id})</a></strong><br>
+                 <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
+      trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${isOffline ? "> 30 min" : (ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`)}</td>`;
+      
+      PARAMS_RESEAU.forEach(p => { 
+        if (isOffline || !obs) {
+            trHtml += `<td class="cell-na">—</td>`;
+        } else {
+            let valeur = obs[p.key];
+            if (p.key === 'rr_per' && estValeurManquante(valeur)) valeur = 0;
+            if (!estValeurManquante(valeur)) trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
+            else if (p.key === 't') trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
+            else if (capteursPerdus.includes(p.key)) trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
+            else trHtml += `<td class="cell-na">—</td>`;
+        }
+      });
+      trHtml += `</tr>`; document.getElementById("tbodyReseau").insertAdjacentHTML('beforeend', trHtml);
+    }
+  }
+
   window.recalculerReseauUI = function() {
-      let ok = 0, warn = 0, fault = 0;
-      const tbody = document.getElementById("tbodyReseau");
-      tbody.innerHTML = "";
-      let alerteHtml = "";
+      let ok = 0, warn = 0, fault = 0; const tbody = document.getElementById("tbodyReseau");
+      tbody.innerHTML = ""; let alerteHtml = "";
       
       for (let id in window.marqueursLeaflet) {
-          let obs = window.stationsCache[id];
-          let meta = window.stationsMetaCache[id];
-          let marker = window.marqueursLeaflet[id];
-          
+          let obs = window.stationsCache[id]; let meta = window.stationsMetaCache[id]; let marker = window.marqueursLeaflet[id];
           if(!meta || !marker) continue;
           
-          let ageMin = Infinity;
-          if (obs && obs.validity_time) ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000);
-          
-          if (!obs || ageMin >= SEUIL_INACTIVITE_MIN) {
-              fault++;
-              if (obs) obs._statut = 'fault';
-              marker.setPopupContent(`<b>${meta.nom} (${id})</b><br>⚠️ Hors ligne`);
-              continue;
-          }
+          let ageMin = Infinity; if (obs && obs.validity_time) ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000);
+          let isOffline = (!obs || ageMin >= SEUIL_INACTIVITE_MIN);
           
           const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
-          let capteursActuels = Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k]));
+          let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k])) : [];
           let baseline = window.stationsBaselines[id] || capteursActuels;
           let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
-          let aUnDefautCritique = estValeurManquante(obs.t);
+          let aUnDefautCritique = isOffline ? true : estValeurManquante(obs.t);
           
-          let statut = aUnDefautCritique ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok");
-          obs._statut = statut;
+          let statut = isOffline ? "fault" : (aUnDefautCritique ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok"));
+          if (obs) obs._statut = statut;
           
           if (statut === "ok") ok++; else if (statut === "warn") warn++; else fault++;
           
-          marker.setPopupContent(`<b>${meta.nom} (${id})</b><br>${statut==='ok'?'✅ OK':(statut==='warn'?'⚠️ Alerte':'⚠️ Défaut')}`);
+          marker.setPopupContent(`<b>${meta.nom} (${id})</b><br>${statut==='ok'?'✅ OK':(statut==='warn'?'⚠️ Alerte':(isOffline?'⚠️ Hors ligne (Muette)':'⚠️ Défaut'))}`);
           
           if (statut === "warn" || statut === "fault") {
               const nomEchappe = meta.nom.replace(/'/g, "\\'"); 
-              let anomalieTexte = aUnDefautCritique ? "Défaut majeur" : "Perte capteur";
+              let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
               let trHtml = `<tr class="row-${statut}">`;
-              trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${id}', '${nomEchappe}', '${obs.numer_sta || ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${meta.nom} (${id})</a></strong><br>
+              trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${id}', '${nomEchappe}', '${obs ? (obs.numer_sta || "") : ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${meta.nom} (${id})</a></strong><br>
                          <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
-              trHtml += `<td class="${aUnDefautCritique ? 'age-stale' : ''}">${ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`}</td>`;
+              trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${isOffline ? "> 30 min" : (ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`)}</td>`;
               
               PARAMS_RESEAU.forEach(p => { 
-                  let valeur = obs[p.key];
-                  if (p.key === 'rr_per' && estValeurManquante(valeur)) valeur = 0;
-                  if (!estValeurManquante(valeur)) trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
-                  else if (p.key === 't') trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
-                  else if (capteursPerdus.includes(p.key)) trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
-                  else trHtml += `<td class="cell-na">—</td>`;
+                  if (isOffline || !obs) { trHtml += `<td class="cell-na">—</td>`; } 
+                  else {
+                      let valeur = obs[p.key];
+                      if (p.key === 'rr_per' && estValeurManquante(valeur)) valeur = 0;
+                      if (!estValeurManquante(valeur)) trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
+                      else if (p.key === 't') trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
+                      else if (capteursPerdus.includes(p.key)) trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
+                      else trHtml += `<td class="cell-na">—</td>`;
+                  }
               });
-              trHtml += `</tr>`;
-              alerteHtml += trHtml;
+              trHtml += `</tr>`; alerteHtml += trHtml;
           }
       }
       
       tbody.innerHTML = alerteHtml;
       nOk = ok; nWarn = warn; nFault = fault;
-      document.getElementById("cnt-ok").textContent = nOk;
-      document.getElementById("cnt-warn").textContent = nWarn;
-      document.getElementById("cnt-fault").textContent = nFault;
-      
+      document.getElementById("cnt-ok").textContent = nOk; document.getElementById("cnt-warn").textContent = nWarn; document.getElementById("cnt-fault").textContent = nFault;
       document.getElementById("zoneTableauAlertes").style.display = (warn > 0 || fault > 0) ? "block" : "none";
       
-      mettreAJourFondEcran();
-      window.changerModeCarte(window.modeAffichageCarte, true);
+      mettreAJourFondEcran(); window.changerModeCarte(window.modeAffichageCarte, true);
   };
 
   window.changerModeCarte = function(mode, keepMode = false) {
-    if (window.modeAffichageCarte === mode && !keepMode) {
-      mode = 'none'; 
-    }
+    if (window.modeAffichageCarte === mode && !keepMode) { mode = 'none'; }
     window.modeAffichageCarte = mode;
     document.querySelectorAll('.btn-toggle-map').forEach(btn => btn.classList.remove('active'));
     
     if (mode !== 'none') {
       let btnId = 'btnMode' + mode.charAt(0).toUpperCase() + mode.slice(1);
-      let btn = document.getElementById(btnId);
-      if (btn) btn.classList.add('active');
+      let btn = document.getElementById(btnId); if (btn) btn.classList.add('active');
     }
 
     if (mode === 'none' || mode === 'pluie') toggleRadarVisibilite(true); else toggleRadarVisibilite(false);
 
-    // GESTION DYNAMIQUE DE L'AFFICHAGE DES LÉGENDES
-    const elLegendeBase = document.getElementById('legendeBase');
-    const elLegendeTemp = document.getElementById('legendeTemp');
-    const elLegendeVent = document.getElementById('legendeVent');
-    const elLegendeHum = document.getElementById('legendeHumidite');
-    
+    const elLegendeBase = document.getElementById('legendeBase'); const elLegendeTemp = document.getElementById('legendeTemp');
+    const elLegendeVent = document.getElementById('legendeVent'); const elLegendeHum = document.getElementById('legendeHumidite');
     if (elLegendeBase) elLegendeBase.style.display = (mode === 'none' || mode === 'pluie') ? 'flex' : 'none';
     if (elLegendeTemp) elLegendeTemp.style.display = (mode === 'temp') ? 'flex' : 'none';
     if (elLegendeVent) elLegendeVent.style.display = (mode === 'vent') ? 'flex' : 'none';
@@ -1186,87 +999,57 @@
     let zoomActuel = window.carteReseau ? window.carteReseau.getZoom() : 7;
 
     for (let id in window.marqueursLeaflet) {
-      let marker = window.marqueursLeaflet[id];
-      let obs = window.stationsCache[id];
-      let meta = window.stationsMetaCache[id] || { lettre: '?' };
+      let marker = window.marqueursLeaflet[id]; let obs = window.stationsCache[id]; let meta = window.stationsMetaCache[id] || { lettre: '?' };
 
-      let showMarker = true;
-      let isOffline = false;
+      let isOffline = false; let showMarker = true;
 
-      if (!obs || !obs.validity_time) {
-          isOffline = true;
-      } else {
-          let ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000);
-          if (ageMin >= SEUIL_INACTIVITE_MIN) isOffline = true;
-      }
+      if (!obs || !obs.validity_time) { isOffline = true; } 
+      else { let ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000); if (ageMin >= SEUIL_INACTIVITE_MIN) isOffline = true; }
 
+      // Si un mode (Temp/Pluie/Hum/Vent) est actif, masquer d'office la station si elle est muette
       if (mode !== 'none' && isOffline) {
           showMarker = false;
       }
 
-      let text = "";
-      let overrideColor = null;
-      let showTooltip = false;
+      let text = ""; let overrideColor = null; let showTooltip = false;
 
       if (!isOffline && showMarker) {
           if (mode === 'temp') {
               if (!estValeurManquante(obs.t)) {
-                  let c = kelvinToCelsius(obs.t);
-                  text = `${c}°C`;
-                  overrideColor = getTempColor(parseFloat(c)); 
-                  if (zoomActuel >= 9) showTooltip = true; 
-              } else {
-                  showMarker = false; 
-              }
+                  let c = kelvinToCelsius(obs.t); text = `${c}°C`; overrideColor = getTempColor(parseFloat(c)); if (zoomActuel >= 9) showTooltip = true; 
+              } else { showMarker = false; }
           }
           else if (mode === 'vent') {
               let ff = !estValeurManquante(obs.ff) ? msToKmh(obs.ff) : null;
               let raf = !estValeurManquante(obs.raf10) ? msToKmh(obs.raf10) : (!estValeurManquante(obs.rafper) ? msToKmh(obs.rafper) : null);
-              
               if (ff !== null || raf !== null) {
                   let vMax = Math.max(ff !== null ? parseFloat(ff) : 0, raf !== null ? parseFloat(raf) : 0);
                   overrideColor = getVentColor(vMax);
-
-                  if (ff !== null && raf !== null) text = `💨 ${ff} (${raf})`;
-                  else if (ff !== null) text = `💨 ${ff} km/h`;
-                  else if (raf !== null) text = `💨 raf ${raf}`;
-                  
+                  if (ff !== null && raf !== null) text = `💨 ${ff} (${raf})`; else if (ff !== null) text = `💨 ${ff} km/h`; else if (raf !== null) text = `💨 raf ${raf}`;
                   if (zoomActuel >= 9) showTooltip = true;
-              } else {
-                  showMarker = false; 
-              }
+              } else { showMarker = false; }
           } 
           else if (mode === 'pluie') {
               let p = !estValeurManquante(obs.rr_per) ? obs.rr_per : (!estValeurManquante(obs.rr1) ? obs.rr1 : null);
               if (p !== null && parseFloat(p) > 0) {
-                  text = `💧 ${p} mm`;
-                  showTooltip = true; 
-              } else {
-                  showMarker = false; 
-              }
+                  text = `💧 ${p} mm`; showTooltip = true; 
+              } else if (p === null) { showMarker = false; }
           }
           else if (mode === 'humidite') {
               if (!estValeurManquante(obs.u)) {
-                  text = `💧 ${obs.u}%`;
-                  overrideColor = getHumiditeColor(parseFloat(obs.u)); 
-                  if (zoomActuel >= 9) showTooltip = true; 
-              } else {
-                  showMarker = false; 
-              }
+                  text = `💧 ${obs.u}%`; overrideColor = getHumiditeColor(parseFloat(obs.u)); if (zoomActuel >= 9) showTooltip = true; 
+              } else { showMarker = false; }
           }
       }
 
       if (showMarker) {
           if (!coucheMarqueurs.hasLayer(marker)) coucheMarqueurs.addLayer(marker);
-          
           let statutActuel = isOffline ? 'fault' : (obs._statut || 'ok');
           marker.setIcon(createStationIcon(statutActuel, meta.lettre, overrideColor));
 
           if (text !== "" && showTooltip) {
               marker.bindTooltip(text, { permanent: true, direction: 'right', className: 'map-live-label', offset: [13, 0] });
-          } else {
-              marker.unbindTooltip();
-          }
+          } else { marker.unbindTooltip(); }
       } else {
           if (coucheMarqueurs.hasLayer(marker)) coucheMarqueurs.removeLayer(marker);
           marker.unbindTooltip();
@@ -1274,89 +1057,16 @@
     }
   };
 
-  function injecterStationDansDashboard(station, obs) {
-    let ageMin = Infinity;
-    if (obs && obs.validity_time) ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000);
-    
-    if (ageMin > SEUIL_INACTIVITE_MIN) {
-      if (window.marqueursLeaflet[station.id]) window.marqueursLeaflet[station.id].remove();
-      return;
-    }
-
-    let marker = window.marqueursLeaflet[station.id];
-    let meta = window.stationsMetaCache[station.id] || { lettre: '?' };
-
-    if (!obs || ageMin >= SEUIL_INACTIVITE_MIN) {
-      nFault++; document.getElementById("cnt-fault").textContent = nFault;
-      document.getElementById("zoneTableauAlertes").style.display = "block";
-      if (marker) {
-          marker.setPopupContent(`<b>${station.nom} (${station.id})</b><br>⚠️ Hors ligne`);
-          if (obs) obs._statut = 'fault';
-          window.changerModeCarte(window.modeAffichageCarte, true);
-      }
-      return; 
-    }
-
-    const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
-    let capteursActuels = Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k]));
-    let baseline = window.stationsBaselines[station.id] || [];
-    if (baseline.length === 0) { window.stationsBaselines[station.id] = capteursActuels; localStorage.setItem('meteo_baselines', JSON.stringify(window.stationsBaselines)); baseline = capteursActuels;}
-    
-    let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
-    let aUnDefautCritique = estValeurManquante(obs.t);
-
-    let statut = aUnDefautCritique ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok");
-    obs._statut = statut;
-
-    if (statut === "ok") nOk++; else if (statut === "warn") nWarn++; else nFault++;
-
-    document.getElementById("cnt-ok").textContent = nOk;
-    document.getElementById("cnt-warn").textContent = nWarn;
-    document.getElementById("cnt-fault").textContent = nFault;
-
-    if (marker) {
-      marker.setPopupContent(`<b>${station.nom} (${station.id})</b><br>${statut==='ok'?'✅ OK':(statut==='warn'?'⚠️ Alerte':'⚠️ Défaut')}`);
-      window.changerModeCarte(window.modeAffichageCarte, true); 
-    }
-
-    if (statut === "warn" || statut === "fault") {
-      document.getElementById("zoneTableauAlertes").style.display = "block";
-      const nomEchappe = station.nom.replace(/'/g, "\\'"); 
-      let anomalieTexte = aUnDefautCritique ? "Défaut majeur" : "Perte capteur";
-      let trHtml = `<tr class="row-${statut}">`;
-      trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${station.id}', '${nomEchappe}', '${station.numer_sta || ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${station.nom} (${station.id})</a></strong><br>
-                 <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
-      trHtml += `<td class="${aUnDefautCritique ? 'age-stale' : ''}">${ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`}</td>`;
-      
-      PARAMS_RESEAU.forEach(p => { 
-        let valeur = obs[p.key];
-        if (p.key === 'rr_per' && estValeurManquante(valeur)) valeur = 0;
-        if (!estValeurManquante(valeur)) trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
-        else if (p.key === 't') trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
-        else if (capteursPerdus.includes(p.key)) trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
-        else trHtml += `<td class="cell-na">—</td>`;
-      });
-      trHtml += `</tr>`;
-      document.getElementById("tbodyReseau").insertAdjacentHTML('beforeend', trHtml);
-    }
-  }
-
-  window.actuelleStationId = null;
-  window.actuelleStationNom = null;
-  window.actuelleStationOmm = null;
+  window.actuelleStationId = null; window.actuelleStationNom = null; window.actuelleStationOmm = null;
 
   window.lancerDetailsStation = function(stationId, stationNom, stationOmm) {
-    window.actuelleStationId = stationId;
-    window.actuelleStationNom = stationNom;
+    window.actuelleStationId = stationId; window.actuelleStationNom = stationNom;
     window.actuelleStationOmm = stationOmm || (window.stationsCache[stationId] ? (window.stationsCache[stationId].numer_sta || window.stationsCache[stationId].id_station) : null);
     
     if (window.carteReseau) window.carteReseau.closePopup();
     
-    document.getElementById("zoneDetailContainer").style.display = "block";
-    document.getElementById("titreDetails").textContent = `Détails : ${stationNom} (${stationId})`;
-    
-    document.getElementById("btnHist1h").style.display = "none";
-    document.getElementById("btnHist24h").style.display = "inline-block";
+    document.getElementById("zoneDetailContainer").style.display = "block"; document.getElementById("titreDetails").textContent = `Détails : ${stationNom} (${stationId})`;
+    document.getElementById("btnHist1h").style.display = "none"; document.getElementById("btnHist24h").style.display = "inline-block";
     document.getElementById("titreHistorique").textContent = "Historique — dernière heure";
     
     let actionHtml = `<button class="btn-action btn-refresh" onclick="rafraichirStationActuelle()">🔄 Rafraîchir</button>`;
@@ -1367,21 +1077,16 @@
     }
     document.getElementById("actionButtonsStation").innerHTML = actionHtml;
 
-    rafraichirStationActuelle();
-    document.getElementById("cardDernieresObs").scrollIntoView({ behavior: 'smooth', block: 'start' });
+    rafraichirStationActuelle(); document.getElementById("cardDernieresObs").scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   window.rafraichirStationActuelle = async function() {
-    const cleApi = document.getElementById("apikey").value.trim();
-    const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
+    const cleApi = document.getElementById("apikey").value.trim(); const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
     document.getElementById("contenuObs").innerHTML = "<p>Mise à jour en direct depuis Météo-France...</p>";
 
     try {
       let obsMerged = await fetchLatestObsExact(window.actuelleStationId, cleApi);
-      if (!obsMerged && window.actuelleStationOmm) {
-          obsMerged = await fetchLatestObsExact(window.actuelleStationOmm, cleApi);
-      }
-
+      if (!obsMerged && window.actuelleStationOmm) { obsMerged = await fetchLatestObsExact(window.actuelleStationOmm, cleApi); }
       if (!obsMerged) obsMerged = window.stationsCache[window.actuelleStationId];
       if (!obsMerged) { document.getElementById("contenuObs").innerHTML = `<p class="error">Aucune donnée trouvée.</p>`; return; }
 
@@ -1391,21 +1096,14 @@
           if (aeroData && aeroData._error !== "QUOTA") {
               let ch = aeroData[icao];
               if (ch && ch.raw) {
-                  if (!estValeurManquante(ch.n)) obsMerged.n = ch.n;
-                  if (!estValeurManquante(ch.ww)) obsMerged.ww = ch.ww;
-                  if (!estValeurManquante(ch.hbas)) obsMerged.hbas = ch.hbas;
-                  if (ch.nuages_metar) obsMerged.nuages_metar = ch.nuages_metar;
-                  if (ch.metar_decode) obsMerged.metar_decode = ch.metar_decode;
-                  if (ch.raw) obsMerged.metar_brut = ch.raw;
+                  if (!estValeurManquante(ch.n)) obsMerged.n = ch.n; if (!estValeurManquante(ch.ww)) obsMerged.ww = ch.ww; if (!estValeurManquante(ch.hbas)) obsMerged.hbas = ch.hbas;
+                  if (ch.nuages_metar) obsMerged.nuages_metar = ch.nuages_metar; if (ch.metar_decode) obsMerged.metar_decode = ch.metar_decode; if (ch.raw) obsMerged.metar_brut = ch.raw;
               }
           }
       }
 
-      window.stationsCache[window.actuelleStationId] = obsMerged;
-      afficherDonneesDetaillees([obsMerged]);
-      
-      chargerHistoriqueStation(window.actuelleStationId, cleApi);
-      calculerExtremesDuJour(window.actuelleStationId, window.actuelleStationOmm, cleApi);
+      window.stationsCache[window.actuelleStationId] = obsMerged; afficherDonneesDetaillees([obsMerged]);
+      chargerHistoriqueStation(window.actuelleStationId, cleApi); calculerExtremesDuJour(window.actuelleStationId, window.actuelleStationOmm, cleApi);
     } catch (erreur) { document.getElementById("contenuObs").innerHTML = `<p class="error">Échec.\n${erreur.message}</p>`; }
   };
 
@@ -1430,11 +1128,7 @@
       
       if (!groupes[info.group]) groupes[info.group] = [];
       let affichage = estValeurManquante(valeur) ? (['rr_per', 'rr1'].includes(cle) ? "0 mm" : "<span style='color:#dc2626; font-weight:bold;'>⚠ Défaut</span>") : (info.transform ? `${info.transform(valeur)} ${info.unit}` : `${valeur} ${info.unit}`);
-      
-      if (cle === "metar_brut") {
-        affichage = `<span style="font-family:monospace; color:#334155; font-size:11px;">${affichage}</span>`;
-      }
-
+      if (cle === "metar_brut") { affichage = `<span style="font-family:monospace; color:#334155; font-size:11px;">${affichage}</span>`; }
       groupes[info.group].push(`<tr><td style="width:30%;"><strong>${info.label}</strong></td><td>${affichage}</td></tr>`);
     }
     
@@ -1448,42 +1142,33 @@
   }
 
   async function calculerExtremesDuJour(stationId, stationOmm, cleApi) {
-      let todayStr = new Date().toLocaleDateString('fr-FR');
-      let cacheKey = stationId + "_" + todayStr;
+      let todayStr = new Date().toLocaleDateString('fr-FR'); let cacheKey = stationId + "_" + todayStr;
       if (window.extremesJourCache[cacheKey]) { afficherExtremesUI(window.extremesJourCache[cacheKey]); return; }
-
       document.getElementById("zoneExtremesJournee").innerHTML = "<div style='text-align:center; font-size:12px; color:#475569;'>Recherche des extrêmes du jour...</div>";
 
       try {
-          const horodatages = [];
-          let d = new Date(); d.setUTCMinutes(0, 0, 0);
+          const horodatages = []; let d = new Date(); d.setUTCMinutes(0, 0, 0);
           for (let i = 0; i <= 23; i++) {
             let t = new Date(d.getTime() - (i * 3600000));
             if(t.toLocaleDateString('fr-FR') === todayStr) horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z"));
           }
 
-          let tn = Infinity, tx = -Infinity, ventMax = -Infinity, cumulPluie = 0;
-          let hTn = "", hTx = "", hVent = "";
+          let tn = Infinity, tx = -Infinity, ventMax = -Infinity, cumulPluie = 0; let hTn = "", hTx = "", hVent = "";
 
           for (let date of horodatages) {
               let url = urlProxy("/public/DPObs/v1/station/horaire", { id_station: stationId, date: date, format: "json" });
               try {
                   let r = await fetch(url, { headers: { "apikey": cleApi } });
                   if (r.ok) {
-                      let data = await r.json();
-                      let obsData = Array.isArray(data) ? data[0] : data;
+                      let data = await r.json(); let obsData = Array.isArray(data) ? data[0] : data;
                       if (obsData && obsData.validity_time) {
                           let heureStr = new Date(obsData.validity_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                          
                           let tempMax = !estValeurManquante(obsData.tx1) ? obsData.tx1 : (!estValeurManquante(obsData.t) ? obsData.t : null);
                           if (tempMax !== null && tempMax > tx) { tx = tempMax; hTx = heureStr; }
-                          
                           let tempMin = !estValeurManquante(obsData.tn1) ? obsData.tn1 : (!estValeurManquante(obsData.t) ? obsData.t : null);
                           if (tempMin !== null && tempMin < tn) { tn = tempMin; hTn = heureStr; }
-                          
                           let raf = !estValeurManquante(obsData.fxy) ? obsData.fxy : (!estValeurManquante(obsData.rafper) ? obsData.rafper : null);
                           if (raf !== null && raf > ventMax) { ventMax = raf; hVent = heureStr; }
-                          
                           if (!estValeurManquante(obsData.rr1)) cumulPluie += parseFloat(obsData.rr1);
                       }
                   }
@@ -1492,10 +1177,8 @@
           }
 
           if (ventMax === -Infinity) ventMax = null;
-
           const extremes = { tn, tx, ventMax, cumulPluie, hTn, hTx, hVent };
-          window.extremesJourCache[cacheKey] = extremes;
-          afficherExtremesUI(extremes);
+          window.extremesJourCache[cacheKey] = extremes; afficherExtremesUI(extremes);
       } catch (e) { document.getElementById("zoneExtremesJournee").innerHTML = ""; }
   }
 
@@ -1505,10 +1188,8 @@
           <span style="font-size:11px; font-weight:800;">Max Temp. (Jour)</span><br><span style="font-size:18px; font-weight:900; color:#dc2626;">${kelvinToCelsius(extremes.tx)} °C</span><br><span style="font-size:11px;">vers ${extremes.hTx}</span></div>`;
       if (extremes.tn !== Infinity && extremes.tn !== null) html += `<div style="flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4);">
           <span style="font-size:11px; font-weight:800;">Min Temp. (Jour)</span><br><span style="font-size:18px; font-weight:900; color:#2563eb;">${kelvinToCelsius(extremes.tn)} °C</span><br><span style="font-size:11px;">vers ${extremes.hTn}</span></div>`;
-      
       if (extremes.ventMax !== null) html += `<div style="flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4);">
           <span style="font-size:11px; font-weight:800;">Rafale Max (Jour)</span><br><span style="font-size:18px; font-weight:900; color:#7c3aed;">${msToKmh(extremes.ventMax)} km/h</span><br><span style="font-size:11px;">vers ${extremes.hVent}</span></div>`;
-      
       if (extremes.cumulPluie > 0) html += `<div style="flex:1; min-width: 100px; background: rgba(255,255,255,0.4); padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.4);">
           <span style="font-size:11px; font-weight:800;">Pluie (Jour)</span><br><span style="font-size:18px; font-weight:900; color:#0284c7;">${extremes.cumulPluie.toFixed(1)} mm</span><br><span style="font-size:11px;">Cumul depuis 00:00</span></div>`;
       html += `</div>`;
@@ -1516,43 +1197,32 @@
   }
 
   window.chargerHistorique1h = function() {
-    document.getElementById("btnHist1h").style.display = "none";
-    document.getElementById("btnHist24h").style.display = "inline-block";
+    document.getElementById("btnHist1h").style.display = "none"; document.getElementById("btnHist24h").style.display = "inline-block";
     document.getElementById("titreHistorique").textContent = "Historique — dernière heure";
     chargerHistoriqueStation(window.actuelleStationId, document.getElementById("apikey").value.trim());
   };
 
   window.chargerHistorique24h = async function() {
     const cleApi = document.getElementById("apikey").value.trim();
-    document.getElementById("btnHist24h").style.display = "none";
-    document.getElementById("btnHist1h").style.display = "inline-block";
+    document.getElementById("btnHist24h").style.display = "none"; document.getElementById("btnHist1h").style.display = "inline-block";
     document.getElementById("titreHistorique").textContent = "Historique — 24 dernières heures";
     document.getElementById("contenuHistorique").innerHTML = "<p>Récupération des cumuls horaires sur 24h...</p>";
     
     try {
-      const horodatages = [];
-      let d = new Date(); d.setUTCMinutes(0, 0, 0);
-      for (let i = 0; i <= 23; i++) {
-        let t = new Date(d.getTime() - (i * 3600000));
-        horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z"));
-      }
+      const horodatages = []; let d = new Date(); d.setUTCMinutes(0, 0, 0);
+      for (let i = 0; i <= 23; i++) { let t = new Date(d.getTime() - (i * 3600000)); horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z")); }
 
       const resultats = [];
       for (let date of horodatages) {
           let url = urlProxy("/public/DPObs/v1/station/horaire", { id_station: window.actuelleStationId, date: date, format: "json" });
           try {
               let r = await fetch(url, { headers: { "apikey": cleApi } });
-              if (r.ok) {
-                  let d = await r.json();
-                  let o = Array.isArray(d) ? d[0] : d;
-                  if (o && o.validity_time) { normaliserObs(o); resultats.push(o); }
-              }
+              if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) { normaliserObs(o); resultats.push(o); } }
           } catch(e) {}
           await new Promise(r => setTimeout(r, 60)); 
       }
 
-      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-      let icao = getIcao(window.actuelleStationNom);
+      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim(); let icao = getIcao(window.actuelleStationNom);
       if (icao && cleCheckWX) {
           let aeroHistResult = await fetchCheckWXHistory(icao, cleCheckWX, 24);
           if (aeroHistResult && aeroHistResult.data && aeroHistResult.data.length > 0) {
@@ -1561,9 +1231,7 @@
                       let tObs = new Date(obs.validity_time).getTime();
                       let closest = aeroHistResult.data.reduce((prev, curr) => Math.abs(new Date(curr.observed).getTime() - tObs) < Math.abs(new Date(prev.observed).getTime() - tObs) ? curr : prev);
                       if (closest && closest.observed && Math.abs(new Date(closest.observed).getTime() - tObs) <= 45 * 60000) {
-                          if (!estValeurManquante(closest.n)) obs.n = closest.n;
-                          if (!estValeurManquante(closest.ww)) obs.ww = closest.ww;
-                          if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
+                          if (!estValeurManquante(closest.n)) obs.n = closest.n; if (!estValeurManquante(closest.ww)) obs.ww = closest.ww; if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
                       }
                   }
               });
@@ -1577,29 +1245,20 @@
   async function chargerHistoriqueStation(stationId, cleApi) {
     document.getElementById("contenuHistorique").innerHTML = "<p>Récupération de l'historique en cours...</p>";
     try {
-      const horodatages = [];
-      let d = new Date(); d.setUTCMinutes(d.getUTCMinutes() - (d.getUTCMinutes()%6), 0, 0);
-      for (let i = 0; i <= 10; i++) {
-        let t = new Date(d.getTime() - (i * 6 * 60000));
-        horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z"));
-      }
+      const horodatages = []; let d = new Date(); d.setUTCMinutes(d.getUTCMinutes() - (d.getUTCMinutes()%6), 0, 0);
+      for (let i = 0; i <= 10; i++) { let t = new Date(d.getTime() - (i * 6 * 60000)); horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z")); }
 
       const resultats = [];
       for (let date of horodatages) {
           let url = urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: stationId, date: date, format: "json" });
           try {
               let r = await fetch(url, { headers: { "apikey": cleApi } });
-              if (r.ok) {
-                  let d = await r.json();
-                  let o = Array.isArray(d) ? d[0] : d;
-                  if (o && o.validity_time) { normaliserObs(o); resultats.push(o); }
-              }
+              if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) { normaliserObs(o); resultats.push(o); } }
           } catch(e) {}
           await new Promise(r => setTimeout(r, 60)); 
       }
 
-      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-      let icao = getIcao(window.actuelleStationNom);
+      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim(); let icao = getIcao(window.actuelleStationNom);
       if (icao && cleCheckWX) {
           let aeroHistResult = await fetchCheckWXHistory(icao, cleCheckWX, 3); 
           if (aeroHistResult && aeroHistResult.data && aeroHistResult.data.length > 0) {
@@ -1608,9 +1267,7 @@
                       let tObs = new Date(obs.validity_time).getTime();
                       let closest = aeroHistResult.data.reduce((prev, curr) => Math.abs(new Date(curr.observed).getTime() - tObs) < Math.abs(new Date(prev.observed).getTime() - tObs) ? curr : prev);
                       if (closest && closest.observed && Math.abs(new Date(closest.observed).getTime() - tObs) <= 45 * 60000) {
-                          if (!estValeurManquante(closest.n)) obs.n = closest.n;
-                          if (!estValeurManquante(closest.ww)) obs.ww = closest.ww;
-                          if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
+                          if (!estValeurManquante(closest.n)) obs.n = closest.n; if (!estValeurManquante(closest.ww)) obs.ww = closest.ww; if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
                       }
                   }
               });
@@ -1619,16 +1276,9 @@
 
       if (resultats.length > 0) {
           resultats.sort((a, b) => new Date(b.validity_time) - new Date(a.validity_time));
-          let newestHist = resultats[0];
-          let currentCached = window.stationsCache[stationId];
-          let timeHist = new Date(newestHist.validity_time).getTime();
-          let timeCached = currentCached && currentCached.validity_time ? new Date(currentCached.validity_time).getTime() : 0;
-          
-          if (timeHist > timeCached) {
-              window.stationsCache[stationId] = newestHist;
-              afficherDonneesDetaillees([newestHist]);
-              window.recalculerReseauUI(); 
-          }
+          let newestHist = resultats[0]; let currentCached = window.stationsCache[stationId];
+          let timeHist = new Date(newestHist.validity_time).getTime(); let timeCached = currentCached && currentCached.validity_time ? new Date(currentCached.validity_time).getTime() : 0;
+          if (timeHist > timeCached) { window.stationsCache[stationId] = newestHist; afficherDonneesDetaillees([newestHist]); window.recalculerReseauUI(); }
       }
 
       afficherHistorique(resultats, true);
@@ -1638,17 +1288,11 @@
   window.chargerHistorique6mPourHeure = async function(dateCibleIso) {
     const cleApi = document.getElementById("apikey").value.trim();
     document.getElementById("titreHistorique").textContent = "Détail 6 min : " + new Date(dateCibleIso).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
-    document.getElementById("btnHist24h").style.display = "inline-block";
-    document.getElementById("btnHist24h").textContent = "⬅️ Retour 24h";
-    document.getElementById("btnHist1h").style.display = "none";
-    document.getElementById("contenuHistorique").innerHTML = "<p>Récupération du flux rapide...</p>";
+    document.getElementById("btnHist24h").style.display = "inline-block"; document.getElementById("btnHist24h").textContent = "⬅️ Retour 24h";
+    document.getElementById("btnHist1h").style.display = "none"; document.getElementById("contenuHistorique").innerHTML = "<p>Récupération du flux rapide...</p>";
 
-    const dateCible = new Date(dateCibleIso);
-    const horodatages = [];
-    for (let i = 0; i <= 9; i++) {
-        let t = new Date(dateCible.getTime() - (i * 6 * 60000));
-        horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z"));
-    }
+    const dateCible = new Date(dateCibleIso); const horodatages = [];
+    for (let i = 0; i <= 9; i++) { let t = new Date(dateCible.getTime() - (i * 6 * 60000)); horodatages.push(t.toISOString().replace(/\.\d{3}Z$/, "Z")); }
 
     try {
       const resultats = [];
@@ -1656,17 +1300,12 @@
           let url = urlProxy("/public/DPObs/v2/station/infrahoraire-6m", { id_station: window.actuelleStationId, date: date, format: "json" });
           try {
               let r = await fetch(url, { headers: { "apikey": cleApi } });
-              if (r.ok) {
-                  let d = await r.json();
-                  let o = Array.isArray(d) ? d[0] : d;
-                  if (o && o.validity_time) { normaliserObs(o); resultats.push(o); }
-              }
+              if (r.ok) { let d = await r.json(); let o = Array.isArray(d) ? d[0] : d; if (o && o.validity_time) { normaliserObs(o); resultats.push(o); } }
           } catch(e) {}
           await new Promise(r => setTimeout(r, 60)); 
       }
 
-      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim();
-      let icao = getIcao(window.actuelleStationNom);
+      const cleCheckWX = document.getElementById("apikeyCheckWX").value.trim(); let icao = getIcao(window.actuelleStationNom);
       if (icao && cleCheckWX) {
           let aeroHistResult = await fetchCheckWXHistory(icao, cleCheckWX, 24);
           if (aeroHistResult && aeroHistResult.data && aeroHistResult.data.length > 0) {
@@ -1675,9 +1314,7 @@
                       let tObs = new Date(obs.validity_time).getTime();
                       let closest = aeroHistResult.data.reduce((prev, curr) => Math.abs(new Date(curr.observed).getTime() - tObs) < Math.abs(new Date(prev.observed).getTime() - tObs) ? curr : prev);
                       if (closest && closest.observed && Math.abs(new Date(closest.observed).getTime() - tObs) <= 45 * 60000) {
-                          if (!estValeurManquante(closest.n)) obs.n = closest.n;
-                          if (!estValeurManquante(closest.ww)) obs.ww = closest.ww;
-                          if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
+                          if (!estValeurManquante(closest.n)) obs.n = closest.n; if (!estValeurManquante(closest.ww)) obs.ww = closest.ww; if (!estValeurManquante(closest.hbas)) obs.hbas = closest.hbas;
                       }
                   }
               });
@@ -1686,15 +1323,9 @@
       
       if (resultats.length > 0) {
           resultats.sort((a, b) => new Date(b.validity_time) - new Date(a.validity_time));
-          let newestHist = resultats[0];
-          let currentCached = window.stationsCache[window.actuelleStationId];
-          let timeHist = new Date(newestHist.validity_time).getTime();
-          let timeCached = currentCached && currentCached.validity_time ? new Date(currentCached.validity_time).getTime() : 0;
-          if (timeHist > timeCached) {
-              window.stationsCache[window.actuelleStationId] = newestHist;
-              afficherDonneesDetaillees([newestHist]);
-              window.recalculerReseauUI(); 
-          }
+          let newestHist = resultats[0]; let currentCached = window.stationsCache[window.actuelleStationId];
+          let timeHist = new Date(newestHist.validity_time).getTime(); let timeCached = currentCached && currentCached.validity_time ? new Date(currentCached.validity_time).getTime() : 0;
+          if (timeHist > timeCached) { window.stationsCache[window.actuelleStationId] = newestHist; afficherDonneesDetaillees([newestHist]); window.recalculerReseauUI(); }
       }
 
       afficherHistorique(resultats, true);
@@ -1702,18 +1333,14 @@
   };
 
   function afficherHistorique(resultats, isInfrahoraire) {
-    const zone = document.getElementById("contenuHistorique");
-    const capteursPresents = new Set();
-    let estModeHoraire = false;
+    const zone = document.getElementById("contenuHistorique"); const capteursPresents = new Set(); let estModeHoraire = false;
 
     resultats.forEach(obs => {
-      if (!obs) return;
-      if ('rr1' in obs) estModeHoraire = true; 
+      if (!obs) return; if ('rr1' in obs) estModeHoraire = true; 
       Object.keys(obs).forEach(key => { if (PARAM_INFO_DETAIL[key] && !estValeurManquante(obs[key])) capteursPresents.add(key); });
     });
 
-    capteursPresents.add('t');
-    if (estModeHoraire) capteursPresents.add('rr1'); else capteursPresents.add('rr_per');
+    capteursPresents.add('t'); if (estModeHoraire) capteursPresents.add('rr1'); else capteursPresents.add('rr_per');
 
     const clesExcluesHistorique = ['metar_decode', 'metar_brut', 'nuages_metar']; 
     const clesOrdonnees = Object.keys(PARAM_INFO_DETAIL).filter(k => capteursPresents.has(k) && !clesExcluesHistorique.includes(k));
@@ -1733,14 +1360,12 @@
       else html += `<td style="white-space:nowrap;"><strong>${heure}</strong></td>`;
       
       clesOrdonnees.forEach(key => {
-        const val = obs[key];
-        const info = PARAM_INFO_DETAIL[key];
+        const val = obs[key]; const info = PARAM_INFO_DETAIL[key];
         if (estValeurManquante(val)) {
              if (['rr_per', 'rr1', 'sss'].includes(key)) html += `<td style="white-space:nowrap;">0 ${info.unit}</td>`;
              else html += `<td style="color:#64748b; white-space:nowrap;">—</td>`;
         } else {
-             let displayVal = info.transform ? info.transform(val) : val;
-             html += `<td style="white-space:nowrap;">${displayVal} ${info.unit || ''}</td>`;
+             let displayVal = info.transform ? info.transform(val) : val; html += `<td style="white-space:nowrap;">${displayVal} ${info.unit || ''}</td>`;
         }
       });
       html += `</tr>`;
@@ -1753,64 +1378,39 @@
   // FONCTIONS MODE TERRAIN (SUPABASE ET GPS)
   // ==========================================================
 
-  window.modeActuel = 'bureau';
-  window.gpsWatcher = null; // Variable pour stocker la session GPS
+  window.modeActuel = 'supervision';
+  window.gpsWatcher = null;
 
-  // Formule mathématique pour calculer la distance entre deux coordonnées GPS (en km)
   function calculerDistance(lat1, lon1, lat2, lon2) {
-      var R = 6371; // Rayon de la terre en km
-      var dLat = (lat2 - lat1) * Math.PI / 180;
-      var dLon = (lon2 - lon1) * Math.PI / 180;
-      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      var d = R * c; 
+      var R = 6371; var dLat = (lat2 - lat1) * Math.PI / 180; var dLon = (lon2 - lon1) * Math.PI / 180;
+      var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); var d = R * c; 
       return d;
   }
 
   window.demarrerGeolocalisation = function() {
       const statusEl = document.getElementById("gpsStatus");
-      
-      // Si le navigateur ou le téléphone ne permet pas le GPS
       if (!navigator.geolocation) {
-          statusEl.textContent = "GPS non supporté par cet appareil.";
-          statusEl.style.color = "#ef4444";
-          window.peuplerSelectTerrain(); // On remplit la liste normalement, sans distance
-          return;
+          statusEl.textContent = "GPS non supporté par cet appareil."; statusEl.style.color = "#ef4444";
+          window.peuplerSelectTerrain(); return;
       }
       
-      statusEl.textContent = "Recherche satellite en cours...";
-      statusEl.style.color = "#f59e0b";
-
-      // Lancement de l'écoute GPS en direct
+      statusEl.textContent = "Recherche satellite en cours..."; statusEl.style.color = "#f59e0b";
       window.gpsWatcher = navigator.geolocation.watchPosition(
           (position) => {
-              const lat = position.coords.latitude;
-              const lon = position.coords.longitude;
-              const precision = Math.round(position.coords.accuracy);
-              
-              statusEl.textContent = `📍 GPS Actif (précision : ${precision}m)`;
-              statusEl.style.color = "#10b981";
-              
-              // On envoie nos coordonnées à la fonction qui remplit la liste
+              const lat = position.coords.latitude; const lon = position.coords.longitude; const precision = Math.round(position.coords.accuracy);
+              statusEl.textContent = `📍 GPS Actif (précision : ${precision}m)`; statusEl.style.color = "#10b981";
               window.peuplerSelectTerrain(lat, lon);
           },
           (error) => {
-              // Si tu refuses la permission ou qu'il y a un problème de signal
-              statusEl.textContent = "Signal GPS perdu ou refusé.";
-              statusEl.style.color = "#ef4444";
-              window.peuplerSelectTerrain(); 
+              statusEl.textContent = "Signal GPS perdu ou refusé."; statusEl.style.color = "#ef4444"; window.peuplerSelectTerrain(); 
           },
           { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
       );
   };
 
   window.arreterGeolocalisation = function() {
-      if (window.gpsWatcher !== null) {
-          navigator.geolocation.clearWatch(window.gpsWatcher);
-          window.gpsWatcher = null;
-      }
+      if (window.gpsWatcher !== null) { navigator.geolocation.clearWatch(window.gpsWatcher); window.gpsWatcher = null; }
   };
 
   window.peuplerSelectTerrain = function(latUser = null, lonUser = null) {
@@ -1821,8 +1421,6 @@
       select.innerHTML = '<option value="">Sélectionnez une station...</option>';
       
       let stationsList = [];
-      
-      // Pour chaque station en mémoire, on calcule la distance
       for (const [id, meta] of Object.entries(window.stationsMetaCache)) {
           let dist = null;
           if (latUser !== null && lonUser !== null && window.stationsCoordCache[id]) {
@@ -1831,81 +1429,49 @@
           stationsList.push({ id: id, nom: meta.nom, dist: dist });
       }
       
-      // Si on a le GPS, on trie de la plus proche à la plus lointaine
-      if (latUser !== null) {
-          stationsList.sort((a, b) => a.dist - b.dist);
-      } else {
-          // Sinon, classement alphabétique classique
-          stationsList.sort((a, b) => a.nom.localeCompare(b.nom));
-      }
+      if (latUser !== null) { stationsList.sort((a, b) => a.dist - b.dist); } else { stationsList.sort((a, b) => a.nom.localeCompare(b.nom)); }
 
       let premierDeLaListe = true;
       for (const st of stationsList) {
-          let opt = document.createElement('option');
-          opt.value = st.id;
-          
+          let opt = document.createElement('option'); opt.value = st.id;
           let texte = `${st.nom} (${st.id})`;
-          if (st.dist !== null) {
-              texte += ` — à ${st.dist.toFixed(1)} km`; // Affiche la distance !
-          }
-          opt.textContent = texte;
-          select.appendChild(opt);
+          if (st.dist !== null) { texte += ` — à ${st.dist.toFixed(1)} km`; }
+          opt.textContent = texte; select.appendChild(opt);
           
-          // SÉLECTION AUTOMATIQUE : 
-          // Si c'est la station la plus proche, qu'elle est à moins de 5 km, 
-          // et que tu n'avais pas encore sélectionné de station manuellement
-          if (premierDeLaListe && st.dist !== null && st.dist < 5.0 && !valeurActuelle) {
-              opt.selected = true;
-              window.stationTerrainId = st.id;
-              document.getElementById("menuActionsTerrain").style.display = "block";
+          if (premierDeLaListe && st.dist !== null && !valeurActuelle) {
+              opt.selected = true; window.stationTerrainId = st.id; document.getElementById("menuActionsTerrain").style.display = "block";
           }
           premierDeLaListe = false;
       }
       
-      // Si on avait déjà choisi une station, on la garde sélectionnée (même si on bouge)
-      if (valeurActuelle && select.querySelector(`option[value="${valeurActuelle}"]`)) {
-          select.value = valeurActuelle;
-      }
+      if (valeurActuelle && select.querySelector(`option[value="${valeurActuelle}"]`)) { select.value = valeurActuelle; }
   };
 
   window.basculerMode = function() {
       const btn = document.getElementById('btnBasculerTerrain');
-      if (window.modeActuel === 'bureau') {
-          window.modeActuel = 'terrain';
-          document.body.classList.add('bg-terrain');
-          btn.innerHTML = 'Mode Bureau 💻';
-          btn.classList.add('mode-bureau');
+      if (window.modeActuel === 'supervision') {
+          window.modeActuel = 'terrain'; document.body.classList.add('bg-terrain');
+          btn.innerHTML = 'Mode Supervision 🖥️'; btn.classList.add('mode-supervision');
           
-          document.getElementById('configCard').style.display = 'none';
-          document.getElementById('zoneReseau').style.display = 'none';
-          document.getElementById('zoneDetailContainer').style.display = 'none';
-          document.getElementById('zoneTerrain').style.display = 'block';
-          
-          // DÉMARRAGE DU GPS EN MODE TERRAIN
+          document.getElementById('configCard').style.display = 'none'; document.getElementById('zoneReseau').style.display = 'none';
+          document.getElementById('zoneDetailContainer').style.display = 'none'; document.getElementById('zoneTerrain').style.display = 'block';
           window.demarrerGeolocalisation();
       } else {
-          window.modeActuel = 'bureau';
-          document.body.classList.remove('bg-terrain');
-          btn.innerHTML = 'Mode Terrain 📍';
-          btn.classList.remove('mode-bureau');
+          window.modeActuel = 'supervision'; document.body.classList.remove('bg-terrain');
+          btn.innerHTML = 'Mode Terrain 📍'; btn.classList.remove('mode-supervision');
           
-          // ARRÊT DU GPS EN MODE BUREAU (pour économiser la batterie)
           window.arreterGeolocalisation();
           
           document.getElementById('zoneTerrain').style.display = 'none';
-          if (document.getElementById('apikey').value.trim() !== '') {
-              document.getElementById('zoneReseau').style.display = 'block';
-          } else {
-              document.getElementById('configCard').style.display = 'block';
-          }
+          if (document.getElementById('apikey').value.trim() !== '') { document.getElementById('zoneReseau').style.display = 'block'; } 
+          else { document.getElementById('configCard').style.display = 'block'; }
           mettreAJourFondEcran();
       }
   };
 
   window.changerStationTerrain = function() {
       window.stationTerrainId = document.getElementById("selectStationTerrain").value;
-      document.getElementById("menuActionsTerrain").style.display = window.stationTerrainId ? "block" : "none";
-      window.fermerFormulaires();
+      document.getElementById("menuActionsTerrain").style.display = window.stationTerrainId ? "block" : "none"; window.fermerFormulaires();
   };
 
   window.ouvrirFormulaire = function(type) {
@@ -1919,8 +1485,7 @@
 
   window.fermerFormulaires = function() {
       ["formObservation", "consultMaintenance", "formPhoto", "formMateriel", "formEtalonnage"].forEach(id => {
-          let el = document.getElementById(id);
-          if (el) el.style.display = "none";
+          let el = document.getElementById(id); if (el) el.style.display = "none";
       });
       let menu = document.getElementById("menuActionsTerrain");
       if (menu) menu.style.display = window.stationTerrainId ? "block" : "none";
@@ -1951,7 +1516,8 @@
           if(etalReq.data) etalReq.data.forEach(d => {
               let resStr = d.est_conforme ? "✅ CONFORME" : "❌ HORS TOLÉRANCE";
               let det = `Pluvio ${d.type_pluvio} - ${resStr}. `;
-              if(d.type_pluvio === 'Augets') det += `Erreur: ${d.erreur_pct}%`; else det += `Ecart: ${d.ecart}g`;
+              if(d.type_pluvio === 'Augets') det += `G: ${d.auget_gauche||0}mm | D: ${d.auget_droit||0}mm (Erreur: ${d.erreur_pct}%)`; 
+              else det += `Ecart: ${d.ecart}g`;
               tousLesEvenements.push({date: d.created_at, type: "📊 Étalonnage", detail: det, badge: "#3b82f6"});
           });
           tousLesEvenements.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -2024,24 +1590,52 @@
       if(error) alert("Erreur : " + error.message); else { alert("✅ Matériel sauvegardé !"); fermerFormulaires(); }
   };
 
+  async function compresserImage(file, maxWidth, maxHeight, quality) {
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = event => {
+              const img = new Image();
+              img.src = event.target.result;
+              img.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  let width = img.width; let height = img.height;
+
+                  if (width > height) {
+                      if (width > maxWidth) { height = Math.round((height *= maxWidth / width)); width = maxWidth; }
+                  } else {
+                      if (height > maxHeight) { width = Math.round((width *= maxHeight / height)); height = maxHeight; }
+                  }
+                  canvas.width = width; canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, width, height);
+                  
+                  canvas.toBlob((blob) => { resolve(blob); }, 'image/jpeg', quality);
+              };
+              img.onerror = error => reject(error);
+          };
+          reader.onerror = error => reject(error);
+      });
+  }
+
   window.envoyerPhoto = async function() {
       const fileInput = document.getElementById('photoInput');
       if(!fileInput.files.length) return alert("Veuillez prendre ou sélectionner une photo.");
       
       let file = fileInput.files[0];
       let btn = event.target;
-      btn.innerText = "⏳ Envoi vers Supabase en cours...";
+      btn.innerText = "⏳ Compression & Envoi...";
       btn.disabled = true;
 
       try {
-          let extension = file.name.split('.').pop();
-          if (!extension || extension === file.name) extension = "jpg"; 
-          let fileName = `station_${window.stationTerrainId}_${Date.now()}.${extension}`;
+          // Compression locale de l'image (1200px max, 70% qualité)
+          let blobCompress = await compresserImage(file, 1200, 1200, 0.7);
+          let fileName = `station_${window.stationTerrainId}_${Date.now()}.jpg`;
 
           const { data: uploadData, error: uploadError } = await supabaseClient
               .storage
               .from('photos_maintenance')
-              .upload(fileName, file, { cacheControl: '3600', upsert: false });
+              .upload(fileName, blobCompress, { cacheControl: '3600', upsert: false });
 
           if (uploadError) throw uploadError;
 
@@ -2060,7 +1654,7 @@
           const { error: dbError } = await supabaseClient.from('photos').insert([payload]);
           if (dbError) throw dbError;
 
-          alert("✅ Photo sauvegardée avec succès !"); 
+          alert("✅ Photo compressée et sauvegardée avec succès !"); 
           fermerFormulaires(); 
       } catch (error) {
           console.error("Erreur lors de l'envoi :", error);
