@@ -306,7 +306,16 @@
     <div class="card" id="formPhoto" style="display:none;">
         <h2>📸 Envoi de Photo</h2>
         <div class="form-group"><label>Type :</label><select id="photoTag"><option value="Generale">Vue générale</option><option value="Pluviometre">Pluviomètre</option></select></div>
-        <div class="form-group"><label>Photo :</label><input type="file" accept="image/*" capture="environment" id="photoInput" style="background:white; color:black;"></div>
+        <div class="form-group">
+            <label>Photo :</label>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <label for="photoInput" style="cursor:pointer; font-size:40px; margin:0; padding:10px 20px; background:rgba(255,255,255,0.6); border-radius:12px; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.2); transition: transform 0.2s;">
+                    📷
+                </label>
+                <span id="photoFileName" style="font-size:13px; color:#1e293b; font-weight:bold;">Aucune sélection</span>
+            </div>
+            <input type="file" accept="image/*" capture="environment" id="photoInput" style="display:none;" onchange="document.getElementById('photoFileName').textContent = this.files.length ? this.files[0].name : 'Aucune sélection';">
+        </div>
         <button class="btn-primary" style="background:#10b981;" onclick="envoyerPhoto()">Envoyer vers Supabase</button>
         <button class="btn-primary" style="background:#64748b; margin-top:10px;" onclick="fermerFormulaires()">Annuler</button>
     </div>
@@ -453,7 +462,7 @@
   }
   function getVentColor(vitesseKmh) {
       if (vitesseKmh < 15) return '#bfdbfe'; if (vitesseKmh < 30) return '#60a5fa'; if (vitesseKmh < 50) return '#3b82f6'; 
-      if (vitesseKmh < 70) return '#1d4ed8'; if (vitesseKmh < 90) return '#1e3a8a'; return '#020617';                      
+      if (vitesseKmh < 70) return '#1d4ed8'; if (vitesseKmh < 90) return '#1e3a8a'; return '#020617';                       
   }
   function getHumiditeColor(u) {
       if (u < 30) return '#b45309'; if (u < 50) return '#f59e0b'; if (u < 70) return '#fcd34d'; 
@@ -878,9 +887,14 @@
     let isOffline = (!obs || ageMin >= SEUIL_INACTIVITE_MIN);
     const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
     let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k])) : [];
+    
+    // --- NOUVELLE LOGIQUE DE BASELINE ---
     let baseline = window.stationsBaselines[station.id] || [];
-    if (baseline.length === 0 && capteursActuels.length > 0) { 
-        window.stationsBaselines[station.id] = capteursActuels; localStorage.setItem('meteo_baselines', JSON.stringify(window.stationsBaselines)); baseline = capteursActuels;
+    let nouvelleBaseline = Array.from(new Set([...baseline, ...capteursActuels]));
+    if (nouvelleBaseline.length > baseline.length) {
+        window.stationsBaselines[station.id] = nouvelleBaseline;
+        localStorage.setItem('meteo_baselines', JSON.stringify(window.stationsBaselines));
+        baseline = nouvelleBaseline;
     }
     
     let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
@@ -901,10 +915,24 @@
       document.getElementById("zoneTableauAlertes").style.display = "block";
       const nomEchappe = station.nom.replace(/'/g, "\\'"); 
       let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
+      
+      // --- NOUVELLE LOGIQUE D'AFFICHAGE DE L'HEURE ---
+      let ageTexte = "";
+      if (isOffline) {
+          if (obs && obs.validity_time) {
+              let dateObs = new Date(obs.validity_time);
+              ageTexte = "Dernier: " + dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+          } else {
+              ageTexte = "Muette";
+          }
+      } else {
+          ageTexte = ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`;
+      }
+
       let trHtml = `<tr class="row-${statut}">`;
       trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${station.id}', '${nomEchappe}', '${station.numer_sta || ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${station.nom} (${station.id})</a></strong><br>
                  <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
-      trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${isOffline ? "> 30 min" : (ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`)}</td>`;
+      trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${ageTexte}</td>`;
       
       PARAMS_RESEAU.forEach(p => { 
         if (isOffline || !obs) {
@@ -935,7 +963,16 @@
           
           const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
           let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k])) : [];
-          let baseline = window.stationsBaselines[id] || capteursActuels;
+          
+          // --- NOUVELLE LOGIQUE DE BASELINE ---
+          let baseline = window.stationsBaselines[id] || [];
+          let nouvelleBaseline = Array.from(new Set([...baseline, ...capteursActuels]));
+          if (nouvelleBaseline.length > baseline.length) {
+              window.stationsBaselines[id] = nouvelleBaseline;
+              localStorage.setItem('meteo_baselines', JSON.stringify(window.stationsBaselines));
+              baseline = nouvelleBaseline;
+          }
+
           let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
           let aUnDefautCritique = isOffline ? true : estValeurManquante(obs.t);
           
@@ -949,10 +986,24 @@
           if (statut === "warn" || statut === "fault") {
               const nomEchappe = meta.nom.replace(/'/g, "\\'"); 
               let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
+              
+              // --- NOUVELLE LOGIQUE D'AFFICHAGE DE L'HEURE ---
+              let ageTexte = "";
+              if (isOffline) {
+                  if (obs && obs.validity_time) {
+                      let dateObs = new Date(obs.validity_time);
+                      ageTexte = "Dernier: " + dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                  } else {
+                      ageTexte = "Muette";
+                  }
+              } else {
+                  ageTexte = ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`;
+              }
+
               let trHtml = `<tr class="row-${statut}">`;
               trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${id}', '${nomEchappe}', '${obs ? (obs.numer_sta || "") : ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${meta.nom} (${id})</a></strong><br>
                          <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
-              trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${isOffline ? "> 30 min" : (ageMin <= 0 ? "à l'instant" : `il y a ${ageMin} min`)}</td>`;
+              trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${ageTexte}</td>`;
               
               PARAMS_RESEAU.forEach(p => { 
                   if (isOffline || !obs) { trHtml += `<td class="cell-na">—</td>`; } 
@@ -1008,7 +1059,7 @@
 
       // Si un mode (Temp/Pluie/Hum/Vent) est actif, masquer d'office la station si elle est muette
       if (mode !== 'none' && isOffline) {
-          showMarker = false;
+        showMarker = false;
       }
 
       let text = ""; let overrideColor = null; let showTooltip = false;
@@ -1396,21 +1447,24 @@
       }
       
       statusEl.textContent = "Recherche satellite en cours..."; statusEl.style.color = "#f59e0b";
-      window.gpsWatcher = navigator.geolocation.watchPosition(
+      
+      navigator.geolocation.getCurrentPosition(
           (position) => {
               const lat = position.coords.latitude; const lon = position.coords.longitude; const precision = Math.round(position.coords.accuracy);
-              statusEl.textContent = `📍 GPS Actif (précision : ${precision}m)`; statusEl.style.color = "#10b981";
+              statusEl.textContent = `📍 Station la plus proche pré-sélectionnée (précision : ${precision}m)`; statusEl.style.color = "#10b981";
               window.peuplerSelectTerrain(lat, lon);
           },
           (error) => {
-              statusEl.textContent = "Signal GPS perdu ou refusé."; statusEl.style.color = "#ef4444"; window.peuplerSelectTerrain(); 
+              statusEl.textContent = "Signal GPS perdu ou refusé."; statusEl.style.color = "#ef4444"; 
+              window.peuplerSelectTerrain(); 
           },
           { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
       );
   };
 
   window.arreterGeolocalisation = function() {
-      if (window.gpsWatcher !== null) { navigator.geolocation.clearWatch(window.gpsWatcher); window.gpsWatcher = null; }
+      const statusEl = document.getElementById("gpsStatus");
+      if (statusEl) { statusEl.textContent = "Recherche GPS en cours..."; statusEl.style.color = "#10b981"; }
   };
 
   window.peuplerSelectTerrain = function(latUser = null, lonUser = null) {
@@ -1421,27 +1475,30 @@
       select.innerHTML = '<option value="">Sélectionnez une station...</option>';
       
       let stationsList = [];
+      let closestId = null;
+      let minDist = Infinity;
+
       for (const [id, meta] of Object.entries(window.stationsMetaCache)) {
           let dist = null;
           if (latUser !== null && lonUser !== null && window.stationsCoordCache[id]) {
               dist = calculerDistance(latUser, lonUser, window.stationsCoordCache[id].lat, window.stationsCoordCache[id].lon);
+              if (dist < minDist) { minDist = dist; closestId = id; }
           }
           stationsList.push({ id: id, nom: meta.nom, dist: dist });
       }
       
-      if (latUser !== null) { stationsList.sort((a, b) => a.dist - b.dist); } else { stationsList.sort((a, b) => a.nom.localeCompare(b.nom)); }
+      stationsList.sort((a, b) => a.nom.localeCompare(b.nom));
 
-      let premierDeLaListe = true;
       for (const st of stationsList) {
           let opt = document.createElement('option'); opt.value = st.id;
           let texte = `${st.nom} (${st.id})`;
-          if (st.dist !== null) { texte += ` — à ${st.dist.toFixed(1)} km`; }
+          
+          if (st.dist !== null && st.id === closestId) { texte += ` 📍 Plus proche (${st.dist.toFixed(1)} km)`; }
           opt.textContent = texte; select.appendChild(opt);
           
-          if (premierDeLaListe && st.dist !== null && !valeurActuelle) {
+          if (latUser !== null && st.id === closestId && !valeurActuelle) {
               opt.selected = true; window.stationTerrainId = st.id; document.getElementById("menuActionsTerrain").style.display = "block";
           }
-          premierDeLaListe = false;
       }
       
       if (valeurActuelle && select.querySelector(`option[value="${valeurActuelle}"]`)) { select.value = valeurActuelle; }
@@ -1499,15 +1556,12 @@
       if(error) alert("Erreur : " + error.message); else { alert("✅ Observation enregistrée !"); document.getElementById("obsTexte").value = ""; fermerFormulaires(); }
   };
 
-  // NOUVELLE FONCTION : SUPPRESSION D'UNE INTERVENTION (AVEC FICHIER SI PHOTO)
   window.supprimerIntervention = async function(tableNom, idRow, urlImage) {
       if(!confirm("⚠️ Êtes-vous sûr de vouloir supprimer définitivement cet élément ?")) return;
 
       try {
-          // 1. Si c'est une photo, on essaie d'abord d'effacer le fichier du Storage
           if (tableNom === 'photos' && urlImage) {
               try {
-                  // Extraction du nom de fichier exact à partir de l'URL publique
                   const nomFichier = urlImage.split('/public/photos_maintenance/')[1];
                   if (nomFichier) {
                       await supabaseClient.storage.from('photos_maintenance').remove([nomFichier]);
@@ -1517,13 +1571,11 @@
               }
           }
 
-          // 2. On supprime la ligne dans la base de données
           const { error } = await supabaseClient.from(tableNom).delete().eq('id', idRow);
           if(error) throw error;
 
           alert("🗑️ Suppression réussie !");
           
-          // 3. On rafraîchit la liste de l'historique
           window.chargerHistoriqueMaintenance();
           
       } catch (error) {
@@ -1570,17 +1622,15 @@
               let time = ev.date ? new Date(ev.date).getTime() : NaN;
               let dateStr = (isNaN(time) || time === 0) ? "Date inconnue" : new Date(time).toLocaleString('fr-FR');
               
-              // On échappe l'URL de l'image pour éviter les bugs javascript dans le onclick
               let urlDriveClean = ev.lien ? ev.lien.replace(/'/g, "\\'") : '';
 
               html += `<li style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 10px; margin-bottom: 10px; border-radius: 8px; position: relative;">`;
               
-              // Bouton Poubelle en haut à droite
               html += `<button onclick="supprimerIntervention('${ev.table_nom}', '${ev.db_id}', '${urlDriveClean}')" style="position:absolute; top:8px; right:8px; background:none; border:none; cursor:pointer; font-size:16px; opacity:0.7; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)';" onmouseout="this.style.opacity='0.7'; this.style.transform='scale(1)'; " title="Supprimer">🗑️</button>`;
 
               html += `<div style="font-size: 11px; color:#94a3b8; margin-bottom: 4px;">📅 ${dateStr}</div>`;
               html += `<div><span style="background:${ev.badge}; color:white; padding: 2px 6px; border-radius: 4px; font-size:11px; font-weight:bold; margin-right: 8px;">${ev.type}</span></div>`;
-              html += `<div style="margin-top: 6px; font-size: 14px; padding-right: 25px;">${ev.detail}</div>`; // padding-right pour ne pas chevaucher la corbeille
+              html += `<div style="margin-top: 6px; font-size: 14px; padding-right: 25px;">${ev.detail}</div>`; 
               if(ev.lien && ev.lien.startsWith("http")) html += `<div style="margin-top: 8px;"><a href="${ev.lien}" target="_blank" style="color: #3b82f6; text-decoration: underline; font-size:12px;">🔗 Voir l'image jointe</a></div>`;
               html += `</li>`;
           });
@@ -1637,7 +1687,6 @@
   };
 
   window.enregistrerMateriel = async function() {
-      // On génère la date du jour au format YYYY-MM-DD
       const dateAujourdhui = new Date().toISOString().split('T')[0];
 
       let payload = { 
@@ -1716,6 +1765,8 @@
           if (dbError) throw dbError;
 
           alert("✅ Photo compressée et sauvegardée avec succès !"); 
+          document.getElementById('photoFileName').textContent = 'Aucune sélection';
+          fileInput.value = "";
           fermerFormulaires(); 
       } catch (error) {
           console.error("Erreur lors de l'envoi :", error);
