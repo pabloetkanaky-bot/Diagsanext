@@ -31,7 +31,7 @@
     body { 
       font-family: 'Inter', sans-serif; 
       margin: 0; 
-      padding: 20px;
+      padding: 20px; 
       color: #1e293b; 
       background-color: #e0e5ec;
       background-size: cover;
@@ -83,7 +83,7 @@
     .btn-action { display: inline-block; padding: 8px 16px; font-size: 13px; font-weight: bold; border-radius: 6px; text-decoration: none; cursor: pointer; border: none; color: white; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; width: auto; }
     .btn-action:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
     .btn-refresh { background-color: rgba(108, 117, 125, 0.8); }
-    .btn-hist { background-color: rgba(23, 162, 184, 0.8); }
+    .btn-hist { background-color: rgba(239, 162, 184, 0.8); }
 
     .btn-icon { background: transparent; border: none; padding: 0; margin-left: 10px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none; transition: all 0.2s; cursor: pointer; }
     .btn-icon img { width: 32px; height: 32px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
@@ -125,7 +125,10 @@
     #contenuHistorique tr:nth-child(even) td:first-child { background-color: #f1f5f9; }
 
     .cell-ok { background: rgba(236, 253, 245, 0.4); }
-    .cell-fault { background: rgba(254, 242, 242, 0.5); color:#b91c1c; font-weight:bold; }
+    .cell-warn { background: rgba(254, 243, 199, 0.75) !important; color: #b45309 !important; font-weight: 800 !important; border: 1.5px solid #f59e0b !important; }
+    .cell-fault { background: rgba(254, 226, 226, 0.75) !important; color: #b91c1c !important; font-weight: 800 !important; border: 1.5px solid #ef4444 !important; }
+    body.bg-terrain .cell-warn { background: rgba(245, 158, 11, 0.35) !important; color: #fcd34d !important; border: 1.5px solid #f59e0b !important; }
+    body.bg-terrain .cell-fault { background: rgba(239, 68, 68, 0.35) !important; color: #fca5a5 !important; border: 1.5px solid #ef4444 !important; }
     .cell-na { background: rgba(248, 250, 252, 0.3); color:#475569; font-style:italic; }
     .cell-trou { color: #b91c1c; font-weight: bold; }
     .age-stale { color:#b91c1c; font-weight:bold; }
@@ -372,7 +375,7 @@
     t_10:            { label: "Temp. sol -10cm",   unit: "°C", transform: kelvinToCelsius, group: "Température" },
     t_20:            { label: "Temp. sol -20cm",   unit: "°C", transform: kelvinToCelsius, group: "Température" },
     t_50:            { label: "Temp. sol -50cm",   unit: "°C", transform: kelvinToCelsius, group: "Température" },
-    t_100:           { label: "Temp. sol -1m",  unit: "°C", transform: kelvinToCelsius, group: "Température" },
+    t_100:           { label: "Temp. sol -1m",   unit: "°C", transform: kelvinToCelsius, group: "Température" },
     u:               { label: "Humidité",        unit: "%",    group: "Humidité & précipitations" },
     rr_per:          { label: "Pluie (6 min)",             unit: "mm",   group: "Humidité & précipitations" },
     rr1:             { label: "Pluie (1h)",               unit: "mm",   group: "Humidité & précipitations" },
@@ -405,7 +408,7 @@
   ];
 
   const WORKER_URL = "https://proxymeteofrance.remiparamoteur.workers.dev";
-  const STATIONS_CIBLES = [ "89003001", "89014001", "21567001", "52023002", "71014004", "89295001", "89053001", "58019001", "71022003", "58023001", "21056001", "21065001", "71056003", "52074002", "21116002", "89068001", "71081001", "89086001", "71106001", "58061001", "58062001", "21154001", "58079004", "52145001", "89131001", "89133001", "21231001", "21473001", "58106005", "71190001", "52197003", "89173001", "89192001", "21310001", "71230002", "58132001", "52248002", "71240001", "89206001", "21326001", "21527001", "52269001", "58145002", "71267001", "58149001", "71105001", "21386001", "21395001", "71289001", "89260001", "21425001", "58177001", "71320001", "52348003", "21454001", "89279002", "58199001", "21131001", "71340002", "21501003", "21503001", "58218006", "21519001", "89365001", "52450002", "21579001", "21584001", "89380001", "21603001", "71523001", "89333001", "89273001", "21564001", "71491001", "52447001", "89349005", "21561003", "71464001", "71482001", "21633002", "21638002", "89418007", "71541001", "52332001", "71558001", "58304005", "52528001", "71589001" ];
+  const STATIONS_CIBLES = [ "89003001", "89014001", "21567001", "52023002", "71014004", "89295001", "89053001", "58019001", "71022003", "58023001", "21056001", "21065001", "71056003", "52074002", "21116002", "89068001", "71081001", "89086001", "71106001", "58061001", "58062001", "21154001", "58079004", "52145001", "89131001", "89133001", "21231001", "21473001", "58106005", "71190001", "52197003", "89173001", "89192001", "21310001", "71230002", "58132001", "52248002", "71240001", "89206001", "21326001", "21527001", "52269001", "58145002", "71267001", "58149001", "71105001", "21386001", "21395001", "71289001", "89260001", "21425001", "58177001", "71320001", "52348003", "21454001", "89279002", "58199001", "21131001", "71340002", "21501003", "21503001", "58218006", "21519001", "89365001", "52450002", "21579001", "21584001", "89380001", "21603001", "71523001", "89333001", "89273001", "21564001", "71491001", "52447001", "89349005", "21561003", "71464001", "71482001", "21633002", "21638002", "89418007", "71541001", "52332001", "71558001", "58304005", "52528001", "52529001", "71589001" ];
 
   function estCible(id) { if (!id) return false; return STATIONS_CIBLES.includes(String(id).trim()); }
 
@@ -826,7 +829,7 @@
               let capteursActuels = Object.keys(c).filter(k => CLES_AUTORISEES.includes(k) && !estValeurManquante(c[k]));
               
               let baseline = window.stationsBaselines[st.id] || [];
-              baseline = baseline.filter(cap => CLES_AUTORISEES.includes(cap)); // Purge de la baseline corrompue
+              baseline = baseline.filter(cap => CLES_AUTORISEES.includes(cap));
               
               let capteursPerdus = baseline.filter(cap => !capteursActuels.includes(cap) && !EXCLUSIONS_VOLATILES.includes(cap));
 
@@ -911,7 +914,7 @@
     let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => CLES_AUTORISEES.includes(k) && !estValeurManquante(obs[k])) : [];
     
     let baseline = window.stationsBaselines[station.id] || [];
-    baseline = baseline.filter(c => CLES_AUTORISEES.includes(c)); // Nettoyage de l'ancienne baseline
+    baseline = baseline.filter(c => CLES_AUTORISEES.includes(c));
     
     let nouvelleBaseline = Array.from(new Set([...baseline, ...capteursActuels]));
     if (nouvelleBaseline.length > baseline.length) {
@@ -938,13 +941,22 @@
     if (statut === "warn" || statut === "fault") {
       document.getElementById("zoneTableauAlertes").style.display = "block";
       const nomEchappe = station.nom.replace(/'/g, "\\'"); 
-      let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
+      let listePannes = capteursPerdus.map(c => PARAM_INFO_DETAIL[c]?.label || c).join(", ");
+      
+      let badgeAnomalie = "";
+      if (isOffline) {
+          badgeAnomalie = `<span style="font-size:11px; color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px; border:1px solid rgba(239,68,68,0.4);">Station muette</span>`;
+      } else if (aUnDefautCritique) {
+          badgeAnomalie = `<span style="font-size:11px; color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px; border:1px solid rgba(239,68,68,0.4);">Défaut majeur (Température)</span>`;
+      } else {
+          badgeAnomalie = `<span style="font-size:11px; color:#d97706; font-weight:800; background:rgba(245,158,11,0.15); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px; border:1px solid rgba(245,158,11,0.4);">⚠️ Panne : ${listePannes || 'Capteur non reçu'}</span>`;
+      }
       
       let ageTexte = "";
       if (isOffline) {
           if (obs && obs.validity_time) {
               let dateObs = new Date(obs.validity_time);
-              ageTexte = "Dernier: " + dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+              ageTexte = dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
           } else {
               ageTexte = "Muette";
           }
@@ -953,8 +965,7 @@
       }
 
       let trHtml = `<tr class="row-${statut}">`;
-      trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${station.id}', '${nomEchappe}', '${station.numer_sta || ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${station.nom} (${station.id})</a></strong><br>
-                 <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
+      trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${station.id}', '${nomEchappe}', '${station.numer_sta || ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${station.nom} (${station.id})</a></strong><br>${badgeAnomalie}</td>`;
       trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${ageTexte}</td>`;
       
       PARAMS_RESEAU.forEach(p => { 
@@ -963,10 +974,17 @@
         } else {
             let valeur = obs[p.key];
             if (p.key === 'rr_per' && estValeurManquante(valeur)) valeur = 0;
-            if (!estValeurManquante(valeur)) trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
-            else if (p.key === 't') trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
-            else if (capteursPerdus.includes(p.key)) trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
-            else trHtml += `<td class="cell-na">—</td>`;
+            let estEnPanne = capteursPerdus.includes(p.key) || (p.key === 'pres' && capteursPerdus.includes('pmer'));
+            
+            if (estEnPanne) {
+                trHtml += `<td class="cell-warn">⚠ Panne</td>`;
+            } else if (!estValeurManquante(valeur)) {
+                trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
+            } else if (p.key === 't') {
+                trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
+            } else {
+                trHtml += `<td class="cell-na">—</td>`;
+            }
         }
       });
       trHtml += `</tr>`; document.getElementById("tbodyReseau").insertAdjacentHTML('beforeend', trHtml);
@@ -987,7 +1005,7 @@
           let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => CLES_AUTORISEES.includes(k) && !estValeurManquante(obs[k])) : [];
           
           let baseline = window.stationsBaselines[id] || [];
-          baseline = baseline.filter(c => CLES_AUTORISEES.includes(c)); // Nettoyage de l'ancienne baseline
+          baseline = baseline.filter(c => CLES_AUTORISEES.includes(c));
 
           let nouvelleBaseline = Array.from(new Set([...baseline, ...capteursActuels]));
           if (nouvelleBaseline.length > baseline.length) {
@@ -1009,13 +1027,22 @@
           
           if (statut === "warn" || statut === "fault") {
               const nomEchappe = meta.nom.replace(/'/g, "\\'"); 
-              let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
+              let listePannes = capteursPerdus.map(c => PARAM_INFO_DETAIL[c]?.label || c).join(", ");
+              
+              let badgeAnomalie = "";
+              if (isOffline) {
+                  badgeAnomalie = `<span style="font-size:11px; color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px; border:1px solid rgba(239,68,68,0.4);">Station muette</span>`;
+              } else if (aUnDefautCritique) {
+                  badgeAnomalie = `<span style="font-size:11px; color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px; border:1px solid rgba(239,68,68,0.4);">Défaut majeur (Température)</span>`;
+              } else {
+                  badgeAnomalie = `<span style="font-size:11px; color:#d97706; font-weight:800; background:rgba(245,158,11,0.15); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px; border:1px solid rgba(245,158,11,0.4);">⚠️ Panne : ${listePannes || 'Capteur non reçu'}</span>`;
+              }
               
               let ageTexte = "";
               if (isOffline) {
                   if (obs && obs.validity_time) {
                       let dateObs = new Date(obs.validity_time);
-                      ageTexte = "Dernier: " + dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                      ageTexte = dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
                   } else {
                       ageTexte = "Muette";
                   }
@@ -1024,19 +1051,26 @@
               }
 
               let trHtml = `<tr class="row-${statut}">`;
-              trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${id}', '${nomEchappe}', '${obs ? (obs.numer_sta || "") : ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${meta.nom} (${id})</a></strong><br>
-                         <span style="font-size:11px; color:${statut==='warn'?'#d97706':'#ef4444'}; font-weight:bold;">${anomalieTexte}</span></td>`;
+              trHtml += `<td><strong><a href="#" onclick="lancerDetailsStation('${id}', '${nomEchappe}', '${obs ? (obs.numer_sta || "") : ""}'); return false;" style="color:var(--primary-color); text-decoration:none;">${meta.nom} (${id})</a></strong><br>${badgeAnomalie}</td>`;
               trHtml += `<td class="${isOffline || aUnDefautCritique ? 'age-stale' : ''}">${ageTexte}</td>`;
               
               PARAMS_RESEAU.forEach(p => { 
-                  if (isOffline || !obs) { trHtml += `<td class="cell-na">—</td>`; } 
-                  else {
+                  if (isOffline || !obs) { 
+                      trHtml += `<td class="cell-na">—</td>`; 
+                  } else {
                       let valeur = obs[p.key];
                       if (p.key === 'rr_per' && estValeurManquante(valeur)) valeur = 0;
-                      if (!estValeurManquante(valeur)) trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
-                      else if (p.key === 't') trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
-                      else if (capteursPerdus.includes(p.key)) trHtml += `<td class="cell-fault">⚠ Perdu</td>`;
-                      else trHtml += `<td class="cell-na">—</td>`;
+                      let estEnPanne = capteursPerdus.includes(p.key) || (p.key === 'pres' && capteursPerdus.includes('pmer'));
+                      
+                      if (estEnPanne) {
+                          trHtml += `<td class="cell-warn">⚠ Panne</td>`;
+                      } else if (!estValeurManquante(valeur)) {
+                          trHtml += `<td class="cell-ok">${p.format(valeur)}</td>`;
+                      } else if (p.key === 't') {
+                          trHtml += `<td class="cell-fault">⚠ Défaut</td>`;
+                      } else {
+                          trHtml += `<td class="cell-na">—</td>`;
+                      }
                   }
               });
               trHtml += `</tr>`; alerteHtml += trHtml;
@@ -1080,7 +1114,6 @@
       if (!obs || !obs.validity_time) { isOffline = true; } 
       else { let ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000); if (ageMin >= SEUIL_INACTIVITE_MIN) isOffline = true; }
 
-      // Si un mode (Temp/Pluie/Hum/Vent) est actif, masquer d'office la station si elle est muette
       if (mode !== 'none' && isOffline) {
         showMarker = false;
       }
@@ -1715,8 +1748,8 @@
       let payload = { 
           station_id: window.stationTerrainId, 
           type_capteur: document.getElementById("matType").value, 
-          numero_serie: document.getElementById("matNouveauSn").value,
-          date_installation: dateAujourdhui,
+          numero_serie: document.getElementById("matNouveauSn").value, 
+          date_installation: dateAujourdhui, 
           statut: 'En service'
       };
       
