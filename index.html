@@ -83,7 +83,7 @@
     .btn-action { display: inline-block; padding: 8px 16px; font-size: 13px; font-weight: bold; border-radius: 6px; text-decoration: none; cursor: pointer; border: none; color: white; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; width: auto; }
     .btn-action:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
     .btn-refresh { background-color: rgba(108, 117, 125, 0.8); }
-    .btn-hist { background-color: rgba(239, 162, 184, 0.8); }
+    .btn-hist { background-color: rgba(23, 162, 184, 0.8); }
 
     .btn-icon { background: transparent; border: none; padding: 0; margin-left: 10px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none; transition: all 0.2s; cursor: pointer; }
     .btn-icon img { width: 32px; height: 32px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
@@ -143,6 +143,24 @@
     .map-live-label::before { display: none; }
     .radar-time-control { background: rgba(255,255,255,0.85); padding: 6px 10px; border-radius: 6px; font-weight: 800; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); pointer-events: none; transition: opacity 0.3s; margin: 10px; color: #0f172a; border: 1px solid rgba(0,0,0,0.1); }
 
+    /* Vignettes photos maintenance */
+    .img-apercu-maintenance {
+      width: 100%;
+      max-width: 240px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      display: block;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .img-apercu-maintenance:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
     /* AJUSTEMENTS TÉLÉPHONE */
     @media (max-width: 768px) {
       body { padding: 8px; }
@@ -162,6 +180,8 @@
       #mapReseau { height: 75vh; min-height: 480px; margin-bottom: 10px; }
       
       .btn-toggle-map { padding: 5px 10px; font-size: 11px; }
+
+      .img-apercu-maintenance { max-width: 100%; height: 180px; }
     }
   </style>
 </head>
@@ -301,14 +321,18 @@
             <h2 style="margin: 0;">📂 Historique des interventions</h2>
             <button class="btn-primary" style="padding: 6px 12px; font-size: 12px; width: auto; background: #ef4444;" onclick="fermerFormulaires()">Fermer</button>
         </div>
-        <div id="contenuConsultMaintenance" style="max-height: 400px; overflow-y: auto;">
+        <div id="contenuConsultMaintenance" style="max-height: 450px; overflow-y: auto;">
             <p style="color:#64748b;">Chargement...</p>
         </div>
     </div>
 
+    <!-- FORMULAIRE PHOTO AVEC CHAMP TEXTE LIBRE -->
     <div class="card" id="formPhoto" style="display:none;">
         <h2>📸 Envoi de Photo</h2>
-        <div class="form-group"><label>Type :</label><select id="photoTag"><option value="Generale">Vue générale</option><option value="Pluviometre">Pluviomètre</option></select></div>
+        <div class="form-group">
+            <label for="photoTag">Description / Titre de la photo :</label>
+            <input type="text" id="photoTag" placeholder="Ex : Vue générale, augets nettoyés, câble dégradé, vue mât...">
+        </div>
         <div class="form-group">
             <label>Photo :</label>
             <div style="display: flex; align-items: center; gap: 15px;">
@@ -560,7 +584,7 @@
     if (cacheStockeInitial) {
         try {
             JSON.parse(cacheStockeInitial).forEach(item => { 
-                if (estCible(item.station.id) || estCible(item.station.numer_sta)) {
+                if (estCible(item.station.id) || estCible(item.station.numer_sta)) { 
                     window.stationsCache[item.station.id] = item.obs; 
                     window.stationsMetaCache[item.station.id] = { nom: item.station.nom, lettre: item.station.nom ? item.station.nom.charAt(0).toUpperCase() : '?' };
                 }
@@ -1137,10 +1161,16 @@
               } else { showMarker = false; }
           } 
           else if (mode === 'pluie') {
-              let p = !estValeurManquante(obs.rr_per) ? obs.rr_per : (!estValeurManquante(obs.rr1) ? obs.rr1 : null);
+              let p6 = (!estValeurManquante(obs.rr_per) && parseFloat(obs.rr_per) > 0) ? parseFloat(obs.rr_per) : 0;
+              let p1h = (!estValeurManquante(obs.rr1) && parseFloat(obs.rr1) > 0) ? parseFloat(obs.rr1) : 0;
+              let p = p6 > 0 ? obs.rr_per : (p1h > 0 ? obs.rr1 : null);
+
               if (p !== null && parseFloat(p) > 0) {
-                  text = `💧 ${p} mm`; showTooltip = true; 
-              } else if (p === null) { showMarker = false; }
+                  text = `💧 ${p} mm`; 
+                  showTooltip = true; 
+              } else { 
+                  showMarker = false; 
+              }
           }
           else if (mode === 'humidite') {
               if (!estValeurManquante(obs.u)) {
@@ -1631,9 +1661,7 @@
           if(error) throw error;
 
           alert("🗑️ Suppression réussie !");
-          
           window.chargerHistoriqueMaintenance();
-          
       } catch (error) {
           alert("Erreur lors de la suppression : " + error.message);
       }
@@ -1654,7 +1682,7 @@
           const getValidDateStr = (d1, d2, d3) => d1 || d2 || d3 || null;
 
           if(obsReq.data) obsReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "observations", date: getValidDateStr(d.created_at, d.date_intervention, d.date_photo), type: "📝 Observation", detail: d.texte, badge: "#8b5cf6"}));
-          if(photosReq.data) photosReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "photos", date: getValidDateStr(d.date_photo, d.created_at), type: "📸 Photo ("+d.tag+")", detail: d.commentaire || "Image ajoutée", lien: d.url_drive, badge: "#10b981"}));
+          if(photosReq.data) photosReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "photos", date: getValidDateStr(d.date_photo, d.created_at), type: "📸 Photo", detail: d.tag || d.commentaire || "Image enregistrée", lien: d.url_drive, badge: "#10b981"}));
           if(matReq.data) matReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "materiel", date: getValidDateStr(d.date_installation, d.created_at), type: "🔧 Remplacement", detail: `Nouveau ${d.type_capteur} (S/N: ${d.numero_serie})`, badge: "#f59e0b"}));
           if(etalReq.data) etalReq.data.forEach(d => {
               let resStr = d.est_conforme ? "✅ CONFORME" : "❌ HORS TOLÉRANCE";
@@ -1677,17 +1705,26 @@
           tousLesEvenements.forEach(ev => {
               let time = ev.date ? new Date(ev.date).getTime() : NaN;
               let dateStr = (isNaN(time) || time === 0) ? "Date inconnue" : new Date(time).toLocaleString('fr-FR');
-              
               let urlDriveClean = ev.lien ? ev.lien.replace(/'/g, "\\'") : '';
 
-              html += `<li style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 10px; margin-bottom: 10px; border-radius: 8px; position: relative;">`;
-              
+              html += `<li style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px; margin-bottom: 12px; border-radius: 8px; position: relative;">`;
               html += `<button onclick="supprimerIntervention('${ev.table_nom}', '${ev.db_id}', '${urlDriveClean}')" style="position:absolute; top:8px; right:8px; background:none; border:none; cursor:pointer; font-size:16px; opacity:0.7; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)';" onmouseout="this.style.opacity='0.7'; this.style.transform='scale(1)'; " title="Supprimer">🗑️</button>`;
 
               html += `<div style="font-size: 11px; color:#94a3b8; margin-bottom: 4px;">📅 ${dateStr}</div>`;
-              html += `<div><span style="background:${ev.badge}; color:white; padding: 2px 6px; border-radius: 4px; font-size:11px; font-weight:bold; margin-right: 8px;">${ev.type}</span></div>`;
-              html += `<div style="margin-top: 6px; font-size: 14px; padding-right: 25px;">${ev.detail}</div>`; 
-              if(ev.lien && ev.lien.startsWith("http")) html += `<div style="margin-top: 8px;"><a href="${ev.lien}" target="_blank" style="color: #3b82f6; text-decoration: underline; font-size:12px;">🔗 Voir l'image jointe</a></div>`;
+              html += `<div><span style="background:${ev.badge}; color:white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 8px;">${ev.type}</span></div>`;
+              html += `<div style="margin-top: 6px; font-size: 14px; font-weight: 600; padding-right: 25px;">${ev.detail}</div>`; 
+
+              // Aperçu de l'image si c'est une photo
+              if(ev.lien && ev.lien.startsWith("http")) {
+                  html += `<div style="margin-top: 10px;">
+                      <a href="${ev.lien}" target="_blank" title="Ouvrir l'image originale en grand">
+                          <img src="${ev.lien}" alt="${ev.detail}" class="img-apercu-maintenance" loading="lazy">
+                      </a>
+                      <div style="margin-top: 5px;">
+                          <a href="${ev.lien}" target="_blank" style="color: #38bdf8; font-weight: bold; text-decoration: underline; font-size: 11px;">🔍 Ouvrir l'originale</a>
+                      </div>
+                  </div>`;
+              }
               html += `</li>`;
           });
           document.getElementById("contenuConsultMaintenance").innerHTML = html + `</ul>`;
@@ -1789,6 +1826,8 @@
       const fileInput = document.getElementById('photoInput');
       if(!fileInput.files.length) return alert("Veuillez prendre ou sélectionner une photo.");
       
+      const tagSaisi = document.getElementById("photoTag").value.trim() || "Photo";
+
       let file = fileInput.files[0];
       let btn = event.target;
       btn.innerText = "⏳ Compression & Envoi...";
@@ -1812,16 +1851,17 @@
 
           let payload = { 
               station_id: window.stationTerrainId, 
-              tag: document.getElementById("photoTag").value, 
-              commentaire: "", 
+              tag: tagSaisi, 
+              commentaire: tagSaisi, 
               url_drive: publicUrlData.publicUrl 
           };
           
           const { error: dbError } = await supabaseClient.from('photos').insert([payload]);
           if (dbError) throw dbError;
 
-          alert("✅ Photo compressée et sauvegardée avec succès !"); 
+          alert("✅ Photo enregistrée avec succès !"); 
           document.getElementById('photoFileName').textContent = 'Aucune sélection';
+          document.getElementById('photoTag').value = '';
           fileInput.value = "";
           fermerFormulaires(); 
       } catch (error) {
