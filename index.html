@@ -176,7 +176,7 @@
 </div>
 
 <div class="container">
-  <div class="card" id="configCard">
+  <div class="card" id="configCard" style="display: none;">
     <div id="zoneSaisieApi" class="form-group">
       <label for="apikey">API Key (Météo-France) :</label>
       <input type="text" id="apikey" value="eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyZW1pcGFyYW1vdGV1ckBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6InJlbWlwYXJhbW90ZXVyIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJpZCI6Mjc1MzMsInV1aWQiOiJhMjM1OTBhZi0wY2IyLTRlYjAtOWU2MC1kZjdkNWQ2MGM4NWYifSwiaXNzIjoiaHR0cHM6XC9cL3BvcnRhaWwtYXBpLm1ldGVvZnJhbmNlLmZyOjQ0M1wvb2F1dGgyXC90b2tlbiIsInRpZXJJbmZvIjp7IjUwUGVyTWluIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOiJzZWMifSwiMTAwUmVxUGVyTWluIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOiJzZWMifSwiODUwcmVxUGVyNU1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IlByZXZpc2lvbkltbWVkaWF0ZVByZWNpcGl0YXRpb25zIiwiY29udGV4dCI6IlwvcHJvXC9waWFmXC8xLjAiLCJwdWJsaXNoZXIiOiJhZG1pbl9tZiIsInZlcnNpb24iOiIxLjAiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc09ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUE9ic1wvdjIiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MiIsInN1YnNjcmlwdGlvblRpZXIiOiIxMDBSZXFQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc1BhcXVldFJhZGFyIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFBhcXVldFJhZGFyXC92MSIsInB1Ymxpc2hlciI6ImxvaWMubWFydGluIiwidmVyc2lvbiI6InYxIiwic3Vic2NyaXB0aW9uVGllciI6IjUwUGVyTWluIn0seyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkRvbm5lZXNQdWJsaXF1ZXNQYXF1ZXRPYnNlcnZhdGlvbiIsImNvbnRleHQiOiJcL3B1YmxpY1wvRFBQYXF1ZXRPYnNcL3YxIiwicHVibGlzaGVyIjoiYmFzdGllbmciLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc09ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUE9ic1wvdjEiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MSIsInN1YnNjcmlwdGlvblRpZXIiOiI1MFBlck1pbiJ9LHsic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzUmFkYXIiLCJjb250ZXh0IjoiXC9wdWJsaWNcL0RQUmFkYXJcL3YxIiwicHVibGlzaGVyIjoiTUVURU8uRlJcL21hcnRpbmwiLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiODUwcmVxUGVyNU1pbiJ9LHsic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzQ2xpbWF0b2xvZ2llIiwiY29udGV4dCI6IlwvcHVibGljXC9EUENsaW1cL3YxIiwicHVibGlzaGVyIjoiYWRtaW5fbWYiLCJ2ZXJzaW9uIjoidjEiLCJzdWJzY3JpcHRpb25UaWVyIjoiNTBQZXJNaW4ifSx7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiRG9ubmVlc1B1YmxpcXVlc1BhcXVldE9ic2VydmF0aW9uIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFBhcXVldE9ic1wvdjIiLCJwdWJsaXNoZXIiOiJiYXN0aWVuZyIsInZlcnNpb24iOiJ2MiIsInN1YnNjcmlwdGlvblRpZXIiOiIxMDBSZXFQZXJNaW4ifV0sImV4cCI6MTg4Mzg5NDg5NCwidG9rZW5fdHlwZSI6ImFwaUtleSIsImlhdCI6MTc4OTIyMjA5NCwianRpIjoiZTU3MTIxODktNjdkNy00MmFjLTk2Y2EtMjdkMzM0Y2E2NDUwIn0=.e-5BUJpz1ScNftZUpJZAs6UBPtnRgSG2QlKHSiWtnLa9pCR3gZZ5lZJ9SaA9307vyfJplWIqPPXXqVXbPZeezrWghRwVMAReJrF9C71ILPib19fSqG6eG7em9XYN9QYhC8ey8G6ssNs7MovbJMmbXwiAFpj0TNUxsrqoXeKj4vRpNmvm07H3jY-JLBHZjTmuJK9J44__OD3JBcJ_8f4iVsFBV-UkHVrPwobK5OaQb3NU8rHarDBannnTqo1eozMqUfZKnOzIbc6MAk4ohP8daoJe68pyK86JWuCWQOANxWrNR48gbv1VPlHw06alwvJ_4wadgWh61RX3HTan8O9rhw==" placeholder="Collez ici votre clé API Météo-France...">
@@ -390,6 +390,8 @@
     tend24:          { label: "Tend. pres. 24h",  unit: "hPa", transform: paToHpa, group: "Autres paramètres" }
   };
 
+  const CLES_AUTORISEES = Object.keys(PARAM_INFO_DETAIL);
+
   const PARAMS_RESEAU = [
     { key: "t",         label: "Temp.",        format: v => kelvinToCelsius(v) + "°C" },
     { key: "td",        label: "Rosée",        format: v => kelvinToCelsius(v) + "°C" },
@@ -572,6 +574,8 @@
     } else if (cleSauvegardee) {
       document.getElementById("apikey").value = cleSauvegardee;
       document.getElementById("configCard").style.display = "none"; scannerRegion(false);
+    } else {
+      document.getElementById("configCard").style.display = "block";
     }
   });
 
@@ -805,7 +809,9 @@
           if (icaos.length > 0) aeroCheckWXData = await fetchCheckWX(icaos, cleCheckWX);
       }
 
-      const stationsManquantes = [];
+      const stationsManquantesOuSuspectes = [];
+      const EXCLUSIONS_VOLATILES = ['rr_per', 'rr1', 'sss', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'];
+
       stationsUniques.forEach(st => {
         let c = paquet[st.id] || (st.numer_sta ? paquet[st.numer_sta] : null) || (st.num_poste ? paquet[st.num_poste] : null);
         if (c) {
@@ -815,21 +821,38 @@
               if (!estValeurManquante(ch.n)) c.n = ch.n; if (!estValeurManquante(ch.ww)) c.ww = ch.ww; if (!estValeurManquante(ch.hbas)) c.hbas = ch.hbas;
               if (ch.nuages_metar) c.nuages_metar = ch.nuages_metar; if (ch.metar_decode) c.metar_decode = ch.metar_decode; if (ch.raw) c.metar_brut = ch.raw;
           }
+          
           if (dateValideEtRecente(c.validity_time)) {
-            window.stationsCache[st.id] = c; nouveauCacheData.push({ station: st, obs: c }); injecterStationDansDashboard(st, c);
-          } else { stationsManquantes.push(st); }
+              let capteursActuels = Object.keys(c).filter(k => CLES_AUTORISEES.includes(k) && !estValeurManquante(c[k]));
+              
+              let baseline = window.stationsBaselines[st.id] || [];
+              baseline = baseline.filter(cap => CLES_AUTORISEES.includes(cap)); // Purge de la baseline corrompue
+              
+              let capteursPerdus = baseline.filter(cap => !capteursActuels.includes(cap) && !EXCLUSIONS_VOLATILES.includes(cap));
+
+              if (capteursPerdus.length > 0 || estValeurManquante(c.t)) {
+                  stationsManquantesOuSuspectes.push(st);
+              } else {
+                  window.stationsCache[st.id] = c; nouveauCacheData.push({ station: st, obs: c }); injecterStationDansDashboard(st, c);
+              }
+          } else { 
+              stationsManquantesOuSuspectes.push(st); 
+          }
         } else {
           let cachedObs = window.stationsCache[st.id]; let ageCache = Infinity;
           if (cachedObs && cachedObs.validity_time) ageCache = (Date.now() - new Date(cachedObs.validity_time).getTime()) / 60000;
-          if (ageCache <= 10) { nouveauCacheData.push({ station: st, obs: cachedObs }); injecterStationDansDashboard(st, cachedObs); } 
-          else { stationsManquantes.push(st); }
+          if (ageCache <= 10) { 
+              nouveauCacheData.push({ station: st, obs: cachedObs }); injecterStationDansDashboard(st, cachedObs); 
+          } else { 
+              stationsManquantesOuSuspectes.push(st); 
+          }
         }
       });
 
-      if (stationsManquantes.length > 0) {
+      if (stationsManquantesOuSuspectes.length > 0) {
          const TAILLE_LOT = 5; let traitesManquantes = 0;
-         for (let i = 0; i < stationsManquantes.length; i += TAILLE_LOT) {
-            const lot = stationsManquantes.slice(i, i + TAILLE_LOT);
+         for (let i = 0; i < stationsManquantesOuSuspectes.length; i += TAILLE_LOT) {
+            const lot = stationsManquantesOuSuspectes.slice(i, i + TAILLE_LOT);
             await Promise.all(lot.map(async (st) => {
                try {
                   const queryId = st.numer_sta || st.id; let obs = await fetchLatestObsExact(queryId, cleApi);
@@ -847,7 +870,7 @@
                } catch(e) { injecterStationDansDashboard(st, null); }
             }));
             traitesManquantes += lot.length;
-            if (elStatutInitial) elStatutInitial.textContent = `Vérification du statut... ${traitesManquantes}/${stationsManquantes.length}`;
+            if (elStatutInitial) elStatutInitial.textContent = `Double-check détaillé... ${traitesManquantes}/${stationsManquantesOuSuspectes.length}`;
             await new Promise(r => setTimeout(r, 2000));
          }
       }
@@ -885,11 +908,11 @@
     let meta = window.stationsMetaCache[station.id] || { lettre: '?' };
 
     let isOffline = (!obs || ageMin >= SEUIL_INACTIVITE_MIN);
-    const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
-    let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k])) : [];
+    let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => CLES_AUTORISEES.includes(k) && !estValeurManquante(obs[k])) : [];
     
-    // --- NOUVELLE LOGIQUE DE BASELINE ---
     let baseline = window.stationsBaselines[station.id] || [];
+    baseline = baseline.filter(c => CLES_AUTORISEES.includes(c)); // Nettoyage de l'ancienne baseline
+    
     let nouvelleBaseline = Array.from(new Set([...baseline, ...capteursActuels]));
     if (nouvelleBaseline.length > baseline.length) {
         window.stationsBaselines[station.id] = nouvelleBaseline;
@@ -897,7 +920,8 @@
         baseline = nouvelleBaseline;
     }
     
-    let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
+    const EXCLUSIONS_VOLATILES = ['rr_per', 'rr1', 'sss', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'];
+    let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !EXCLUSIONS_VOLATILES.includes(c));
     let aUnDefautCritique = isOffline ? true : estValeurManquante(obs.t);
     let statut = isOffline ? "fault" : (aUnDefautCritique ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok"));
     if (obs) obs._statut = statut;
@@ -916,7 +940,6 @@
       const nomEchappe = station.nom.replace(/'/g, "\\'"); 
       let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
       
-      // --- NOUVELLE LOGIQUE D'AFFICHAGE DE L'HEURE ---
       let ageTexte = "";
       if (isOffline) {
           if (obs && obs.validity_time) {
@@ -961,11 +984,11 @@
           let ageMin = Infinity; if (obs && obs.validity_time) ageMin = Math.round((Date.now() - new Date(obs.validity_time).getTime()) / 60000);
           let isOffline = (!obs || ageMin >= SEUIL_INACTIVITE_MIN);
           
-          const KEYS_METADATA = ["reference_time", "insert_time", "validity_time", "lat", "lon", "geo_id_insee", "id_station"];
-          let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => !KEYS_METADATA.includes(k) && !estValeurManquante(obs[k])) : [];
+          let capteursActuels = (obs && !isOffline) ? Object.keys(obs).filter(k => CLES_AUTORISEES.includes(k) && !estValeurManquante(obs[k])) : [];
           
-          // --- NOUVELLE LOGIQUE DE BASELINE ---
           let baseline = window.stationsBaselines[id] || [];
+          baseline = baseline.filter(c => CLES_AUTORISEES.includes(c)); // Nettoyage de l'ancienne baseline
+
           let nouvelleBaseline = Array.from(new Set([...baseline, ...capteursActuels]));
           if (nouvelleBaseline.length > baseline.length) {
               window.stationsBaselines[id] = nouvelleBaseline;
@@ -973,7 +996,8 @@
               baseline = nouvelleBaseline;
           }
 
-          let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !['rr_per', 'rr1', 'sss', 'etat_sol', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'].includes(c));
+          const EXCLUSIONS_VOLATILES = ['rr_per', 'rr1', 'sss', 'raf10', 'ddraf10', 'n', 'ww', 'tend24', 'hbas', 'nuages_metar', 'metar_decode', 'metar_brut'];
+          let capteursPerdus = baseline.filter(c => !capteursActuels.includes(c) && !EXCLUSIONS_VOLATILES.includes(c));
           let aUnDefautCritique = isOffline ? true : estValeurManquante(obs.t);
           
           let statut = isOffline ? "fault" : (aUnDefautCritique ? "fault" : (capteursPerdus.length > 0 ? "warn" : "ok"));
@@ -987,7 +1011,6 @@
               const nomEchappe = meta.nom.replace(/'/g, "\\'"); 
               let anomalieTexte = isOffline ? "Station muette" : (aUnDefautCritique ? "Défaut majeur" : "Perte capteur");
               
-              // --- NOUVELLE LOGIQUE D'AFFICHAGE DE L'HEURE ---
               let ageTexte = "";
               if (isOffline) {
                   if (obs && obs.validity_time) {
