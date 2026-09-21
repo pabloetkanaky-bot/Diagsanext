@@ -363,8 +363,8 @@
             <div class="form-group">
                 <label>Étalon :</label>
                 <select id="etalonAugets" onchange="calculerErreurAugets()">
-                    <option value="8">8 mm</option>
-                    <option value="20" selected>20 mm</option>
+                    <option value="8">8 g</option>
+                    <option value="20" selected>20 g</option>
                 </select>
             </div>
             <div class="form-group"><label>Mesure Gauche :</label><input type="number" id="mesureGauche" oninput="calculerErreurAugets()"></div>
@@ -390,7 +390,7 @@
     metar_decode:    { label: "METAR Décodé",    unit: "", group: "Aéronautique & Ciel" },
     metar_brut:      { label: "METAR Brut",      unit: "", group: "Aéronautique & Ciel" },
     vv:              { label: "Visibilité",        unit: "m", group: "Aéronautique & Ciel" },
-    n:               { label: "Nébulosité",             unit: "octas", group: "Aéronautique & Ciel" },
+    n:               { label: "Nébulosité",            unit: "octas", group: "Aéronautique & Ciel" },
     hbas:            { label: "Plafond",             unit: "m", group: "Aéronautique & Ciel" },
     nuages_metar:    { label: "Nuages",          unit: "",  group: "Aéronautique & Ciel" },
     ww:              { label: "Temps présent",      unit: "", group: "Aéronautique & Ciel" },
@@ -410,7 +410,7 @@
     ddraf10:         { label: "Dir. Rafales",    unit: "°",   group: "Vent" },
     raf10:           { label: "Rafale max (10 min)",             unit: "km/h", transform: msToKmh, group: "Vent" },
     rafper:          { label: "Rafale max (1h)",                 unit: "km/h", transform: msToKmh, group: "Vent" },
-    insolh:          { label: "Insolation",     unit: "min", group: "Autres paramètres" },
+    insolh:          { label: "Insolation",      unit: "min", group: "Autres paramètres" },
     ray_glo01:       { label: "Rayonnement",     unit: "J/cm²", group: "Autres paramètres" },
     pres:            { label: "Pression stat.",        unit: "hPa", transform: paToHpa, group: "Autres paramètres" },
     pmer:            { label: "Pression mer",             unit: "hPa", transform: paToHpa, group: "Autres paramètres" },
@@ -491,7 +491,7 @@
   }
   function getVentColor(vitesseKmh) {
       if (vitesseKmh < 15) return '#bfdbfe'; if (vitesseKmh < 30) return '#60a5fa'; if (vitesseKmh < 50) return '#3b82f6'; 
-      if (vitesseKmh < 70) return '#1d4ed8'; if (vitesseKmh < 90) return '#1e3a8a'; return '#020617';                       
+      if (vitesseKmh < 70) return '#1d4ed8'; if (vitesseKmh < 90) return '#1e3a8a'; return '#020617';                        
   }
   function getHumiditeColor(u) {
       if (u < 30) return '#b45309'; if (u < 50) return '#f59e0b'; if (u < 70) return '#fcd34d'; 
@@ -980,7 +980,11 @@
       if (isOffline) {
           if (obs && obs.validity_time) {
               let dateObs = new Date(obs.validity_time);
-              ageTexte = dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+              if (ageMin > 1440) { // Si supérieur à 24 heures (1440 minutes)
+                  ageTexte = dateObs.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit'}) + ' à ' + dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+              } else {
+                  ageTexte = dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+              }
           } else {
               ageTexte = "Muette";
           }
@@ -1066,7 +1070,11 @@
               if (isOffline) {
                   if (obs && obs.validity_time) {
                       let dateObs = new Date(obs.validity_time);
-                      ageTexte = dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                      if (ageMin > 1440) { // Si supérieur à 24 heures
+                          ageTexte = dateObs.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit'}) + ' à ' + dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                      } else {
+                          ageTexte = dateObs.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                      }
                   } else {
                       ageTexte = "Muette";
                   }
@@ -1687,7 +1695,7 @@
           if(etalReq.data) etalReq.data.forEach(d => {
               let resStr = d.est_conforme ? "✅ CONFORME" : "❌ HORS TOLÉRANCE";
               let det = `Pluvio ${d.type_pluvio} - ${resStr}. `;
-              if(d.type_pluvio === 'Augets') det += `G: ${d.auget_gauche||0}mm | D: ${d.auget_droit||0}mm (Erreur: ${d.erreur_pct}%)`; 
+              if(d.type_pluvio === 'Augets') det += `G: ${d.auget_gauche||0}g | D: ${d.auget_droit||0}g (Erreur: ${d.erreur_pct}%)`; 
               else det += `Ecart: ${d.ecart}g`;
               tousLesEvenements.push({db_id: d.id, table_nom: "etalonnages", date: getValidDateStr(d.date_intervention, d.created_at), type: "📊 Étalonnage", detail: det, badge: "#3b82f6"});
           });
