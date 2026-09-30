@@ -372,7 +372,7 @@
             <div class="form-group"><label>Erreur :</label><input type="text" id="erreurAugets" readonly></div>
         </div>
         
-        <div id="blocLambrecht" style="display:none;"><div class="form-group"><label>Étalon (g) :</label><input type="number" id="etalonLambrecht" value="3.49" step="0.01" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Mesuré (g) :</label><input type="number" id="mesurePoids" step="0.01" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Écart :</label><input type="text" id="ecartLambrecht" readonly></div></div>
+        <div id="blocLambrecht" style="display:none;"><div class="form-group"><label>Étalon (g) :</label><input type="number" id="etalonLambrecht" value="3.49" step="any" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Mesuré (g) :</label><input type="number" id="mesurePoids" step="any" oninput="calculerEcartLambrecht()"></div><div class="form-group"><label>Écart :</label><input type="text" id="ecartLambrecht" readonly></div></div>
         
         <div class="form-group"><label>Résultat :</label><select id="resultatEtalonnage" style="font-weight:bold;"><option value="true">✅ CONFORME</option><option value="false">❌ HORS TOLÉRANCE</option></select></div>
         <button class="btn-primary" style="background:#3b82f6;" onclick="enregistrerEtalonnage()">Enregistrer</button>
@@ -1692,11 +1692,17 @@
           if(obsReq.data) obsReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "observations", date: getValidDateStr(d.created_at, d.date_intervention, d.date_photo), type: "📝 Observation", detail: d.texte, badge: "#8b5cf6"}));
           if(photosReq.data) photosReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "photos", date: getValidDateStr(d.date_photo, d.created_at), type: "📸 Photo", detail: d.tag || d.commentaire || "Image enregistrée", lien: d.url_drive, badge: "#10b981"}));
           if(matReq.data) matReq.data.forEach(d => tousLesEvenements.push({db_id: d.id, table_nom: "materiel", date: getValidDateStr(d.date_installation, d.created_at), type: "🔧 Remplacement", detail: `Nouveau ${d.type_capteur} (S/N: ${d.numero_serie})`, badge: "#f59e0b"}));
-          if(etalReq.data) etalReq.data.forEach(d => {
+         if(etalReq.data) etalReq.data.forEach(d => {
               let resStr = d.est_conforme ? "✅ CONFORME" : "❌ HORS TOLÉRANCE";
               let det = `Pluvio ${d.type_pluvio} - ${resStr}. `;
-              if(d.type_pluvio === 'Augets') det += `G: ${d.auget_gauche||0}g | D: ${d.auget_droit||0}g (Erreur: ${d.erreur_pct}%)`; 
-              else det += `Ecart: ${d.ecart}g`;
+              
+              if(d.type_pluvio === 'Augets') {
+                  det += `G: ${Number(d.auget_gauche||0).toFixed(5)}g | D: ${Number(d.auget_droit||0).toFixed(5)}g (Erreur: ${Number(d.erreur_pct||0).toFixed(5)}%)`; 
+              } else {
+                  let signeEcart = d.ecart > 0 ? "+" : "";
+                  det += `Mesuré: ${Number(d.poids_mesure||0).toFixed(5)}g | Écart: ${signeEcart}${Number(d.ecart||0).toFixed(5)}g`;
+              }
+              
               tousLesEvenements.push({db_id: d.id, table_nom: "etalonnages", date: getValidDateStr(d.date_intervention, d.created_at), type: "📊 Étalonnage", detail: det, badge: "#3b82f6"});
           });
           
@@ -1766,7 +1772,7 @@
       if(etalon > 0 && m > 0) {
           let ecart = m - etalon;
           let champ = document.getElementById("ecartLambrecht");
-          champ.value = ecart > 0 ? "+" + ecart.toFixed(1) + " g" : ecart.toFixed(1) + " g";
+          champ.value = ecart > 0 ? "+" + ecart.toFixed(5) + " g" : ecart.toFixed(5) + " g";
           champ.style.color = Math.abs(ecart) <= 2 ? "#10b981" : "#ef4444";
           document.getElementById("resultatEtalonnage").value = Math.abs(ecart) <= 2 ? "true" : "false";
       }
