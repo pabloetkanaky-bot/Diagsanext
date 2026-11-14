@@ -1117,7 +1117,7 @@
       mettreAJourFondEcran(); window.changerModeCarte(window.modeAffichageCarte, true);
   };
 
-  window.changerModeCarte = function(mode, keepMode = false) {
+ window.changerModeCarte = function(mode, keepMode = false) {
     if (window.modeAffichageCarte === mode && !keepMode) { mode = 'none'; }
     window.modeAffichageCarte = mode;
     document.querySelectorAll('.btn-toggle-map').forEach(btn => btn.classList.remove('active'));
@@ -1151,6 +1151,7 @@
       }
 
       let text = ""; let overrideColor = null; let showTooltip = false;
+      let opacityValue = 1.0; // <-- NOUVEAU : On prépare l'opacité par défaut
 
       if (!isOffline && showMarker) {
           if (mode === 'temp') {
@@ -1177,7 +1178,7 @@
                   text = `💧 ${p} mm`; 
                   showTooltip = true; 
               } else { 
-                  showMarker = false; 
+                  opacityValue = 0.25; // <-- MODIFICATION : Au lieu de showMarker = false, on rend transparent (0.25 = 25% visible)
               }
           }
           else if (mode === 'humidite') {
@@ -1191,6 +1192,7 @@
           if (!coucheMarqueurs.hasLayer(marker)) coucheMarqueurs.addLayer(marker);
           let statutActuel = isOffline ? 'fault' : (obs._statut || 'ok');
           marker.setIcon(createStationIcon(statutActuel, meta.lettre, overrideColor));
+          marker.setOpacity(opacityValue); // <-- NOUVEAU : On applique la transparence ici
 
           if (text !== "" && showTooltip) {
               marker.bindTooltip(text, { permanent: true, direction: 'right', className: 'map-live-label', offset: [13, 0] });
