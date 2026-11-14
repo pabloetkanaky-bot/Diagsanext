@@ -1752,46 +1752,76 @@
   };
 
   window.calculerErreurAugets = function() {
-      let etalon = parseFloat(document.getElementById("etalonAugets").value) || 20;
-      let g = parseFloat(document.getElementById("mesureGauche").value) || 0;
-      let d = parseFloat(document.getElementById("mesureDroit").value) || 0;
-      let moyenne = (g + d) / 2;
+    let etalon = parseFloat(document.getElementById("etalonAugets").value) || 20;
+    let g = parseFloat(document.getElementById("mesureGauche").value) || 0;
+    let d = parseFloat(document.getElementById("mesureDroit").value) || 0;
+    let moyenne = (g + d) / 2;
 
-      if(g > 0 || d > 0) {
-          let err = ((moyenne - etalon) / etalon) * 100;
-          let champ = document.getElementById("erreurAugets");
-          champ.value = err.toFixed(2) + " %";
-          champ.style.color = Math.abs(err) <= 4 ? "#10b981" : "#ef4444";
-          document.getElementById("resultatEtalonnage").value = Math.abs(err) <= 4 ? "true" : "false";
-      }
-  };
+    if(g > 0 || d > 0) {
+        let err = ((moyenne - etalon) / etalon) * 100;
+        let champ = document.getElementById("erreurAugets");
+        
+        let absErr = Math.abs(err).toFixed(2);
+        if (err > 0) {
+            champ.value = "Excès de " + absErr + " %";
+        } else if (err < 0) {
+            champ.value = "Déficit de " + absErr + " %";
+        } else {
+            champ.value = "Mesure exacte (0 %)";
+        }
 
-  window.calculerEcartLambrecht = function() {
-      let etalon = parseFloat(document.getElementById("etalonLambrecht").value);
-      let m = parseFloat(document.getElementById("mesurePoids").value) || 0;
-      if(etalon > 0 && m > 0) {
-          let ecart = m - etalon;
-          let champ = document.getElementById("ecartLambrecht");
-          champ.value = ecart > 0 ? "+" + ecart.toFixed(5) + " g" : ecart.toFixed(5) + " g";
-          champ.style.color = Math.abs(ecart) <= 2 ? "#10b981" : "#ef4444";
-          document.getElementById("resultatEtalonnage").value = Math.abs(ecart) <= 2 ? "true" : "false";
-      }
-  };
+        champ.style.color = Math.abs(err) <= 4 ? "#10b981" : "#ef4444";
+        document.getElementById("resultatEtalonnage").value = Math.abs(err) <= 4 ? "true" : "false";
+    }
+};
 
-  window.enregistrerEtalonnage = async function() {
-      let type = document.getElementById("pluvioType").value;
-      let payload = { station_id: window.stationTerrainId, type_pluvio: type, est_conforme: document.getElementById("resultatEtalonnage").value === "true" };
-      if(type === 'Augets') {
-          payload.auget_gauche = parseFloat(document.getElementById("mesureGauche").value);
-          payload.auget_droit = parseFloat(document.getElementById("mesureDroit").value);
-          payload.erreur_pct = parseFloat(document.getElementById("erreurAugets").value);
-      } else {
-          payload.poids_mesure = parseFloat(document.getElementById("mesurePoids").value);
-          payload.ecart = parseFloat(document.getElementById("ecartLambrecht").value);
-      }
-      const { error } = await supabaseClient.from('etalonnages').insert([payload]);
-      if(error) alert("Erreur : " + error.message); else { alert("✅ Étalonnage sauvegardé !"); fermerFormulaires(); }
-  };
+window.calculerEcartLambrecht = function() {
+    let etalon = parseFloat(document.getElementById("etalonLambrecht").value);
+    let m = parseFloat(document.getElementById("mesurePoids").value) || 0;
+    if(etalon > 0 && m > 0) {
+        let ecart = m - etalon;
+        let champ = document.getElementById("ecartLambrecht");
+        
+        let absEcart = Math.abs(ecart).toFixed(2);
+        if (ecart > 0) {
+            champ.value = "Excès de " + absEcart + " g";
+        } else if (ecart < 0) {
+            champ.value = "Déficit de " + absEcart + " g";
+        } else {
+            champ.value = "Mesure exacte (0 g)";
+        }
+
+        champ.style.color = Math.abs(ecart) <= 2 ? "#10b981" : "#ef4444";
+        document.getElementById("resultatEtalonnage").value = Math.abs(ecart) <= 2 ? "true" : "false";
+    }
+};
+
+window.enregistrerEtalonnage = async function() {
+    let type = document.getElementById("pluvioType").value;
+    let payload = { station_id: window.stationTerrainId, type_pluvio: type, est_conforme: document.getElementById("resultatEtalonnage").value === "true" };
+    
+    if(type === 'Augets') {
+        let g = parseFloat(document.getElementById("mesureGauche").value) || 0;
+        let d = parseFloat(document.getElementById("mesureDroit").value) || 0;
+        let etalon = parseFloat(document.getElementById("etalonAugets").value) || 20;
+        
+        let errCalc = (((g + d) / 2) - etalon) / etalon * 100;
+        
+        payload.auget_gauche = g;
+        payload.auget_droit = d;
+        payload.erreur_pct = parseFloat(errCalc.toFixed(2));
+    } else {
+        let m = parseFloat(document.getElementById("mesurePoids").value) || 0;
+        let etalon = parseFloat(document.getElementById("etalonLambrecht").value);
+        let ecartCalc = m - etalon;
+        
+        payload.poids_mesure = m;
+        payload.ecart = parseFloat(ecartCalc.toFixed(5));
+    }
+    
+    const { error } = await supabaseClient.from('etalonnages').insert([payload]);
+    if(error) alert("Erreur : " + error.message); else { alert("✅ Étalonnage sauvegardé !"); fermerFormulaires(); }
+};
 
   window.enregistrerMateriel = async function() {
       const dateAujourdhui = new Date().toISOString().split('T')[0];
