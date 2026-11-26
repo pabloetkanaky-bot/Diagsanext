@@ -620,33 +620,83 @@
 
   function extractCheckWXData(m) {
       if (!m || typeof m === "string" || !m.icao) return null;
-      let vv_api = m.visibility?.meters_float !== undefined ? m.visibility.meters_float : null;
-      if (vv_api === null && m.visibility?.meters) vv_api = parseInt(String(m.visibility.meters).replace(/\D/g,''));
-      let hbas = null, n = null, ww = null; let flight_category = m.flight_category || 'Inconnu'; let raw = m.raw_text || '';
+      let vv_api = m.visibility?.meters_float != null ? m.visibility.meters_float : null;
+      if (vv_api === null && m.visibility?.meters) vv_api = parseInt(String(m.visibility.meters).replace(/\D/g, ''), 10);
+      if (Number.isNaN(vv_api)) vv_api = null;
+
+      let hbas = null, n = null, ww = null;
+      let flight_category = m.flight_category || 'Inconnu';
+      let raw = m.raw_text || '';
       let cloudsStr = [];
 
-      if (m.clouds && m.clouds.length > 0) {
-          const c = m.clouds[0];
-          if (['CAVOK', 'CLR', 'SKC', 'NCD'].includes(c.code)) {
-              n = 0; cloudsStr.push(c.code === 'CAVOK' ? "CAVOK" : "Clair");
+      // Isole le corps principal du METAR (ignore les tendances TEMPO/BECMG et remarques RMK)
+      const rawMain = raw.split(/\b(?:TEMPO|BECMG|NOSIG|RMK)\b/)[0] || '';
+      const rawClouds = [];
+      const cloudRegex = /(?:^|\s)(FEW|SCT|BKN|OVC|VV)(\d{3}|\/\/\/)(CB|TCU|\/\/\/)?(?=\s|$)/g;
+      let match;
+      while ((match = cloudRegex.exec(rawMain)) !== null) {
+          let code = match[1];
+          let baseFt = match[2] !== '///' ? parseInt(match[2], 10) * 100 : null;
+          let typeNuage = (match[3] && match[3] !== '///') ? match[3] : '';
+          rawClouds.push({ code, baseFt, typeNuage });
+      }
+
+      const codesClairs = ['CAVOK', 'CLR', 'SKC', 'NCD', 'NSC'];
+      let layers = [];
+
+      if (rawClouds.length > 0) {
+          // Priorité au brut : exact en pieds et immunisé contre les suffixes "///" des METAR AUTO
+          layers = rawClouds;
+      } else if (m.clouds && m.clouds.length > 0) {
+          const firstCode = m.clouds[0].code;
+          if (codesClairs.includes(firstCode)) {
+              n = 0;
+              cloudsStr.push(firstCode === 'CAVOK' ? "CAVOK" : (firstCode === 'NSC' ? "NSC" : "Clair"));
           } else {
-              let maxN = 0; let lowestCeiling = null;
               m.clouds.forEach(layer => {
-                  let baseM = null;
-                  if (layer.base_meters_agl !== undefined) { baseM = Math.round(layer.base_meters_agl); }
-                  else if (layer.base_feet_agl !== undefined) { baseM = Math.round(layer.base_feet_agl * 0.3048); }
-                  else if (layer.base_feet !== undefined) { baseM = Math.round(layer.base_feet * 0.3048); }
-                  if (layer.code === 'FEW') maxN = Math.max(maxN, 2);
-                  if (layer.code === 'SCT') maxN = Math.max(maxN, 4);
-                  if (layer.code === 'BKN') { maxN = Math.max(maxN, 6); if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
-                  if (layer.code === 'OVC') { maxN = Math.max(maxN, 8); if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
-                  if (layer.code === 'VV') { maxN = 9; if (lowestCeiling === null && baseM !== null) lowestCeiling = baseM; }
-                  let baseTxt = baseM !== null ? `${baseM}m` : (layer.base_feet_agl ? `${layer.base_feet_agl}ft` : '?');
-                  cloudsStr.push(`${layer.code} à ${baseTxt}`);
+                  if (codesClairs.includes(layer.code)) return;
+                  let baseFt = null;
+                  if (layer.base_feet_agl != null) baseFt = Math.round(layer.base_feet_agl);
+                  else if (layer.feet != null) baseFt = Math.round(layer.feet);
+                  else if (layer.base_feet != null) baseFt = Math.round(layer.base_feet);
+                  else if (layer.base_meters_agl != null) baseFt = Math.round(layer.base_meters_agl / 0.3048);
+                  else if (layer.meters != null) baseFt = Math.round(layer.meters / 0.3048);
+                  layers.push({ code: layer.code, baseFt, typeNuage: '' });
               });
-              n = maxN; hbas = lowestCeiling !== null ? lowestCeiling : null;
           }
-      } else if (vv_api >= 10000 && !raw.includes("OVC") && !raw.includes("BKN")) { n = 0; }
+      } else if (/\b(CAVOK|CLR|SKC|NCD|NSC)\b/.test(rawMain)) {
+          n = 0;
+          cloudsStr.push(rawMain.includes("CAVOK") ? "CAVOK" : (rawMain.includes("NSC") ? "NSC" : "Clair"));
+      } else if (vv_api >= 10000 && !rawMain.includes("OVC") && !rawMain.includes("BKN")) {
+          n = 0;
+      }
+
+      if (layers.length > 0) {
+          let maxN = 0;
+          let lowestCeilingM = null;
+          layers.forEach(l => {
+              let baseM = l.baseFt !== null ? Math.round(l.baseFt * 0.3048) : null;
+              if (l.code === 'FEW') maxN = Math.max(maxN, 2);
+              if (l.code === 'SCT') maxN = Math.max(maxN, 4);
+              if (l.code === 'BKN') {
+                  maxN = Math.max(maxN, 6);
+                  if (baseM !== null && (lowestCeilingM === null || baseM < lowestCeilingM)) lowestCeilingM = baseM;
+              }
+              if (l.code === 'OVC') {
+                  maxN = Math.max(maxN, 8);
+                  if (baseM !== null && (lowestCeilingM === null || baseM < lowestCeilingM)) lowestCeilingM = baseM;
+              }
+              if (l.code === 'VV') {
+                  maxN = Math.max(maxN, 9);
+                  if (baseM !== null && (lowestCeilingM === null || baseM < lowestCeilingM)) lowestCeilingM = baseM;
+              }
+              let suffix = l.typeNuage ? ` ${l.typeNuage}` : '';
+              let baseTxt = l.baseFt !== null ? `${l.baseFt} ft${suffix}` : `///${suffix}`;
+              cloudsStr.push(`${l.code} ${baseTxt}`);
+          });
+          n = maxN;
+          hbas = lowestCeilingM;
+      }
 
       let conditionsStr = [];
       if (m.conditions && m.conditions.length > 0) {
@@ -654,8 +704,8 @@
           m.conditions.forEach(cond => conditionsStr.push(cond.text || cond.code));
       }
 
-      let vent_spd = m.wind?.speed_kph ? Math.round(m.wind.speed_kph) : (m.wind?.speed_kts ? Math.round(m.wind.speed_kts * 1.852) : null);
-      let vent_dir = m.wind?.degrees !== undefined ? m.wind.degrees : null;
+      let vent_spd = m.wind?.speed_kph != null ? Math.round(m.wind.speed_kph) : (m.wind?.speed_kts != null ? Math.round(m.wind.speed_kts * 1.852) : null);
+      let vent_dir = m.wind?.degrees != null ? m.wind.degrees : null;
       let vent_str = (vent_spd !== null && vent_dir !== null) ? `${vent_dir}° à ${vent_spd}km/h` : 'Calme';
       let vis_str = vv_api !== null ? (vv_api >= 9999 ? '>10km' : `${vv_api}m`) : 'N/D';
       let cond_str = conditionsStr.length > 0 ? conditionsStr.join(", ") : 'RAS';
