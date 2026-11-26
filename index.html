@@ -740,7 +740,10 @@ let metar_decode = `[${flight_category}] Vent: ${vent_str} | Vis: ${vis_str} | N
       } catch(e) { return { error: true }; }
   }
 
-  async function tenterPaquetRapide(cleApi) {
+ async function tenterPaquetRapide(cleApi) {
+    const parStation = {};
+    let auMoinsUnPaquet = false;
+
     for (let decalageMin = 0; decalageMin <= 24; decalageMin += 6) {
       const dateStr = new Date(arrondir6min(Date.now()).getTime() - decalageMin * 60000).toISOString().replace(/\.\d{3}Z$/, "Z");
       try {
@@ -750,21 +753,33 @@ let metar_decode = `[${flight_category}] Vent: ${vent_str} | Vis: ${vis_str} | N
         if (resJson.ok) {
            const data = await resJson.json();
            if (Array.isArray(data) && data.length > 0) {
-             const parStation = {};
+             auMoinsUnPaquet = true;
              data.forEach(obs => {
                 normaliserObs(obs);
                 [obs.geo_id_insee, obs.num_poste, obs.id_station, obs.numer_sta].forEach(k => {
-                    if (k) { let str = String(k).trim(); let keys = [str]; if (str.length === 4) keys.push("0" + str); keys.forEach(ks => { parStation[ks] = obs; }); }
+                    if (k) {
+                        let str = String(k).trim();
+                        let keys = [str];
+                        if (str.length === 4) keys.push("0" + str);
+                        keys.forEach(ks => {
+                            // Garde la mesure la plus récente, complète seulement les manquantes
+                            if (!parStation[ks] || (estValeurManquante(parStation[ks].t) && !estValeurManquante(obs.t))) {
+                                parStation[ks] = obs;
+                            }
+                        });
+                    }
                 });
              });
-             return parStation;
+             // Si toutes les stations cibles ont déjà une température récente, inutile de continuer
+             const toutesTrouvees = STATIONS_CIBLES.every(id => parStation[id] && !estValeurManquante(parStation[id].t));
+             if (toutesTrouvees) break;
            }
         }
       } catch (e) { if (e.message === "401") throw e; }
+      await new Promise(r => setTimeout(r, 150));
     }
-    return null; 
+    return auMoinsUnPaquet ? parStation : null;
   }
-
   async function scannerRegion(forcerRafraichissement = false) {
     const cleApi = document.getElementById("apikey").value.trim();
     if (!cleApi || cleApi === "") { alert("Veuillez saisir votre API Key Météo-France."); return; }
