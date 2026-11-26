@@ -217,7 +217,9 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <h2 style="margin:0;">🌍 Cartographie en direct</h2>
       <div style="display:flex; gap: 8px;">
-        <button id="btnEditApi" onclick="modifierApi()" style="padding: 8px 12px; font-size: 13px; background: rgba(255,255,255,0.4); color: #1e293b; border: 1px solid rgba(255,255,255,0.4); border-radius:6px; cursor:pointer; font-weight: bold;">⚙️ API</button>
+        <div style="display:flex; gap: 8px;">
+        <button id="btnRefreshMap" onclick="scannerRegion(true)" style="padding: 8px 16px; font-size: 13px; background: rgba(100, 116, 139, 0.8); font-weight:bold; color:white; border:none; border-radius:6px; cursor:pointer;">🔄 Actualiser</button>
+      </div>
         <button id="btnRefreshMap" onclick="scannerRegion(true)" style="padding: 8px 16px; font-size: 13px; background: rgba(100, 116, 139, 0.8); font-weight:bold; color:white; border:none; border-radius:6px; cursor:pointer;">🔄 Actualiser</button>
       </div>
     </div>
@@ -301,7 +303,6 @@
         <button class="btn-terrain btn-terrain-purple" onclick="ouvrirFormulaire('observation')">📝 Ajouter Observation</button>
         <button class="btn-terrain btn-terrain-dark" onclick="chargerHistoriqueMaintenance()">📂 Consulter Historique</button>
         <button class="btn-terrain" onclick="ouvrirFormulaire('photo')">📸 Photo & Constat</button>
-        <button class="btn-terrain btn-terrain-orange" onclick="ouvrirFormulaire('materiel')">🔧 Remplacer Matériel</button>
         <button class="btn-terrain btn-terrain-blue" onclick="ouvrirFormulaire('etalonnage')">📊 Étalonnage Pluvio</button>
     </div>
 
@@ -465,7 +466,7 @@
       let prevIndex = window.radarIndex - 1; if (prevIndex < 0) prevIndex = window.radarLayers.length - 1;
       window.radarLayers[prevIndex].setOpacity(0); window.radarLayers[window.radarIndex].setOpacity(0.65);
       const timeStr = new Date(window.radarTimestamps[window.radarIndex] * 1000).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
-      let displayDiv = document.getElementById('radar-time-display'); if (displayDiv) displayDiv.innerHTML = `📡 Pluie : ${timeStr}`;
+      let displayDiv = document.getElementById('radar-time-display'); if (displayDiv) displayDiv.innerHTML = `📡 Radar : ${timeStr}`;
       window.radarIndex = (window.radarIndex + 1) % window.radarLayers.length;
   }
 
