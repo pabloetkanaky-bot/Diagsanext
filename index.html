@@ -220,8 +220,6 @@
         <div style="display:flex; gap: 8px;">
         <button id="btnRefreshMap" onclick="scannerRegion(true)" style="padding: 8px 16px; font-size: 13px; background: rgba(100, 116, 139, 0.8); font-weight:bold; color:white; border:none; border-radius:6px; cursor:pointer;">🔄 Actualiser</button>
       </div>
-        <button id="btnRefreshMap" onclick="scannerRegion(true)" style="padding: 8px 16px; font-size: 13px; background: rgba(100, 116, 139, 0.8); font-weight:bold; color:white; border:none; border-radius:6px; cursor:pointer;">🔄 Actualiser</button>
-      </div>
     </div>
     
     <div class="reseau-resume">
@@ -1816,9 +1814,9 @@
         
         let absErr = Math.abs(err).toFixed(2);
         if (err > 0) {
-            champ.value = "Excès de " + absErr + " %";
+            champ.value = "Sous estime de " + absErr + " %";
         } else if (err < 0) {
-            champ.value = "Déficit de " + absErr + " %";
+            champ.value = "Surestime de " + absErr + " %";
         } else {
             champ.value = "Mesure exacte (0 %)";
         }
