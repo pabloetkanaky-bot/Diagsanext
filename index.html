@@ -706,10 +706,9 @@
       let vent_dir = m.wind?.degrees != null ? m.wind.degrees : null;
       let vent_str = (vent_spd !== null && vent_dir !== null) ? `${vent_dir}° à ${vent_spd}km/h` : 'Calme';
       let vis_str = vv_api !== null ? (vv_api >= 9999 ? '>10km' : `${vv_api}m`) : 'N/D';
-      let cond_str = conditionsStr.length > 0 ? conditionsStr.join(", ") : 'RAS';
-      let nuages_str = cloudsStr.length > 0 ? cloudsStr.join(", ") : (n === 0 ? "Clair/CAVOK" : "Non signalé");
-      let metar_decode = `[${flight_category}] Vent: ${vent_str} | Vis: ${vis_str} | Nuages: ${nuages_str} | Temps: ${cond_str}`;
-
+      let cond_str = conditionsStr.length > 0 ? ` | Temps: ${conditionsStr.join(", ")}` : '';
+let nuages_str = cloudsStr.length > 0 ? cloudsStr.join(", ") : (n === 0 ? "Clair/CAVOK" : "Non signalé");
+let metar_decode = `[${flight_category}] Vent: ${vent_str} | Vis: ${vis_str} | Nuages: ${nuages_str}${cond_str}`;
       return { hbas, n, ww, raw, flight_category, icao: m.icao, observed: m.observed, nuages_metar: nuages_str, metar_decode: metar_decode, metar_brut: raw };
   }
 
